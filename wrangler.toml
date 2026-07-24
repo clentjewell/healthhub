@@ -1,0 +1,13 @@
+# Cloudflare Workers — static assets deployment (preview).
+# Serves the Astro static build (dist/) from a Worker. This publishes to a
+# *.workers.dev preview URL only; it does NOT bind the production domain
+# (healthhubtweedcoast.com.au) or touch DNS. Custom domain / DNS cutover is a
+# manual launch step (Phase 6).
+name = "healthhub-tweed-coast"
+compatibility_date = "2026-07-01"
+
+[assets]
+directory = "./dist"
+# Serve pretty URLs (/services → /services/index.html) and a 404 page.
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"

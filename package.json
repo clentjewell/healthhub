@@ -9,11 +9,15 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
     "astro": "^5.0.0",
     "@astrojs/sitemap": "^3.2.0",
     "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
   }
 }
