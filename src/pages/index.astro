@@ -1,0 +1,77 @@
+---
+/**
+ * Home — PHASE 1 SCAFFOLD STUB.
+ * This verifies the layout, theme, header and footer render and build cleanly.
+ * The real home template (hero, services grid, teasers) is built in Phase 2.
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { site, nap, hours, bookingCta } from '@data/site';
+---
+
+<BaseLayout title="Home">
+  <section class="hero section">
+    <div class="container">
+      <p class="eyebrow">Wellness studio · Hastings Point</p>
+      <h1>{site.name}</h1>
+      <p class="lede">
+        A calm, community wellness studio on the Tweed Coast — the studio arm of
+        Pottsville Acupuncture. Acupuncture and allied health, movement classes,
+        and events under one roof.
+      </p>
+      <div class="hero-actions">
+        <a href={bookingCta.href} class="btn btn-primary">{bookingCta.label}</a>
+        <a href="/classes-events" class="btn btn-ghost">See what’s on</a>
+      </div>
+      <p class="scaffold-note">
+        Phase&nbsp;1 scaffold — design system, base layout, header and footer with
+        NAP. Page templates and real content follow in later phases.
+      </p>
+    </div>
+  </section>
+
+  <section class="section band">
+    <div class="container">
+      <p class="eyebrow band-eyebrow">Find us</p>
+      <h2>{nap.locality}, on the Tweed Coast</h2>
+      <p class="band-nap">
+        {nap.street}, {nap.locality} {nap.region} {nap.postcode}<br />
+        {hours.label}
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: clamp(64px, 12vw, 140px) var(--space-section);
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .scaffold-note {
+    margin-top: 48px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-accent);
+    padding-left: 14px;
+  }
+
+  .band {
+    background: var(--color-band);
+    color: var(--color-band-text);
+  }
+  .band :global(h2) {
+    color: #fff;
+  }
+  .band-eyebrow {
+    color: color-mix(in srgb, var(--color-accent) 70%, white);
+  }
+  .band-nap {
+    margin-top: 16px;
+    font-size: var(--fs-lede);
+    opacity: 0.9;
+  }
+</style>

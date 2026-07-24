@@ -1,0 +1,122 @@
+/* =========================================================================
+   DESIGN TOKENS
+   -------------------------------------------------------------------------
+   Two themes, one shared token family:
+
+   1. PRIMITIVES  — the raw Pottsville design language, captured from the live
+      site (pottsvilleacupuncture.com.au). These are the shared DNA.
+
+   2. :root SEMANTIC (default = POTTSVILLE)  — used by the /proposals/hub
+      Pottsville-styled proposal page (Prompt 2). Calm, clinical, teal.
+
+   3. [data-theme="healthhub"] SEMANTIC  — the Health Hub sibling variant
+      (Prompt 1). Same family, distinct identity: warmer, grounded, "studio".
+      Applied on <html> by BaseLayout. The proposal layout leaves the default.
+
+   NOTE: the production Pottsville site uses licensed fonts (Qurova / Noah /
+   Reborn) that cannot be redistributed. We map to the OPEN Google Fonts the
+   Pottsville /hub/ page itself loads (Bebas Neue, Cormorant Garamond,
+   Raleway) — same editorial character, freely licensable. Flagged as a
+   decision in DESIGN-TOKENS.md.
+   ========================================================================= */
+
+:root {
+  /* ---- 1. PRIMITIVES (Pottsville baseline, verbatim) ------------------- */
+  --p-hero: #1dbfc1;        /* bright teal */
+  --p-hero-hover: #17b9bc;
+  --p-deep: #0d6e70;        /* deep teal — confirmed brand colour */
+  --p-tint: #effafa;        /* pale teal wash */
+  --p-paper: #faf8f4;       /* warm off-white */
+  --p-ink: #3a3a3a;         /* body text */
+
+  --p-grey-700: #383838;
+  --p-grey-500: #6b6b6b;
+  --p-grey-300: #bfbdba;
+  --p-grey-200: #d9d9d9;
+  --p-grey-100: #edebea;
+  --p-grey-50: #f5f4f1;
+
+  --p-gold: #f4b400;        /* review stars */
+
+  /* Earthy "hub" sub-palette already present in Pottsville's own tokens */
+  --p-hub-sand: #e9dec9;
+  --p-hub-clay: #c97b5c;
+  --p-hub-pine: #2f4a3a;
+
+  /* ---- 2. SEMANTIC — default theme = POTTSVILLE ------------------------ */
+  --color-bg: var(--p-paper);
+  --color-surface: #ffffff;
+  --color-surface-tint: var(--p-tint);
+  --color-band: var(--p-deep);            /* full-bleed dark section band */
+  --color-band-text: #ffffff;
+
+  --color-text: var(--p-ink);
+  --color-text-muted: var(--p-grey-500);
+  --color-heading: var(--p-deep);
+
+  --color-brand: var(--p-deep);           /* primary buttons / links */
+  --color-brand-hover: var(--p-hero);
+  --color-accent: var(--p-hero);          /* eyebrows / small highlights */
+  --color-border: var(--p-grey-200);
+  --color-star: var(--p-gold);
+
+  /* ---- Typography (shared family) ------------------------------------- */
+  --font-display: 'Bebas Neue', 'Arial Narrow', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Type scale (matches Pottsville) */
+  --fs-h1: clamp(2.4rem, 5.5vw, 4.5rem);
+  --fs-h2: clamp(1.9rem, 4vw, 3.2rem);
+  --fs-h3: clamp(1.3rem, 2.4vw, 1.8rem);
+  --fs-h4: 1.1rem;
+  --fs-lede: clamp(1.05rem, 1.6vw, 1.25rem);
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-eyebrow: 0.6875rem;   /* 11px */
+
+  --lh-heading: 1.15;
+  --lh-body: 1.55;
+  --tracking-eyebrow: 0.25em;
+
+  /* ---- Layout & shape ------------------------------------------------- */
+  --container: 1180px;
+  --container-narrow: 780px;
+  --gutter: 24px;
+  --space-section: 96px;
+  --space-section-sm: 64px;
+
+  --radius-sm: 4px;   /* buttons, chips */
+  --radius-md: 6px;   /* cards, images */
+  --radius-lg: 12px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(13, 110, 112, 0.08);
+
+  --transition: 0.2s ease;
+}
+
+/* ---- 3. HEALTH HUB sibling theme --------------------------------------
+   Same family (deep teal is retained as the primary action colour, so the
+   two sites read as siblings) with a distinct, warmer identity:
+   • pine-green headings          → grounded, "studio / community"
+   • warm sand-tinted paper       → softer than the clinical Pottsville white
+   • clay accent                  → earthy highlight in place of bright teal
+   • pine section bands           → instead of teal bands
+   DECISION: proposed variant, pending sign-off (see DESIGN-TOKENS.md).       */
+[data-theme='healthhub'] {
+  --color-bg: #fbf8f2;                  /* warmer sand-tinted paper */
+  --color-surface: #ffffff;
+  --color-surface-tint: #f4efe4;        /* sand wash */
+  --color-band: var(--p-hub-pine);      /* #2f4a3a pine band */
+  --color-band-text: #ffffff;
+
+  --color-text: #33352f;                /* warm ink */
+  --color-text-muted: #6f6f66;
+  --color-heading: var(--p-hub-pine);   /* pine headings — distinct identity */
+
+  --color-brand: var(--p-deep);         /* teal retained → family link */
+  --color-brand-hover: #0a5658;
+  --color-accent: var(--p-hub-clay);    /* clay accent / eyebrows */
+  --color-border: #e6ddcd;              /* warm border */
+}

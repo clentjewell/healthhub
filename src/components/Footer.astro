@@ -1,0 +1,163 @@
+---
+/**
+ * Site footer — carries the canonical NAP block (from site.ts) plus
+ * navigation and social. This is the human-readable NAP; the machine-readable
+ * LocalBusiness JSON-LD (Phase 5) reads from the same site.ts source.
+ */
+import { site, nap, hours, social, nav, bookingCta, fullAddress } from '@data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <span class="logo-name">{site.shortName}</span>
+      <small>{site.tagline}</small>
+      <p class="footer-blurb">
+        The community wellness studio arm of Pottsville Acupuncture — movement,
+        allied health and events on the Tweed Coast.
+      </p>
+    </div>
+
+    <div class="footer-col">
+      <h2 class="footer-h">Visit</h2>
+      <address class="nap">
+        <span>{nap.street}</span>
+        <span>{nap.locality} {nap.region} {nap.postcode}</span>
+        <a href={nap.mapUrl} target="_blank" rel="noopener">Get directions</a>
+      </address>
+      <p class="hours"><strong>Open</strong><br />{hours.label}</p>
+    </div>
+
+    <div class="footer-col">
+      <h2 class="footer-h">Explore</h2>
+      <ul class="footer-nav">
+        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        <li><a href={bookingCta.href}>{bookingCta.label}</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h2 class="footer-h">Connect</h2>
+      <ul class="footer-nav">
+        {nap.phone && <li><a href={`tel:${nap.phone.replace(/\s/g, '')}`}>{nap.phone}</a></li>}
+        {nap.email && <li><a href={`mailto:${nap.email}`}>{nap.email}</a></li>}
+        {social.instagram && <li><a href={social.instagram} target="_blank" rel="noopener">Instagram {social.handle}</a></li>}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-base">
+    <p>&copy; {year} {nap.legalName}. {fullAddress}.</p>
+    <p class="footer-fine">Made on the Tweed Coast.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-band);
+    color: var(--color-band-text);
+    padding-block: 64px 32px;
+    margin-top: 96px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+  .footer-brand .logo-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: block;
+    color: #fff;
+  }
+  .footer-brand small {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .footer-blurb {
+    margin-top: 16px;
+    font-size: 14px;
+    opacity: 0.8;
+    max-width: 34ch;
+  }
+  .footer-h {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.7;
+    margin: 0 0 16px;
+  }
+  .nap {
+    font-style: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .nap a,
+  .footer-nav a {
+    color: #fff;
+    opacity: 0.85;
+  }
+  .nap a:hover,
+  .footer-nav a:hover {
+    opacity: 1;
+    color: #fff;
+    text-decoration: underline;
+  }
+  .nap a {
+    margin-top: 8px;
+    opacity: 0.75;
+  }
+  .hours {
+    font-size: 14px;
+    margin-top: 16px;
+    opacity: 0.85;
+  }
+  .footer-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .footer-base {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  .footer-base p {
+    margin: 0;
+    max-width: none;
+  }
+
+  @media (max-width: 880px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 540px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
