@@ -97,26 +97,35 @@
 }
 
 /* ---- 3. HEALTH HUB sibling theme --------------------------------------
-   Same family (deep teal is retained as the primary action colour, so the
-   two sites read as siblings) with a distinct, warmer identity:
-   • pine-green headings          → grounded, "studio / community"
-   • warm sand-tinted paper       → softer than the clinical Pottsville white
-   • clay accent                  → earthy highlight in place of bright teal
-   • pine section bands           → instead of teal bands
-   DECISION: proposed variant, pending sign-off (see DESIGN-TOKENS.md).       */
+   Derived from the OFFICIAL Health Hub Tweed Coast logo (blue + turquoise
+   enso with a gold chakra dot). Same blue-green family as Pottsville's teal,
+   distinct identity:
+   • steel-blue wordmark / headings   → the "HEALTH HUB" logo blue
+   • turquoise accent                 → the "TWEED COAST" / enso turquoise
+   • deep navy section bands
+   • gold spark                       → the logo's centre dot (active/"on now")
+   Colours matched by eye to the supplied logo — fine-tune to exact brand
+   hexes if a brand sheet exists (one-file change). See DESIGN-TOKENS.md.     */
 [data-theme='healthhub'] {
-  --color-bg: #fbf8f2;                  /* warmer sand-tinted paper */
+  --hub-blue: #34719f;          /* wordmark steel-blue — brand / headings */
+  --hub-navy: #22496c;          /* deep — bands, hover */
+  --hub-turq: #2e9fa4;          /* turquoise accent (text-readable) */
+  --hub-turq-bright: #45c2c6;   /* logo turquoise — decorative details */
+  --hub-gold: #f2b01e;          /* chakra-dot gold spark */
+
+  --color-bg: #ffffff;                  /* clean white, as the logo lockup */
   --color-surface: #ffffff;
-  --color-surface-tint: #f4efe4;        /* sand wash */
-  --color-band: var(--p-hub-pine);      /* #2f4a3a pine band */
+  --color-surface-tint: #eaf5f6;        /* pale turquoise wash */
+  --color-band: var(--hub-navy);        /* deep navy band */
   --color-band-text: #ffffff;
 
-  --color-text: #33352f;                /* warm ink */
-  --color-text-muted: #6f6f66;
-  --color-heading: var(--p-hub-pine);   /* pine headings — distinct identity */
+  --color-text: #2a3742;                /* cool ink */
+  --color-text-muted: #5c6b75;
+  --color-heading: var(--hub-blue);     /* steel-blue headings — matches wordmark */
 
-  --color-brand: var(--p-deep);         /* teal retained → family link */
-  --color-brand-hover: #0a5658;
-  --color-accent: var(--p-hub-clay);    /* clay accent / eyebrows */
-  --color-border: #e6ddcd;              /* warm border */
+  --color-brand: var(--hub-blue);       /* primary buttons / links */
+  --color-brand-hover: var(--hub-navy);
+  --color-accent: var(--hub-turq);      /* turquoise eyebrows / accents */
+  --color-border: #dce6eb;              /* cool border */
+  --color-star: var(--hub-gold);
 }

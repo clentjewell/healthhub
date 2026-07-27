@@ -65,32 +65,39 @@ line-height `1.15`, body `1.55`. Eyebrow: 11px, `letter-spacing .25em`, uppercas
 - Section rhythm `96px` (→ `64px` on mobile)
 - Radius `4px` (buttons/chips), `6px` (cards/images)
 
-## 4. Health Hub sibling theme (PROPOSED — needs sign-off)
+## 4. Health Hub sibling theme (aligned to the OFFICIAL logo)
 
-Goal: *same family, distinct identity.* The Health Hub theme keeps **deep teal
-`#0D6E70` as the primary action colour** so the two sites are unmistakably
-siblings, then diverges to feel warmer and more "studio / community":
+Goal: *same family, distinct identity.* The **official Health Hub Tweed Coast
+logo** (supplied by the client) is a **blue + turquoise** enso with a gold
+chakra dot. The theme is matched to it — a cool blue sibling of Pottsville's
+warm teal:
 
-| Semantic token | Pottsville (default) | Health Hub (proposed) |
+| Semantic token | Pottsville (default) | Health Hub (from logo) |
 |---|---|---|
-| page background | paper `#FAF8F4` | warm sand `#FBF8F2` |
-| headings | deep teal `#0D6E70` | **pine `#2F4A3A`** |
-| accent / eyebrow | bright teal `#1DBFC1` | **clay `#C97B5C`** |
-| primary button | deep teal | deep teal *(shared — family link)* |
-| dark section band | deep teal | **pine `#2F4A3A`** |
-| borders | grey `#D9D9D9` | warm `#E6DDCD` |
+| page background | paper `#FAF8F4` | white `#FFFFFF` |
+| section tint | pale teal `#EFFAFA` | pale turquoise `#EAF5F6` |
+| headings | deep teal `#0D6E70` | **steel-blue `#34719F`** (wordmark) |
+| accent / eyebrow | bright teal `#1DBFC1` | **turquoise `#2E9FA4`** (`#45C2C6` bright, for detail) |
+| primary button | deep teal | **steel-blue `#34719F`** → navy `#22496C` hover |
+| dark section band | deep teal | **navy `#22496C`** |
+| spark / active | gold `#F4B400` (stars) | **gold `#F2B01E`** (chakra dot) |
+| borders | grey `#D9D9D9` | cool `#DCE6EB` |
 
-> **DECISION 2 — Health Hub identity.** The above (teal + earthy pine/clay/sand)
-> is derived directly from Pottsville's own `--hub-*` tokens and reads as a
-> grounded studio sibling. **Alternative on file:** the existing "Health Hub
-> Tweed Coast" cross-promo band on the Pottsville site uses a cooler
-> **slate-blue** (`#46688C → #537EA6`) with a turquoise `#36C7C4` accent — a
-> cooler, more clinical sibling. Both are one-file swaps in `tokens.css`.
-> **Which direction do you want?**
+The header wordmark mirrors the logo's two-tone treatment: blue "HEALTH HUB" +
+turquoise "TWEED COAST".
 
-> **DECISION 3 — logo.** No Health Hub logo asset was available. The header
-> currently renders a **typographic wordmark** (Bebas Neue "HEALTH HUB" +
-> "Tweed Coast"). If a real logo exists, send it and we'll drop it in.
+> **DECISION 2 — Health Hub identity → RESOLVED.** Palette matched to the
+> official logo (blue/turquoise/gold). Hexes were sampled by eye from the
+> supplied artwork; if a brand sheet has exact values, they're a one-file swap
+> in `tokens.css`. *(The earlier earthy pine/clay/sand proposal — used before
+> the logo was supplied — has been replaced.)*
+
+> **DECISION 3 — logo → OUTSTANDING.** The header still renders a **typographic
+> wordmark** (Bebas Neue "HEALTH HUB" + turquoise "Tweed Coast"), recoloured to
+> match the logo. To use the **actual logo artwork** in the header/footer,
+> please send the file — **SVG preferred** (crisp at any size), otherwise a
+> high-res transparent PNG. I'll drop it in and keep the wordmark as the
+> text/SEO fallback.
 
 ## How the two themes coexist
 
