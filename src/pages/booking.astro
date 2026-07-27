@@ -14,6 +14,7 @@ const rows = await Promise.all(
     return {
       name: p.data.name,
       href: `/practitioners/${p.id}`,
+      image: p.data.image,
       service: svc?.data.title ?? p.data.role,
       bookingUrl: p.data.bookingUrl,
       phone: p.data.phone,
@@ -39,8 +40,11 @@ const rows = await Promise.all(
           rows.map((r) => (
             <li class="booking-row">
               <div class="bk-info">
-                <a class="bk-name" href={r.href}>{r.name}</a>
-                <span class="bk-service">{r.service}</span>
+                {r.image && <img class="bk-avatar" src={r.image} alt={r.name} loading="lazy" width="56" height="56" />}
+                <div>
+                  <a class="bk-name" href={r.href}>{r.name}</a>
+                  <span class="bk-service">{r.service}</span>
+                </div>
               </div>
               <div class="bk-actions">
                 {r.bookingUrl && <a href={r.bookingUrl} class="btn btn-primary bk-btn">Book online</a>}
@@ -72,6 +76,8 @@ const rows = await Promise.all(
     padding: 20px 0;
     border-bottom: 1px solid var(--color-border);
   }
+  .bk-info { display: flex; align-items: center; gap: 16px; }
+  .bk-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; object-position: top; flex-shrink: 0; }
   .bk-name { font-weight: 700; font-size: 1.05rem; display: block; }
   .bk-service { font-size: 13px; color: var(--color-text-muted); }
   .bk-actions { display: flex; align-items: center; gap: 16px; white-space: nowrap; }

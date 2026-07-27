@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, summary, provider, bookingUrl, bookingPhone, placeholder } = entry.data;
+const { title, summary, image, provider, bookingUrl, bookingPhone, placeholder } = entry.data;
 
 const practitioner = provider ? await getEntry('practitioners', provider) : undefined;
 const telHref = bookingPhone ? `tel:${bookingPhone.replace(/\s/g, '')}` : undefined;
@@ -27,6 +27,7 @@ const telHref = bookingPhone ? `tel:${bookingPhone.replace(/\s/g, '')}` : undefi
   <article class="section">
     <div class="container service-layout">
       <div class="service-content">
+        {image && <img class="service-hero-img" src={image} alt={title} />}
         {placeholder && <p class="ph-note">Placeholder content — real copy migrated in Phase 3.</p>}
         <Content />
 
@@ -68,6 +69,13 @@ const telHref = bookingPhone ? `tel:${bookingPhone.replace(/\s/g, '')}` : undefi
     grid-template-columns: 1fr 320px;
     gap: 48px;
     align-items: start;
+  }
+  .service-hero-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: 28px;
   }
   .service-content :global(p) { color: var(--color-text); }
   .service-actions { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }

@@ -4,6 +4,7 @@ shortTitle: "Acupuncture"
 icon: "🌿"
 order: 1
 summary: "Relieve your pain, restore your energy and revitalise your passion for living."
+image: "/images/services/acupuncture.webp"
 provider: "dr-malcolm-mckay"
 bookingUrl: "https://pottsvilleacupuncture.com.au/appointment/"
 bookingPhone: "0420 437 156"

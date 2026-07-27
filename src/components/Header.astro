@@ -13,8 +13,7 @@ const isActive = (href: string) =>
 <header class="site-header">
   <div class="nav-inner">
     <a href="/" class="logo" aria-label={`${site.name} — home`}>
-      <span class="logo-name">{site.shortName}</span>
-      <small>{site.tagline}</small>
+      <img src="/images/logo.png" alt={site.name} class="logo-img" width="220" height="46" />
     </a>
 
     <button
@@ -65,23 +64,15 @@ const isActive = (href: string) =>
 
   .logo {
     display: inline-flex;
-    flex-direction: column;
-    line-height: 1;
-    color: var(--color-heading);
+    align-items: center;
   }
-  .logo-name {
-    font-family: var(--font-display);
-    font-size: 24px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  .logo-img {
+    height: 44px;
+    width: auto;
+    display: block;
   }
-  .logo small {
-    font-family: var(--font-sans);
-    font-size: 10px;
-    letter-spacing: 0.34em;
-    text-transform: uppercase;
-    color: var(--color-accent); /* turquoise "TWEED COAST", matching the logo */
-    margin-top: 3px;
+  @media (max-width: 480px) {
+    .logo-img { height: 38px; }
   }
 
   .menu {
