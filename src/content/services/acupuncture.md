@@ -1,13 +1,11 @@
 ---
-title: "Acupuncture"
+title: "Acupuncture & Traditional Chinese Medicine"
 shortTitle: "Acupuncture"
 icon: "🌿"
 order: 1
-summary: "Traditional Chinese acupuncture for pain, stress and wellbeing."
-placeholder: true
+summary: "Relieve your pain, restore your energy and revitalise your passion for living."
+provider: "dr-malcolm-mckay"
+bookingUrl: "https://pottsvilleacupuncture.com.au/appointment/"
+bookingPhone: "0420 437 156"
 ---
-
-**Placeholder** — real service copy is migrated from the live site in Phase 3.
-
-This section will describe the Acupuncture offering: what it involves, who it's for,
-what to expect in a session, and how to get started. <!-- TODO(content): pull real copy from healthhubtweedcoast.com.au -->
+Relieve your pain, restore your energy and revitalise your passion for living. Dr Mal McKay Acupuncturist has been in practice for over 30 years helping people just like you to overcome their health problems.

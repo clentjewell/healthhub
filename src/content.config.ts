@@ -27,11 +27,13 @@ const services = defineCollection({
     shortTitle: z.string().optional(),
     summary: z.string(),
     order: z.number().default(99),
-    /** Emoji or short glyph placeholder until real iconography (Phase 3). */
     icon: z.string().optional(),
     image: z.string().optional(),
-    /** Optional practitioner ids offering this service. */
-    practitioners: z.array(z.string()).default([]),
+    /** Practitioner (id) who offers this service — services are 1:1 with a provider. */
+    provider: z.string().optional(),
+    /** Booking pathway for this service (varies per provider — not all Halaxy). */
+    bookingUrl: z.string().url().optional(),
+    bookingPhone: z.string().optional(),
     draft: z.boolean().default(false),
     placeholder: z.boolean().default(false),
   }),
@@ -46,8 +48,11 @@ const practitioners = defineCollection({
     role: z.string().default('Practitioner'),
     order: z.number().default(99),
     image: z.string().optional(),
-    /** Per-practitioner Halaxy booking link. TODO where not found (Phase 3). */
+    /** Per-practitioner booking link (platform varies; empty = phone/contact only). */
     bookingUrl: z.string().url().optional(),
+    phone: z.string().optional(),
+    /** Service (id) this practitioner offers. */
+    service: z.string().optional(),
     modalities: z.array(z.string()).default([]),
     placeholder: z.boolean().default(false),
   }),

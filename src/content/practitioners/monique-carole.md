@@ -1,13 +1,31 @@
 ---
 name: "Monique Carole"
-role: "Practitioner"
-order: 2
-modalities: []
-placeholder: true
+role: "Wellbeing Coach"
+order: 3
+image: "/images/practitioners/monique-carole.webp"
+phone: "0416 066 310"
+service: "pilates-body-balance"
 ---
+Paddleboard Pilates / SUP Fitness
 
-**Placeholder bio** — Monique Carole's real biography, credentials and modalities are
-migrated from the live site in Phase 3. Nothing here is invented.
+Thai Yoga Massage Therapy / Kinesiology Bodywork
 
-<!-- TODO(content): real bio + role/title from healthhubtweedcoast.com.au -->
-<!-- TODO(booking): per-practitioner Halaxy bookingUrl -->
+Hello, I’m Monique – a dedicated Wellbeing Coach passionate about helping people improve their health, vitality, and overall sense of wellbeing through mindful movement and holistic therapies.
+
+Through my own journey of healing from pain and trauma I was introduced to powerful techniques that not only helped me but convinced me to learn and share these therapeutic modalities with others in need – to support lasting, positive change.
+
+My approach is low-impact and designed to enhance physical, mental, and emotional wellbeing for all ages. My passion is to help people reconnect with their bodies, increase energy, and cultivate confidence and strength, so they can live healthier, more vibrant, and fulfilling lives.
+
+⚡ Workout Smarter – Not Harder ⚡
+
+🧘 Classes include gentle but powerful Pilates exercises and mindful movement. Focusing on controlled movements that bring stability, strength, and mobility to the entire body – enhancing core strength and rejuvenating both body and mind.
+
+🌍 Pilates treats the body as an interconnected whole unlocking both physical and emotional strength – sculpting long, lean muscles, strengthening the core, improving posture and flexibility – leading to reduced joint strain, relief from chronic aches and pains, and a renewed sense of energy.
+
+😴 Pilates also supports the mind and nervous system. Its mindful, breath-focused approach calms stress, eases anxiety, and promotes deep relaxation. This balance not only enhances emotional well-being but provide a natural pathway to more nourishing and restorative sleep – sometimes called the best meditation!
+
+🤍 A Practice of Harmony Ultimately, Pilates clears the mind, steadies the body, and helps us rediscover an inner rhythm that builds resilience and grace.
+
+🌿 Just 30 minutes a day practicing Pilates daily can help regulate mood, improve focus and foster a healthier mindset and a foundation for well-being that flows into every part of daily life. 🌟
+
+Stay for both classes 8:15-9:30am $20

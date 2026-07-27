@@ -26,9 +26,9 @@ export const nap = {
   postcode: '2489',
   country: 'Australia',
   countryCode: 'AU',
-  // TODO(content): confirm public phone number from the live site (Phase 3).
-  phone: '',
-  // TODO(content): confirm public reception email (Phase 3).
+  // General studio contact (from live contact page).
+  phone: '0415 919 521',
+  // TODO(content): public reception email not published on the live site — confirm.
   email: '',
   /** Google Maps place link — TODO(content): confirm exact place URL (Phase 3). */
   mapUrl: 'https://www.google.com/maps/search/?api=1&query=87-89+Tweed+Coast+Road+Hastings+Point+NSW+2489',
@@ -54,7 +54,7 @@ export const social = {
   handle: '@healthhubtweedcoast',
   // TODO(content): confirm live social URLs (Phase 3).
   instagram: 'https://www.instagram.com/healthhubtweedcoast/',
-  facebook: '',
+  facebook: 'https://www.facebook.com/HealthHubTweedCoast/',
 } as const;
 
 /** Primary navigation for the Health Hub site. */

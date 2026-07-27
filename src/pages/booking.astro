@@ -1,101 +1,90 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PageHeader from '@components/PageHeader.astro';
-import { booking } from '@data/site';
 
 const practitioners = (await getCollection('practitioners')).sort(
   (a, b) => a.data.order - b.data.order,
 );
-const missingLinks = practitioners.filter((p) => !p.data.bookingUrl).length;
+
+// Resolve each practitioner's service label for display.
+const rows = await Promise.all(
+  practitioners.map(async (p) => {
+    const svc = p.data.service ? await getEntry('services', p.data.service) : undefined;
+    return {
+      name: p.data.name,
+      href: `/practitioners/${p.id}`,
+      service: svc?.data.title ?? p.data.role,
+      bookingUrl: p.data.bookingUrl,
+      phone: p.data.phone,
+    };
+  }),
+);
 ---
 
 <BaseLayout
   title="Make a Booking"
-  description="Book an appointment at Health Hub Tweed Coast — acupuncture and allied health, Hastings Point."
+  description="Book acupuncture, allied health and classes at Health Hub Tweed Coast, Hastings Point."
 >
   <PageHeader
     eyebrow="Appointments"
     title="Make a Booking"
-    lede="Book online with the practitioner of your choice. Classes are booked from the timetable."
+    lede="Each practitioner manages their own bookings — book online where available, or get in touch directly."
   />
 
   <section class="section">
     <div class="container narrow-mid">
-      <div class="booking-general">
-        <h2>Book online</h2>
-        <p class="lede">
-          Appointments are managed through Halaxy. Choose a practitioner below, or
-          open the main booking page.
-        </p>
-        {
-          booking.halaxyUrl ? (
-            <a href={booking.halaxyUrl} class="btn btn-primary">Open booking</a>
-          ) : (
-            <p class="todo-note">General Halaxy booking URL — TODO (Phase 3).</p>
-          )
-        }
-      </div>
-
-      <h2 class="by-prac-h">Book with a practitioner</h2>
       <ul class="booking-list">
         {
-          practitioners.map((p) => (
+          rows.map((r) => (
             <li class="booking-row">
-              <div>
-                <span class="bk-name">{p.data.name}</span>
-                <span class="bk-role">{p.data.role}</span>
+              <div class="bk-info">
+                <a class="bk-name" href={r.href}>{r.name}</a>
+                <span class="bk-service">{r.service}</span>
               </div>
-              {p.data.bookingUrl ? (
-                <a href={p.data.bookingUrl} class="btn btn-primary bk-btn">Book</a>
-              ) : (
-                <span class="bk-todo">Booking link TODO</span>
-              )}
+              <div class="bk-actions">
+                {r.bookingUrl && <a href={r.bookingUrl} class="btn btn-primary bk-btn">Book online</a>}
+                {r.phone && (
+                  <a href={`tel:${r.phone.replace(/\s/g, '')}`} class="bk-phone">{r.phone}</a>
+                )}
+              </div>
             </li>
           ))
         }
       </ul>
 
-      {
-        missingLinks > 0 && (
-          <p class="todo-summary">
-            {missingLinks} of {practitioners.length} practitioner booking links are placeholders —
-            per-practitioner Halaxy links are pulled from the live site in Phase 3.
-          </p>
-        )
-      }
+      <p class="bk-extra">
+        Also available by arrangement: <strong>Kirtan &amp; Harmonium Chant</strong> with Melissa
+        Redman — 0413&nbsp;267&nbsp;544.
+      </p>
     </div>
   </section>
 </BaseLayout>
 
 <style>
   .narrow-mid { max-width: 820px; margin-inline: auto; }
-  .booking-general {
-    background: var(--color-surface-tint);
-    border-radius: var(--radius-md);
-    padding: 32px;
-    margin-bottom: 48px;
-  }
-  .booking-general h2 { margin-bottom: 12px; }
-  .by-prac-h { margin-bottom: 20px; }
   .booking-list { list-style: none; margin: 0; padding: 0; }
   .booking-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 18px 0;
+    gap: 20px;
+    padding: 20px 0;
     border-bottom: 1px solid var(--color-border);
   }
-  .bk-name { font-weight: 600; display: block; }
-  .bk-role { font-size: 13px; color: var(--color-text-muted); }
+  .bk-name { font-weight: 700; font-size: 1.05rem; display: block; }
+  .bk-service { font-size: 13px; color: var(--color-text-muted); }
+  .bk-actions { display: flex; align-items: center; gap: 16px; white-space: nowrap; }
   .bk-btn { padding: 8px 20px; font-size: 13px; }
-  .bk-todo, .todo-note { font-size: 13px; color: var(--color-text-muted); font-style: italic; }
-  .todo-summary {
-    margin-top: 28px;
-    font-size: 13px;
+  .bk-phone { font-size: 14px; font-weight: 600; color: var(--color-brand); }
+  .bk-extra {
+    margin-top: 32px;
+    font-size: 14px;
     color: var(--color-text-muted);
     border-left: 3px solid var(--color-accent);
     padding-left: 12px;
+  }
+  @media (max-width: 560px) {
+    .booking-row { flex-direction: column; align-items: flex-start; gap: 12px; }
   }
 </style>

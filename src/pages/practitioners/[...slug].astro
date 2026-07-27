@@ -1,9 +1,8 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PlaceholderImage from '@components/PlaceholderImage.astro';
 import CtaBand from '@components/CtaBand.astro';
-import { bookingCta } from '@data/site';
 
 export async function getStaticPaths() {
   const practitioners = await getCollection('practitioners');
@@ -15,7 +14,11 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { name, role, image, bookingUrl, modalities, placeholder } = entry.data;
+const { name, role, image, bookingUrl, phone, service, modalities, placeholder } = entry.data;
+
+const svc = service ? await getEntry('services', service) : undefined;
+const telHref = phone ? `tel:${phone.replace(/\s/g, '')}` : undefined;
+const firstName = name.split(' ')[0].replace(/^Dr$/, name.split(' ')[1] ?? name);
 ---
 
 <BaseLayout
@@ -35,20 +38,23 @@ const { name, role, image, bookingUrl, modalities, placeholder } = entry.data;
             )
           }
         </div>
-        <a
-          href={bookingUrl ?? bookingCta.href}
-          class="btn btn-primary prac-book"
-        >
-          Book with {name.split(' ')[0]}
-        </a>
-        {!bookingUrl && <p class="prac-todo">Per-practitioner booking link TODO (Phase 3)</p>}
+
+        {svc && (
+          <a class="svc-chip" href={`/services/${svc.id}`}>
+            <span>Offers</span> {svc.data.shortTitle ?? svc.data.title} →
+          </a>
+        )}
+
+        {bookingUrl && <a href={bookingUrl} class="btn btn-primary prac-book">Book online</a>}
+        {telHref && <a href={telHref} class="btn btn-ghost prac-book">Call {phone}</a>}
+        {!bookingUrl && !telHref && <a href="/booking" class="btn btn-primary prac-book">Make a booking</a>}
       </aside>
 
       <div class="prac-content">
         <p class="eyebrow">{role}</p>
         <h1>{name}</h1>
         {modalities.length > 0 && <p class="prac-modalities">{modalities.join(' · ')}</p>}
-        {placeholder && <p class="ph-note">Placeholder bio — real biography and credentials are migrated in Phase 3.</p>}
+        {placeholder && <p class="ph-note">Placeholder bio — migrated in Phase 3.</p>}
         <div class="prac-bio">
           <Content />
         </div>
@@ -60,23 +66,29 @@ const { name, role, image, bookingUrl, modalities, placeholder } = entry.data;
 </BaseLayout>
 
 <style>
-  .prac-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 56px;
-    align-items: start;
-  }
+  .prac-layout { display: grid; grid-template-columns: 320px 1fr; gap: 56px; align-items: start; }
   .prac-aside { position: sticky; top: 96px; }
-  .prac-photo { border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; }
+  .prac-photo { border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; }
   .prac-photo img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
-  .prac-book { width: 100%; justify-content: center; }
-  .prac-todo { font-size: 12px; color: var(--color-text-muted); font-style: italic; margin-top: 10px; text-align: center; }
+  .svc-chip {
+    display: block;
+    background: var(--color-surface-tint);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-brand);
+    margin-bottom: 14px;
+  }
+  .svc-chip span { color: var(--color-text-muted); font-weight: 500; }
+  .prac-book { width: 100%; justify-content: center; margin-bottom: 10px; }
   .prac-modalities { color: var(--color-text-muted); margin-top: 8px; }
   .ph-note {
     font-size: 13px; color: var(--color-text-muted); font-style: italic;
     border-left: 3px solid var(--color-accent); padding-left: 12px; margin-top: 20px;
   }
   .prac-bio { margin-top: 20px; }
+  .prac-bio :global(p) { color: var(--color-text); }
   @media (max-width: 820px) {
     .prac-layout { grid-template-columns: 1fr; }
     .prac-aside { position: static; max-width: 300px; }

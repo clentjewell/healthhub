@@ -1,10 +1,9 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PageHeader from '@components/PageHeader.astro';
 import PlaceholderImage from '@components/PlaceholderImage.astro';
 import CtaBand from '@components/CtaBand.astro';
-import { bookingCta } from '@data/site';
 
 export async function getStaticPaths() {
   const services = await getCollection('services');
@@ -16,7 +15,10 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, summary, image, placeholder } = entry.data;
+const { title, summary, provider, bookingUrl, bookingPhone, placeholder } = entry.data;
+
+const practitioner = provider ? await getEntry('practitioners', provider) : undefined;
+const telHref = bookingPhone ? `tel:${bookingPhone.replace(/\s/g, '')}` : undefined;
 ---
 
 <BaseLayout title={title} description={summary} path={`/services/${entry.id}`}>
@@ -25,18 +27,32 @@ const { title, summary, image, placeholder } = entry.data;
   <article class="section">
     <div class="container service-layout">
       <div class="service-content">
-        {placeholder && <p class="ph-note">Placeholder content — real copy is migrated in Phase 3.</p>}
+        {placeholder && <p class="ph-note">Placeholder content — real copy migrated in Phase 3.</p>}
         <Content />
+
         <div class="service-actions">
-          <a href={bookingCta.href} class="btn btn-primary">{bookingCta.label}</a>
+          {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
+          {telHref && <a href={telHref} class="btn btn-ghost">Call {bookingPhone}</a>}
+          {!bookingUrl && !telHref && <a href="/booking" class="btn btn-primary">Make a booking</a>}
         </div>
       </div>
+
       <aside class="service-aside">
         {
-          image ? (
-            <img src={image} alt={title} loading="lazy" />
-          ) : (
-            <PlaceholderImage label="Service image" ratio="4/3" icon={entry.data.icon} />
+          practitioner && (
+            <a class="provider-card" href={`/practitioners/${practitioner.id}`}>
+              <span class="provider-eyebrow">Offered by</span>
+              <div class="provider-media">
+                {practitioner.data.image ? (
+                  <img src={practitioner.data.image} alt={`Portrait of ${practitioner.data.name}`} loading="lazy" />
+                ) : (
+                  <PlaceholderImage label="Portrait" ratio="4/5" icon="👤" />
+                )}
+              </div>
+              <span class="provider-name">{practitioner.data.name}</span>
+              <span class="provider-role">{practitioner.data.role}</span>
+              <span class="provider-link">View profile →</span>
+            </a>
           )
         }
       </aside>
@@ -49,22 +65,38 @@ const { title, summary, image, placeholder } = entry.data;
 <style>
   .service-layout {
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 320px;
     gap: 48px;
     align-items: start;
   }
   .service-content :global(p) { color: var(--color-text); }
-  .service-actions { margin-top: 32px; }
+  .service-actions { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
   .ph-note {
-    font-size: 13px;
-    color: var(--color-text-muted);
-    border-left: 3px solid var(--color-accent);
-    padding-left: 12px;
-    font-style: italic;
+    font-size: 13px; color: var(--color-text-muted);
+    border-left: 3px solid var(--color-accent); padding-left: 12px; font-style: italic;
   }
-  .service-aside { position: sticky; top: 96px; }
+  .provider-card {
+    position: sticky;
+    top: 96px;
+    display: block;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    color: var(--color-text);
+  }
+  .provider-card:hover { border-color: var(--color-accent); box-shadow: var(--shadow-md); }
+  .provider-eyebrow {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--color-accent); font-weight: 600;
+  }
+  .provider-media { border-radius: var(--radius-sm); overflow: hidden; margin: 14px 0; }
+  .provider-media img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
+  .provider-name { display: block; font-weight: 700; font-size: 1.1rem; }
+  .provider-role { display: block; font-size: 13px; color: var(--color-text-muted); margin-bottom: 12px; }
+  .provider-link { font-size: 13px; font-weight: 600; color: var(--color-brand); }
   @media (max-width: 860px) {
     .service-layout { grid-template-columns: 1fr; }
-    .service-aside { position: static; order: -1; max-width: 420px; }
+    .provider-card { position: static; max-width: 320px; }
   }
 </style>

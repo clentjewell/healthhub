@@ -2,12 +2,10 @@
 title: "Naturopathy"
 shortTitle: "Naturopathy"
 icon: "🍃"
-order: 3
-summary: "Whole-person naturopathic care and herbal medicine."
-placeholder: true
+order: 6
+summary: "Using evidenced-based strategies and centuries old naturopathic wisdom, my role is to support and guide you and your family, to good health."
+provider: "amanda-ross"
+bookingUrl: "https://the-naturopathic-care-clinic.simplecliniconline.com/diary"
+bookingPhone: "0408 643 282"
 ---
-
-**Placeholder** — real service copy is migrated from the live site in Phase 3.
-
-This section will describe the Naturopathy offering: what it involves, who it's for,
-what to expect in a session, and how to get started. <!-- TODO(content): pull real copy from healthhubtweedcoast.com.au -->
+Using evidenced-based strategies and centuries old naturopathic wisdom, my role is to support and guide you and your family, to good health.
