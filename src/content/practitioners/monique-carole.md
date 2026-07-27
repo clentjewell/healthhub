@@ -5,8 +5,16 @@ order: 3
 image: "/images/practitioners/monique-carole.webp"
 phone: "0416 066 310"
 service: "pilates-body-balance"
+facebook: "https://www.facebook.com/HolisticHealthAndFitnessCoaching/"
+sessions:
+  - label: "Chair Pilates 8:15-8:45am"
+    price: "$10"
+  - label: "Mat Pilates 8:45-9:30am"
+    price: "$15"
+  - label: "Stay for both classes 8:15-9:30am"
+    price: "$20"
 ---
-## Wellbeing Coach
+### Wellbeing Coach
 
 * Pilates Fitness Training
 * Holistic Hypnotherapy
@@ -20,7 +28,7 @@ Through my own journey of healing from pain and trauma I was introduced to power
 
 My approach is low-impact and designed to enhance physical, mental, and emotional wellbeing for all ages. My passion is to help people reconnect with their bodies, increase energy, and cultivate confidence and strength, so they can live healthier, more vibrant, and fulfilling lives.
 
-### Service Description
+## Service Description
 
 **Pilates & Body Balance Classes**
 
@@ -37,14 +45,4 @@ Ultimately, Pilates clears the mind, steadies the body, and helps us rediscover 
 
 🌿 Just 30 minutes a day practicing Pilates daily can help regulate mood, improve focus and foster a healthier mindset and a foundation for well-being that flows into every part of daily life. 🌟
 
-### Fee and Class Times
-
-**Wednesday**
-
-Chair Pilates 8:15-8:45am $10
-
-Mat Pilates 8:45-9:30am $15
-
-Stay for both classes 8:15-9:30am $20
-
-**BOOK NOW**  0416 066 310
+## Fee and Class Times

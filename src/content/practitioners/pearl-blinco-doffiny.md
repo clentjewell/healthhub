@@ -5,20 +5,22 @@ order: 7
 image: "/images/practitioners/pearl-blinco-doffiny.webp"
 phone: "0467 512 368"
 service: "crystal-sound-bowls"
+facebook: "https://www.facebook.com/profile.php?id=61584055244098"
+sessions:
+  - label: "Sunday 5:00pm – 6:00pm"
+    price: "$20 per class"
 ---
-## Sound Bowls - TWIZTED
-
-## Pearl – Sound Bowl Therapist & Founder of Twizted
+### Pearl – Sound Bowl Therapist & Founder of Twizted
 
 Pearl brings a gentle, grounded presence to our health studio, offering sound bowl sessions that invite deep rest, nervous system regulation, and emotional ease. As the cofounder of **Twizted**, she is passionate about creating spaces where people can slow down, reconnect with themselves, and experience the subtle yet powerful effects of sound.
 
-### Meet Pearl
+## Meet Pearl
 
 “**Hi, I love the effect that sound bowls have on me and I enjoy even more sharing it with others.**”
 
 Pearl’s connection to crystal singing bowls is both personal and intuitive. She has experienced firsthand how steady, resonant tones can soften the body, quiet the mind, and create a sense of inner spaciousness. Her classes are designed to share that experience with others in a way that feels safe, nurturing, and accessible to all.
 
-### What You May Experience in a Sound Bowl Session
+## What You May Experience in a Sound Bowl Session
 
 Pearl’s sessions weave together tone, vibration, and stillness to support a wide range of wellbeing benefits. Many participants describe:
 
@@ -30,7 +32,7 @@ Pearl’s sessions weave together tone, vibration, and stillness to support a wi
 
 Each class is an invitation to pause, breathe, and let the sound gently guide you back to yourself.
 
-### Training & Qualifications
+## Training & Qualifications
 
 Pearl brings both technical skill and compassionate awareness to her work. Her training includes:
 
@@ -40,9 +42,7 @@ Pearl brings both technical skill and compassionate awareness to her work. Her t
 
 This combination of sound therapy education and people‑focused training allows her to hold a steady, supportive space for individuals from all walks of life, including those navigating stress, overwhelm, or emotional challenges.
 
-### Service Description
-
-### Sound Bowl Classes at Our Health Studio
+## Sound Bowl Classes at Our Health Studio
 
 Pearl’s classes are suitable for beginners, seasoned meditators, and anyone seeking a restorative pause in their week. Sessions typically include:
 
@@ -52,8 +52,4 @@ Pearl’s classes are suitable for beginners, seasoned meditators, and anyone se
 
 You’re welcome to lie down, sit comfortably, or find any position that supports your relaxation. No prior experience is needed—just comfortable clothing and a willingness to unwind.
 
-### Times and Fees of Classes and Sessions
-
-#### **Weekly**
-
-Sunday 5:00pm – 6:00pm –  $20 per class
+## Times and Fees of Classes and Sessions

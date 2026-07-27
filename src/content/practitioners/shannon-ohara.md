@@ -5,8 +5,15 @@ order: 4
 image: "/images/practitioners/shannon-ohara.webp"
 phone: "0418 255 493"
 service: "hatha-yin-yoga"
+sessions:
+  - label: "Casual Class"
+    price: "$24"
+  - label: "5 x class pass"
+    price: "$110"
+  - label: "10 x class pass"
+    price: "$200"
 ---
-## YIN & HATHA YOGA TEACHER
+### YIN & HATHA YOGA TEACHER
 
 Namaste, meaning: “the light in me honours the light in you”.
 
@@ -22,7 +29,7 @@ I give thanks to all my teachers past, present & future who have & continue to n
 
 I teach Hatha with a sprinkle of joy, flowing movements & laughter thrown in to invigorate & balance the body and Yin to rest, release & restore the body back into a calm state.
 
-I believe we need to take our practice seriously but it’s all about our approach & attitude while we are doing it. It’s all there for us…we just need to slow down & tune in.
+I believe we need to take our practice seriously but it’s all about our approach & attitude while we are doing it. It’s all there for us…we just need to slow down & tune in.
 
 Yoga is not a religion but a way of life. If practiced properly, it unites our mind, body & spirit so we can come to understand ourselves in a holistic sense. To learn how to live in this fast-paced world, to be able to self-regulate our breath, emotions & reactions to then live a calmer & more balanced life.
 
@@ -32,7 +39,7 @@ Om Shanti…
 
 Shannon
 
-### Yoga Classes - Hatha & Yin
+## Yoga Classes - Hatha & Yin
 
 Each class is 1 hour and 15 minutes long. Come prepared with your mat and water bottle and leave your shoes and the world at the door. We’ll explore asana (through correct alignment & use of props), pranayama (breath control), meditation & yoga philosophy (ancient wisdom & ethics) to directly connect us to the self & to the elements & strengths of the universe.
 
@@ -49,16 +56,10 @@ Yin-Yang Yoga:
 
 A Yin–Yang yoga class blends two complementary energies into one beautifully balanced practice. It’s the kind of class that leaves people feeling both spacious and steady, softened yet awake. A Yin–Yang class weaves together the slow, meditative stillness of Yin with the warm, flowing movement of Yang, creating a practice that nourishes both body and mind.
 
-### Class Times & Fees
+## Class Times & Fees
 
 **Monday Yin-Yang:** 7:30 – 8:45 am (75mins)
 
-**Tuesday Hatha:** 6:00 – 7:15 pm (75mins)
+**Tuesday Hatha:** 6:00 – 7:15 pm (75mins)
 
-**Wednesday Yin:** 6:00 – 7:15 pm (75mins)
-
-**Casual Class:** $24
-
-**5 x class pass:** $110
-
-**10 x class pass:** $200
+**Wednesday Yin:** 6:00 – 7:15 pm (75mins)

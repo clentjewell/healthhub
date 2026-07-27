@@ -5,8 +5,23 @@ order: 5
 image: "/images/practitioners/rebecca-lindsay.webp"
 phone: "0411 417 337"
 service: "embodied-movement-dance"
+facebook: "https://www.facebook.com/rebecca.lindsay.7547"
+instagram: "https://www.instagram.com/yourwisdomyourway/"
+sessions:
+  - label: "Thursdays 11:00am – 12:00pm"
+    price: "$24 per class"
+  - label: "Friday 27th March 2026 7:00pm -8:15pm per session"
+    price: "$30"
+  - label: "Friday 1st May 2026 7:00 – 8:15pm per session"
+    price: "$30"
+  - label: "Friday 5th June 7:00pm – 8:15pm per session"
+    price: "$30"
+  - label: "5x Class Pass"
+    price: "$110"
+  - label: "10x Class Pass"
+    price: "$200"
 ---
-## Embodied Movement & Dance
+### Embodied Movement & Dance
 
 *Qualifications: Graduate Diploma of Gestalt Psychotherapy | Feminine Embodiment Coaching Certification | Doula Certification | Qualified Hatha Yoga Teacher 200hrs | Diploma Reflexology | Diploma Remedial Massage | Diploma Contemporary Music | Certificate Gendai Reiki Ho | Certificate Pre Natal Yoga*
 
@@ -32,17 +47,15 @@ If you’d like to work with me please reach out.
 
 I look forward to connecting with you.
 
-#### *Rebecca*
+## Service Description
 
-### Service Description
+### Sacred Circle ~ Emdodied Movement & Dance
 
-## Sacred Circle ~ Emdodied Movement & Dance
-
-The Sacred Circle is for women to come together and be guided in embodiment practices that nourish her soul. We journey with meditation, breath, movement, music and dance. This a space for women to feel deeply into her body, express freely from her heart and connect with her essence.
+The Sacred Circle is for women to come together and be guided in embodiment practices that nourish her soul. We journey with meditation, breath, movement, music and dance. This a space for women to feel deeply into her body, express freely from her heart and connect with her essence.
 
 A class in embodied movement and dance invites participants into a slow, intuitive exploration of their inner and outer experience. It blends guided prompts with free-form movement so people can shift from “doing it right” to sensing, feeling, and responding from within.
 
-### What the class typically involves
+## What the class typically involves
 
 * **Arrival and grounding** — Gentle breathwork, body awareness, and simple settling practices help participants drop out of the thinking mind and into physical presence.
 * **Guided somatic exploration** — Slow, mindful movements invite curiosity about sensations, impulses, and emotions. The focus is on noticing rather than performing.
@@ -50,7 +63,7 @@ A class in embodied movement and dance invites participants into a slow, intuiti
 * **Thematic prompts** — Invitations such as “move from your centre,” “follow the breath,” or “let the body lead” help unlock new layers of awareness and embodied understanding.
 * **Integration and reflection** — The class closes with stillness, journaling, or quiet sharing to help anchor the insights that arose through movement.
 
-### What clients experience
+## What clients experience
 
 * A shift from cognitive understanding to felt understanding
 * A sense of awakening in the body’s natural intelligence
@@ -59,21 +72,4 @@ A class in embodied movement and dance invites participants into a slow, intuiti
 
 This creates a space where movement becomes a pathway to wisdom, healing, and self-discovery.
 
-### Times and Fees of Classes and Sessions
-
-#### **Weekly**
-
-Thursdays 11:00am – 12:00pm  $24 per class
-
-#### **Monthly**
-
-Friday 27th March 2026  7:00pm -8:15pm  $30 per session
-
-Friday 1st May 2026   7:00 – 8:15pm  $30 per session
-
-Friday 5th June   7:00pm – 8:15pm $30 per session
-
-#### **Class Pass**
-
-5x Class Pass  $110  
-10x Class Pass  $200
+## Times and Fees of Classes and Sessions

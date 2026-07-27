@@ -54,6 +54,20 @@ const practitioners = defineCollection({
     /** Service (id) this practitioner offers. */
     service: z.string().optional(),
     modalities: z.array(z.string()).default([]),
+    /** Social / external links shown in the profile hero. */
+    facebook: z.string().url().optional(),
+    instagram: z.string().url().optional(),
+    website: z.string().url().optional(),
+    /** Fee/session items, rendered as boxes on the profile. */
+    sessions: z
+      .array(
+        z.object({
+          label: z.string(),
+          price: z.string().optional(),
+          note: z.string().optional(),
+        }),
+      )
+      .default([]),
     placeholder: z.boolean().default(false),
   }),
 });
