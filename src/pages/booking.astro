@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+import { booking } from '@data/site';
+
+const practitioners = (await getCollection('practitioners')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const missingLinks = practitioners.filter((p) => !p.data.bookingUrl).length;
+---
+
+<BaseLayout
+  title="Make a Booking"
+  description="Book an appointment at Health Hub Tweed Coast — acupuncture and allied health, Hastings Point."
+>
+  <PageHeader
+    eyebrow="Appointments"
+    title="Make a Booking"
+    lede="Book online with the practitioner of your choice. Classes are booked from the timetable."
+  />
+
+  <section class="section">
+    <div class="container narrow-mid">
+      <div class="booking-general">
+        <h2>Book online</h2>
+        <p class="lede">
+          Appointments are managed through Halaxy. Choose a practitioner below, or
+          open the main booking page.
+        </p>
+        {
+          booking.halaxyUrl ? (
+            <a href={booking.halaxyUrl} class="btn btn-primary">Open booking</a>
+          ) : (
+            <p class="todo-note">General Halaxy booking URL — TODO (Phase 3).</p>
+          )
+        }
+      </div>
+
+      <h2 class="by-prac-h">Book with a practitioner</h2>
+      <ul class="booking-list">
+        {
+          practitioners.map((p) => (
+            <li class="booking-row">
+              <div>
+                <span class="bk-name">{p.data.name}</span>
+                <span class="bk-role">{p.data.role}</span>
+              </div>
+              {p.data.bookingUrl ? (
+                <a href={p.data.bookingUrl} class="btn btn-primary bk-btn">Book</a>
+              ) : (
+                <span class="bk-todo">Booking link TODO</span>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        missingLinks > 0 && (
+          <p class="todo-summary">
+            {missingLinks} of {practitioners.length} practitioner booking links are placeholders —
+            per-practitioner Halaxy links are pulled from the live site in Phase 3.
+          </p>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .narrow-mid { max-width: 820px; margin-inline: auto; }
+  .booking-general {
+    background: var(--color-surface-tint);
+    border-radius: var(--radius-md);
+    padding: 32px;
+    margin-bottom: 48px;
+  }
+  .booking-general h2 { margin-bottom: 12px; }
+  .by-prac-h { margin-bottom: 20px; }
+  .booking-list { list-style: none; margin: 0; padding: 0; }
+  .booking-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .bk-name { font-weight: 600; display: block; }
+  .bk-role { font-size: 13px; color: var(--color-text-muted); }
+  .bk-btn { padding: 8px 20px; font-size: 13px; }
+  .bk-todo, .todo-note { font-size: 13px; color: var(--color-text-muted); font-style: italic; }
+  .todo-summary {
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-accent);
+    padding-left: 12px;
+  }
+</style>

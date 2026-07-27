@@ -1,0 +1,70 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+import PlaceholderImage from '@components/PlaceholderImage.astro';
+import CtaBand from '@components/CtaBand.astro';
+import { bookingCta } from '@data/site';
+
+export async function getStaticPaths() {
+  const services = await getCollection('services');
+  return services.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, summary, image, placeholder } = entry.data;
+---
+
+<BaseLayout title={title} description={summary} path={`/services/${entry.id}`}>
+  <PageHeader eyebrow="Service" title={title} lede={summary} />
+
+  <article class="section">
+    <div class="container service-layout">
+      <div class="service-content">
+        {placeholder && <p class="ph-note">Placeholder content — real copy is migrated in Phase 3.</p>}
+        <Content />
+        <div class="service-actions">
+          <a href={bookingCta.href} class="btn btn-primary">{bookingCta.label}</a>
+        </div>
+      </div>
+      <aside class="service-aside">
+        {
+          image ? (
+            <img src={image} alt={title} loading="lazy" />
+          ) : (
+            <PlaceholderImage label="Service image" ratio="4/3" icon={entry.data.icon} />
+          )
+        }
+      </aside>
+    </div>
+  </article>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .service-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 48px;
+    align-items: start;
+  }
+  .service-content :global(p) { color: var(--color-text); }
+  .service-actions { margin-top: 32px; }
+  .ph-note {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-accent);
+    padding-left: 12px;
+    font-style: italic;
+  }
+  .service-aside { position: sticky; top: 96px; }
+  @media (max-width: 860px) {
+    .service-layout { grid-template-columns: 1fr; }
+    .service-aside { position: static; order: -1; max-width: 420px; }
+  }
+</style>

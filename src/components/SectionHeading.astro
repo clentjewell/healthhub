@@ -1,0 +1,32 @@
+---
+/** Eyebrow + heading + optional lede. `as` picks the heading level. */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  as?: 'h1' | 'h2' | 'h3';
+  lede?: string;
+  align?: 'left' | 'center';
+}
+const { eyebrow, title, as = 'h2', lede, align = 'left' } = Astro.props;
+const Heading = as;
+---
+
+<div class:list={['section-heading', `align-${align}`]}>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <Heading>{title}</Heading>
+  {lede && <p class="lede">{lede}</p>}
+</div>
+
+<style>
+  .section-heading { margin-bottom: 40px; }
+  .align-center {
+    text-align: center;
+    margin-inline: auto;
+  }
+  .align-center :global(.lede) {
+    margin-inline: auto;
+  }
+  .section-heading :global(.lede) {
+    margin-top: 16px;
+  }
+</style>

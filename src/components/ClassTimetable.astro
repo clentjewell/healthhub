@@ -1,0 +1,102 @@
+---
+import { formatClock, DAY_ORDER, CATEGORY_LABEL } from '../lib/format';
+
+interface ClassItem {
+  title: string;
+  day: string;
+  startTime: string;
+  endTime?: string;
+  instructor?: string;
+  category: string;
+  level?: string;
+  bookingUrl?: string;
+}
+interface Props {
+  classes: ClassItem[];
+}
+const { classes } = Astro.props;
+
+// Group by day, ordered Mon→Sun, sessions sorted by start time.
+const byDay = DAY_ORDER.map((day) => ({
+  day,
+  sessions: classes
+    .filter((c) => c.day === day)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime)),
+})).filter((d) => d.sessions.length > 0);
+---
+
+<div class="timetable">
+  {
+    byDay.map(({ day, sessions }) => (
+      <div class="tt-day">
+        <h3 class="tt-dayname">{day}</h3>
+        <ul class="tt-list">
+          {sessions.map((s) => (
+            <li class="tt-row">
+              <span class="tt-time">
+                {formatClock(s.startTime)}
+                {s.endTime && <span class="tt-end"> – {formatClock(s.endTime)}</span>}
+              </span>
+              <span class="tt-info">
+                <span class="tt-title">{s.title}</span>
+                <span class="tt-sub">
+                  <span class="tt-cat">{CATEGORY_LABEL[s.category] ?? s.category}</span>
+                  {s.level && <span> · {s.level}</span>}
+                  {s.instructor && <span> · {s.instructor}</span>}
+                </span>
+              </span>
+              {s.bookingUrl ? (
+                <a class="tt-book" href={s.bookingUrl}>Book →</a>
+              ) : (
+                <span class="tt-book tt-todo">TODO</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .timetable { display: flex; flex-direction: column; gap: 8px; }
+  .tt-day {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+  }
+  .tt-dayname {
+    font-size: 0.95rem;
+    color: var(--color-heading);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .tt-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .tt-row {
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-surface-tint);
+  }
+  .tt-row:last-child { border-bottom: none; }
+  .tt-time {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text);
+  }
+  .tt-end { color: var(--color-text-muted); font-weight: 400; }
+  .tt-info { display: flex; flex-direction: column; gap: 2px; }
+  .tt-title { font-weight: 600; font-size: 15px; }
+  .tt-sub { font-size: 13px; color: var(--color-text-muted); }
+  .tt-cat { color: var(--color-accent); font-weight: 600; }
+  .tt-book { font-size: 13px; font-weight: 600; color: var(--color-brand); white-space: nowrap; }
+  .tt-todo { color: var(--color-text-muted); font-style: italic; }
+  @media (max-width: 620px) {
+    .tt-row { grid-template-columns: 1fr auto; }
+    .tt-time { grid-column: 1 / -1; }
+  }
+</style>

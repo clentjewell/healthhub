@@ -1,0 +1,65 @@
+---
+import PlaceholderImage from './PlaceholderImage.astro';
+interface Props {
+  name: string;
+  role: string;
+  href: string;
+  image?: string;
+  modalities?: string[];
+  placeholder?: boolean;
+}
+const { name, role, href, image, modalities = [], placeholder } = Astro.props;
+---
+
+<a class="prac-card" href={href}>
+  <div class="prac-media">
+    {
+      image ? (
+        <img src={image} alt={`Portrait of ${name}`} loading="lazy" />
+      ) : (
+        <PlaceholderImage label="Portrait" ratio="4/5" icon="👤" />
+      )
+    }
+  </div>
+  <h3>{name}</h3>
+  <p class="role">{role}</p>
+  {modalities.length > 0 && <p class="modalities">{modalities.join(' · ')}</p>}
+  {placeholder && <span class="ph-badge">Placeholder</span>}
+</a>
+
+<style>
+  .prac-card {
+    position: relative;
+    display: block;
+    color: var(--color-text);
+  }
+  .prac-media {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .prac-media img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/5; }
+  .prac-card h3 { font-size: 1.15rem; margin-bottom: 4px; }
+  .prac-card:hover h3 { color: var(--color-brand); }
+  .role {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--color-accent);
+    margin: 0;
+    text-transform: none;
+  }
+  .modalities { font-size: 13px; color: var(--color-text-muted); margin: 6px 0 0; }
+  .ph-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--color-text-muted);
+    padding: 3px 7px;
+    border-radius: 999px;
+  }
+</style>

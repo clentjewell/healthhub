@@ -1,0 +1,59 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  href: string;
+  icon?: string;
+  placeholder?: boolean;
+}
+const { title, summary, href, icon, placeholder } = Astro.props;
+---
+
+<a class="service-card" href={href}>
+  {icon && <span class="service-icon" aria-hidden="true">{icon}</span>}
+  <h3>{title}</h3>
+  <p>{summary}</p>
+  <span class="link">Learn more →</span>
+  {placeholder && <span class="ph-badge">Placeholder</span>}
+</a>
+
+<style>
+  .service-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 28px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  }
+  .service-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+  }
+  .service-icon { font-size: 1.75rem; line-height: 1; margin-bottom: 14px; }
+  .service-card h3 { font-size: 1.25rem; margin-bottom: 10px; }
+  .service-card p {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.55;
+    margin: 0 0 20px;
+    flex: 1;
+  }
+  .link { font-size: 13px; font-weight: 600; color: var(--color-brand); }
+  .ph-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
+    padding: 3px 7px;
+    border-radius: 999px;
+  }
+</style>

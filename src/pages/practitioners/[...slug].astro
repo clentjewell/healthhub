@@ -1,0 +1,84 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PlaceholderImage from '@components/PlaceholderImage.astro';
+import CtaBand from '@components/CtaBand.astro';
+import { bookingCta } from '@data/site';
+
+export async function getStaticPaths() {
+  const practitioners = await getCollection('practitioners');
+  return practitioners.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { name, role, image, bookingUrl, modalities, placeholder } = entry.data;
+---
+
+<BaseLayout
+  title={name}
+  description={`${name} — ${role} at Health Hub Tweed Coast.`}
+  path={`/practitioners/${entry.id}`}
+>
+  <article class="section">
+    <div class="container prac-layout">
+      <aside class="prac-aside">
+        <div class="prac-photo">
+          {
+            image ? (
+              <img src={image} alt={`Portrait of ${name}`} />
+            ) : (
+              <PlaceholderImage label="Portrait" ratio="4/5" icon="👤" />
+            )
+          }
+        </div>
+        <a
+          href={bookingUrl ?? bookingCta.href}
+          class="btn btn-primary prac-book"
+        >
+          Book with {name.split(' ')[0]}
+        </a>
+        {!bookingUrl && <p class="prac-todo">Per-practitioner booking link TODO (Phase 3)</p>}
+      </aside>
+
+      <div class="prac-content">
+        <p class="eyebrow">{role}</p>
+        <h1>{name}</h1>
+        {modalities.length > 0 && <p class="prac-modalities">{modalities.join(' · ')}</p>}
+        {placeholder && <p class="ph-note">Placeholder bio — real biography and credentials are migrated in Phase 3.</p>}
+        <div class="prac-bio">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .prac-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  .prac-aside { position: sticky; top: 96px; }
+  .prac-photo { border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; }
+  .prac-photo img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
+  .prac-book { width: 100%; justify-content: center; }
+  .prac-todo { font-size: 12px; color: var(--color-text-muted); font-style: italic; margin-top: 10px; text-align: center; }
+  .prac-modalities { color: var(--color-text-muted); margin-top: 8px; }
+  .ph-note {
+    font-size: 13px; color: var(--color-text-muted); font-style: italic;
+    border-left: 3px solid var(--color-accent); padding-left: 12px; margin-top: 20px;
+  }
+  .prac-bio { margin-top: 20px; }
+  @media (max-width: 820px) {
+    .prac-layout { grid-template-columns: 1fr; }
+    .prac-aside { position: static; max-width: 300px; }
+  }
+</style>

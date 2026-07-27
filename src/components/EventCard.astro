@@ -1,0 +1,117 @@
+---
+import { formatEventDate, formatEventTime, CATEGORY_LABEL } from '../lib/format';
+interface Props {
+  title: string;
+  date: Date;
+  category: string;
+  summary: string;
+  location?: string;
+  price?: string;
+  bookingUrl?: string;
+  featured?: boolean;
+  placeholder?: boolean;
+}
+const { title, date, category, summary, location, price, bookingUrl, featured, placeholder } =
+  Astro.props;
+---
+
+<article class:list={['event-card', { featured }]}>
+  <div class="event-date" aria-hidden="true">
+    <span class="event-day">{formatEventDate(date)}</span>
+    <span class="event-time">{formatEventTime(date)}</span>
+  </div>
+  <div class="event-body">
+    <p class="event-cat">{CATEGORY_LABEL[category] ?? category}</p>
+    <h3>{title}</h3>
+    <p class="event-summary">{summary}</p>
+    <p class="event-meta">
+      {location && <span>{location}</span>}
+      {price && <span class="event-price">{price}</span>}
+    </p>
+    {
+      bookingUrl ? (
+        <a class="btn btn-primary event-cta" href={bookingUrl}>Book</a>
+      ) : (
+        <span class="event-todo">Booking link TODO</span>
+      )
+    }
+  </div>
+  {placeholder && <span class="ph-badge">Placeholder</span>}
+</article>
+
+<style>
+  .event-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+    padding: 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+  .event-card.featured {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+  }
+  .event-date {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 24px;
+    border-right: 1px solid var(--color-border);
+  }
+  .event-day {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    color: var(--color-heading);
+    text-transform: uppercase;
+  }
+  .event-time { font-size: 13px; color: var(--color-text-muted); }
+  .event-cat {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .event-body h3 { font-size: 1.2rem; margin-bottom: 8px; }
+  .event-summary { font-size: 14px; color: var(--color-text-muted); margin: 0 0 12px; }
+  .event-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin: 0 0 16px;
+  }
+  .event-price { font-weight: 600; color: var(--color-text); }
+  .event-cta { padding: 8px 18px; font-size: 13px; }
+  .event-todo {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+  .ph-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
+    padding: 3px 7px;
+    border-radius: 999px;
+  }
+  @media (max-width: 540px) {
+    .event-card { grid-template-columns: 1fr; }
+    .event-date {
+      flex-direction: row;
+      gap: 12px;
+      padding: 0 0 12px;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
+</style>

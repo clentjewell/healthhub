@@ -1,0 +1,95 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+import SectionHeading from '@components/SectionHeading.astro';
+import ClassTimetable from '@components/ClassTimetable.astro';
+import EventCard from '@components/EventCard.astro';
+import CtaBand from '@components/CtaBand.astro';
+
+const classes = (await getCollection('classes'))
+  .filter((c) => c.data.active)
+  .map((c) => c.data);
+
+const now = new Date();
+const events = (await getCollection('events'))
+  .filter((e) => e.data.date >= now)
+  .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+
+const anyPlaceholder =
+  (await getCollection('classes')).some((c) => c.data.placeholder) ||
+  events.some((e) => e.data.placeholder);
+---
+
+<BaseLayout
+  title="Classes & Events"
+  description="Weekly timetable and upcoming events at Health Hub Tweed Coast — yoga, pilates, sound and more."
+>
+  <PageHeader
+    eyebrow="What's on"
+    title="Classes & Events"
+    lede="Our weekly studio timetable and upcoming one-off events, workshops and courses."
+  />
+
+  {
+    anyPlaceholder && (
+      <div class="container">
+        <p class="ph-note">
+          Timetable and events below are placeholder entries — real schedule is seeded from the
+          live site in Phase 3, and the Hub team will self-edit via the CMS in Phase 4.
+        </p>
+      </div>
+    )
+  }
+
+  {/* Weekly timetable */}
+  <section class="section">
+    <div class="container">
+      <SectionHeading eyebrow="Every week" title="Weekly Timetable" />
+      <ClassTimetable classes={classes} />
+    </div>
+  </section>
+
+  {/* Upcoming events */}
+  <section class="section band-tint">
+    <div class="container">
+      <SectionHeading eyebrow="Coming up" title="Upcoming Events" />
+      {
+        events.length > 0 ? (
+          <div class="events-list">
+            {events.map((e) => (
+              <EventCard
+                title={e.data.title}
+                date={e.data.date}
+                category={e.data.category}
+                summary={e.data.summary}
+                location={e.data.location}
+                price={e.data.price}
+                bookingUrl={e.data.bookingUrl}
+                featured={e.data.featured}
+                placeholder={e.data.placeholder}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>No upcoming events listed right now — check back soon.</p>
+        )
+      }
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .ph-note {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-accent);
+    padding-left: 12px;
+    font-style: italic;
+    margin-top: 32px;
+  }
+  .band-tint { background: var(--color-surface-tint); }
+  .events-list { display: flex; flex-direction: column; gap: 16px; max-width: 820px; }
+</style>

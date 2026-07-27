@@ -1,0 +1,63 @@
+---
+/**
+ * Dual-CTA band: "Book a treatment" (clinic / Halaxy) vs "Join a class" (Hub).
+ * Two visually distinct, unambiguous paths — reused across pages, and mirrors
+ * the dual-CTA pattern the /hub/ proposal needs (Prompt 2).
+ */
+import { bookingCta } from '@data/site';
+interface Props {
+  heading?: string;
+}
+const { heading = 'Two ways in' } = Astro.props;
+---
+
+<section class="cta-band">
+  <div class="container">
+    <h2>{heading}</h2>
+    <div class="cta-grid">
+      <div class="cta-col">
+        <h3>Book a treatment</h3>
+        <p>Acupuncture and allied-health appointments with our practitioners.</p>
+        <a href={bookingCta.href} class="btn btn-light">Make a booking</a>
+      </div>
+      <div class="cta-col">
+        <h3>Join a class</h3>
+        <p>Yoga, pilates, sound and events in the studio — all levels welcome.</p>
+        <a href="/classes-events" class="btn btn-outline-light">See the timetable</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    background: var(--color-band);
+    color: var(--color-band-text);
+    padding-block: var(--space-section);
+  }
+  .cta-band h2 { color: #fff; margin-bottom: 40px; }
+  .cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .cta-col {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    padding: 32px;
+  }
+  .cta-col h3 { color: #fff; font-size: 1.4rem; margin-bottom: 10px; }
+  .cta-col p { color: rgba(255, 255, 255, 0.82); font-size: 15px; margin-bottom: 24px; }
+  .btn-light { background: #fff; color: var(--color-band); }
+  .btn-light:hover { background: var(--color-surface-tint); color: var(--color-band); }
+  .btn-outline-light {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  .btn-outline-light:hover { border-color: #fff; background: rgba(255, 255, 255, 0.1); color: #fff; }
+  @media (max-width: 720px) {
+    .cta-grid { grid-template-columns: 1fr; }
+  }
+</style>

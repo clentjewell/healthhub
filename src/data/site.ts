@@ -69,5 +69,18 @@ export const nav = [
 /** Primary booking call-to-action (Halaxy pathways live on /booking). */
 export const bookingCta = { label: 'Make a Booking', href: '/booking' } as const;
 
+/** Booking / contact integration config. */
+export const booking = {
+  /** General Halaxy booking URL (all practitioners). TODO(booking): confirm (Phase 3). */
+  halaxyUrl: '',
+} as const;
+
+export const contact = {
+  /** Form POST endpoint (Maxxim site-apps). TODO: set real endpoint. */
+  formEndpoint: '',
+  /** Google Maps embed query (no API key needed). */
+  mapEmbedQuery: '87-89 Tweed Coast Road, Hastings Point NSW 2489',
+} as const;
+
 export const fullAddress =
   `${nap.street}, ${nap.locality} ${nap.region} ${nap.postcode}`;
