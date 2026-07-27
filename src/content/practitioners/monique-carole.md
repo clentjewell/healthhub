@@ -6,13 +6,15 @@ image: "/images/practitioners/monique-carole.webp"
 phone: "0416 066 310"
 service: "pilates-body-balance"
 facebook: "https://www.facebook.com/HolisticHealthAndFitnessCoaching/"
-sessions:
-  - label: "Chair Pilates 8:15-8:45am"
-    price: "$10"
-  - label: "Mat Pilates 8:45-9:30am"
-    price: "$15"
-  - label: "Stay for both classes 8:15-9:30am"
-    price: "$20"
+feeGroups:
+  - title: "Class Options"
+    items:
+      - label: "Chair Pilates (8:15–8:45am)"
+        price: "$10"
+      - label: "Mat Pilates (8:45–9:30am)"
+        price: "$15"
+      - label: "Stay for both classes (8:15–9:30am)"
+        price: "$20"
 ---
 ### Wellbeing Coach
 

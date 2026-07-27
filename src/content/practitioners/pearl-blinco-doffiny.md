@@ -6,9 +6,11 @@ image: "/images/practitioners/pearl-blinco-doffiny.webp"
 phone: "0467 512 368"
 service: "crystal-sound-bowls"
 facebook: "https://www.facebook.com/profile.php?id=61584055244098"
-sessions:
-  - label: "Sunday 5:00pm – 6:00pm"
-    price: "$20 per class"
+feeGroups:
+  - title: "Sound Bowl Sessions"
+    items:
+      - label: "Sunday 5:00–6:00pm"
+        price: "$20 / class"
 ---
 ### Pearl – Sound Bowl Therapist & Founder of Twizted
 

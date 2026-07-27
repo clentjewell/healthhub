@@ -7,19 +7,25 @@ phone: "0411 417 337"
 service: "embodied-movement-dance"
 facebook: "https://www.facebook.com/rebecca.lindsay.7547"
 instagram: "https://www.instagram.com/yourwisdomyourway/"
-sessions:
-  - label: "Thursdays 11:00am – 12:00pm"
-    price: "$24 per class"
-  - label: "Friday 27th March 2026 7:00pm -8:15pm per session"
-    price: "$30"
-  - label: "Friday 1st May 2026 7:00 – 8:15pm per session"
-    price: "$30"
-  - label: "Friday 5th June 7:00pm – 8:15pm per session"
-    price: "$30"
-  - label: "5x Class Pass"
-    price: "$110"
-  - label: "10x Class Pass"
-    price: "$200"
+feeGroups:
+  - title: "Weekly Class"
+    items:
+      - label: "Thursdays 11:00am – 12:00pm"
+        price: "$24 / class"
+  - title: "Class Passes"
+    items:
+      - label: "5× Class Pass"
+        price: "$110"
+      - label: "10× Class Pass"
+        price: "$200"
+  - title: "Workshops"
+    items:
+      - label: "Fri 27 Mar 2026, 7:00–8:15pm"
+        price: "$30"
+      - label: "Fri 1 May 2026, 7:00–8:15pm"
+        price: "$30"
+      - label: "Fri 5 Jun, 7:00–8:15pm"
+        price: "$30"
 ---
 ### Embodied Movement & Dance
 

@@ -58,13 +58,21 @@ const practitioners = defineCollection({
     facebook: z.string().url().optional(),
     instagram: z.string().url().optional(),
     website: z.string().url().optional(),
-    /** Fee/session items, rendered as boxes on the profile. */
-    sessions: z
+    /**
+     * Fees grouped by category (each group renders as a box). A group is
+     * either a single priced service (title + price + note) or a category
+     * with several options (title + items[]). Mirrors each practitioner's
+     * own structure on the live site.
+     */
+    feeGroups: z
       .array(
         z.object({
-          label: z.string(),
+          title: z.string(),
           price: z.string().optional(),
           note: z.string().optional(),
+          items: z
+            .array(z.object({ label: z.string(), price: z.string().optional() }))
+            .default([]),
         }),
       )
       .default([]),

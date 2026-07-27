@@ -9,27 +9,33 @@ service: "yoga-meditation"
 facebook: "https://www.facebook.com/alicia.bingham.52/"
 instagram: "https://www.instagram.com/omneyoga"
 website: "https://www.omneyoga.com"
-sessions:
-  - label: "Casual Seniors Yoga 60 mins"
-    price: "$18"
-  - label: "5 Class Pass (Senior’s Yoga 60 mins)"
-    price: "$85"
-  - label: "10 Class Pass (Senior’s Yoga 60 mins)"
-    price: "$160"
-  - label: "Casual Yoga and Meditation 75 mins"
-    price: "$24"
-  - label: "5 Class Pass (Yoga and Meditation 75 mins)"
-    price: "$110"
-  - label: "10 Class Pass (Yoga and Meditation 75 mins)"
-    price: "$200"
-  - label: "Initial Session (90 minutes)"
-    price: "$120"
-  - label: "Follow-Up Session (60 minutes)"
-    price: "$90"
-  - label: "Start-Up Package (1x Initial + 2x Follow-Up Sessions)"
-    price: "$275"
-  - label: "5 Pack (5 x Follow-Up Sessions)"
-    price: "$400"
+feeGroups:
+  - title: "Seniors Yoga"
+    items:
+      - label: "Casual (60 mins)"
+        price: "$18"
+      - label: "5 Class Pass"
+        price: "$85"
+      - label: "10 Class Pass"
+        price: "$160"
+  - title: "Yoga & Meditation"
+    items:
+      - label: "Casual (75 mins)"
+        price: "$24"
+      - label: "5 Class Pass"
+        price: "$110"
+      - label: "10 Class Pass"
+        price: "$200"
+  - title: "1:1 Private Yoga Sessions (in-person & online)"
+    items:
+      - label: "Initial Session (90 min)"
+        price: "$120"
+      - label: "Follow-Up Session (60 min)"
+        price: "$90"
+      - label: "Start-Up Package (1× Initial + 2× Follow-Up)"
+        price: "$275"
+      - label: "5 Pack (5× Follow-Up)"
+        price: "$400"
 ---
 ### Trauma-Informed Yoga Teacher
 
@@ -65,6 +71,4 @@ Please arrive 10mins before class to sign in & get settled
 * FRIDAY  Hatha Yoga 9:30am – 10:45am
 * SUNDAY HATHA Yoga 8:00am – 9:15am
 
-**FEES**
-
-Payment available in-studio (Cash and EFTPOS)
+Payment available in-studio (Cash and EFTPOS).

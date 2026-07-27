@@ -5,13 +5,15 @@ order: 4
 image: "/images/practitioners/shannon-ohara.webp"
 phone: "0418 255 493"
 service: "hatha-yin-yoga"
-sessions:
-  - label: "Casual Class"
-    price: "$24"
-  - label: "5 x class pass"
-    price: "$110"
-  - label: "10 x class pass"
-    price: "$200"
+feeGroups:
+  - title: "Class Fees"
+    items:
+      - label: "Casual Class"
+        price: "$24"
+      - label: "5× Class Pass"
+        price: "$110"
+      - label: "10× Class Pass"
+        price: "$200"
 ---
 ### YIN & HATHA YOGA TEACHER
 

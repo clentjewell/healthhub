@@ -8,11 +8,14 @@ phone: "0408 643 282"
 service: "naturopathy"
 facebook: "https://www.facebook.com/natcareclinic/"
 instagram: "https://www.instagram.com/the_naturopathic_care_clinic/"
-sessions:
-  - label: "Perimenopause: Thursday 19th March – 6-8pm per person"
-    price: "$25"
-  - label: "Dementia and Alzheimer’s prevention: Thursday 23rd April – 6-8pm per person"
-    price: "$25"
+feeGroups:
+  - title: "Seminars & Workshops"
+    note: "Naturopathy consultations are booked online — see the button below."
+    items:
+      - label: "Perimenopause — Thu 19 Mar, 6–8pm"
+        price: "$25 pp"
+      - label: "Dementia & Alzheimer’s prevention — Thu 23 Apr, 6–8pm"
+        price: "$25 pp"
 ---
 ### Naturopath
 
