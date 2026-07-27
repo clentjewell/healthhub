@@ -7,9 +7,11 @@ bookingUrl: "https://visibook.com/functionandflow?pp=calintro"
 phone: "0434 570 512"
 service: "function-flow"
 ---
+## Function & Flow Wellness
+
 I teach full‑body, functional workouts that go far beyond just “exercise.” I’m all about helping you move well — with strong technique, great form, and a deep connection to your core and pelvic floor. In my small‑group classes, you get the perfect blend of strength, mobility, stability, and coordination, all delivered in a supportive space where you can challenge yourself safely and confidently. I welcome every age, every fitness level, and every body — including pre‑ and post‑natal participants with medical clearance — and I love creating an environment where you feel empowered, capable, and excited to move.
 
-Flow & Function Group Exercise Classes
+### Flow & Function Group Exercise Classes
 
 When you walk into my class, you step into a space that feels focused, supportive, and energising. I start by guiding everyone through a gentle warm‑up that wakes up the joints, activates the core, and gets your breath moving with your body. From the very beginning, I’m cueing form, alignment, and technique so you feel grounded and confident before we build intensity.
 
@@ -21,4 +23,8 @@ We finish with a cool‑down that brings your nervous system back to calm — st
 
 My goal is for you to walk out feeling like you’ve worked hard in the best possible way: empowered, capable, and proud of what your body can do.
 
-Wednesday 6:00 – 6:45 am (45mins)
+### Class Times & Fees
+
+**Wednesday** 6:00 – 6:45 am (45mins)
+
+$15 per class
