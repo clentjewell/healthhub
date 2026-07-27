@@ -39,25 +39,36 @@ turquoise/pink/coral/purple — not used here.)
 
 ## 2. Typography
 
-The **production** Pottsville site uses licensed fonts (**Qurova**, **Noah**,
-**Reborn**) delivered as `.otf` from the Pottsville repo. **These cannot be
-redistributed**, so we map to the open Google Fonts the Pottsville `/hub/` page
-itself already loads — same editorial character, freely licensable:
+The Pottsville family is **Noah** (body/UI) + **Reborn** (uppercase display
+headings) — both **geometric sans**. These are licensed fonts; the client
+supplied the files, so we **self-host them** (`src/styles/fonts.css`,
+`public/fonts/*.woff2`) for exact parity. Both are sans — there is **no serif**
+in the design language.
 
-| Role | Font | Substitutes for |
+> The Bebas Neue / Cormorant Garamond / Raleway that appear on the live
+> `/hub/` page are **stray leftover `<link>`s, not the design** — an early
+> version of this build wrongly adopted them. Corrected.
+
+| Role | Font | Weights supplied |
 |---|---|---|
-| Display / brand wordmark | **Bebas Neue** (condensed, uppercase) | Reborn |
-| Editorial headings & pull-quotes | **Cormorant Garamond** (serif) | — (the "editorial type") |
-| Body & UI | **Raleway** (sans) | Noah |
+| Headings + wordmark (UPPERCASE) | **Reborn** | 400 |
+| Body / UI | **Noah** | 700 (bold), 900 (black), 400 italic |
 
 Type scale (matches Pottsville): `h1 clamp(2.4rem,5.5vw,4.5rem)` ·
 `h2 clamp(1.9rem,4vw,3.2rem)` · `h3 clamp(1.3rem,2.4vw,1.8rem)`. Heading
-line-height `1.15`, body `1.55`. Eyebrow: 11px, `letter-spacing .25em`, uppercase.
+line-height `1.15`, body `1.55`. Headings uppercase, `letter-spacing .01em`.
 
-> **DECISION 1 — fonts.** We ship Bebas Neue / Cormorant Garamond / Raleway
-> (open) rather than the licensed Qurova/Noah/Reborn. If Maxxim holds a web
-> licence for the production fonts and wants exact parity, we can swap them in
-> via `@font-face` — one change in `tokens.css`. **Confirm which you want.**
+> **DECISION 1 — fonts → RESOLVED (Path A, exact parity).** Noah + Reborn are
+> self-hosted from the supplied files. Fonts subset to Latin + converted to
+> WOFF2.
+>
+> **⚠️ Still needed for full parity — Noah UPRIGHT text weights:**
+> **Regular 400** (primary body copy — most important), **Medium 500**,
+> **SemiBold 600**. These weren't in the supplied set, so upright body/UI text
+> currently falls back to **Mulish** (a close free geometric sans). Bold,
+> black and italic already render in real Noah. Drop the woff2 files in
+> `public/fonts/`, add the `@font-face` blocks (templated in `fonts.css`), and
+> remove Mulish — a ~3-line change.
 
 ## 3. Layout & shape
 
