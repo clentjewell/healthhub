@@ -95,11 +95,13 @@ const isActive = (href: string) =>
     text-decoration-thickness: 2px;
     text-decoration-color: var(--color-accent);
   }
-  .nav-cta {
+  /* Higher specificity than `.menu a` so the button label stays white. */
+  .menu a.nav-cta {
     padding: 10px 18px;
     font-size: 13px;
+    color: #fff;
   }
-  .nav-cta:hover {
+  .menu a.nav-cta:hover {
     color: #fff;
   }
 

@@ -2,6 +2,7 @@
 title: "Full Moon Sound Bath Journey"
 date: "2026-08-15T18:30:00+10:00"
 category: "sound-bath"
+image: "/images/events/sound-bath-journey.webp"
 instructor: "TBC"
 location: "Health Hub Tweed Coast, Hastings Point"
 price: "$45"

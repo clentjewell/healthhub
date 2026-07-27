@@ -67,7 +67,7 @@ const events = (await getCollection('events'))
             <ServiceCard
               title={s.data.shortTitle ?? s.data.title}
               summary={s.data.summary}
-              href={`/services/${s.id}`}
+              href={s.data.provider ? `/practitioners/${s.data.provider}` : `/services/${s.id}`}
               icon={s.data.icon}
               image={s.data.image}
               placeholder={s.data.placeholder}
@@ -94,6 +94,7 @@ const events = (await getCollection('events'))
               date={e.data.date}
               category={e.data.category}
               summary={e.data.summary}
+              image={e.data.image}
               location={e.data.location}
               price={e.data.price}
               bookingUrl={e.data.bookingUrl}
