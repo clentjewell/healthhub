@@ -13,11 +13,11 @@
       (Prompt 1). Same family, distinct identity: warmer, grounded, "studio".
       Applied on <html> by BaseLayout. The proposal layout leaves the default.
 
-   NOTE: the production Pottsville site uses licensed fonts (Qurova / Noah /
-   Reborn) that cannot be redistributed. We map to the OPEN Google Fonts the
-   Pottsville /hub/ page itself loads (Bebas Neue, Cormorant Garamond,
-   Raleway) — same editorial character, freely licensable. Flagged as a
-   decision in DESIGN-TOKENS.md.
+   NOTE: the Pottsville family is Noah (body) + Reborn (uppercase headings) —
+   both geometric sans. These are LICENSED fonts, supplied by the client and
+   self-hosted here (see fonts.css) for exact parity. (The Bebas Neue /
+   Cormorant Garamond / Raleway seen on the live /hub/ page are stray leftover
+   includes, not the design language.)
    ========================================================================= */
 
 :root {
@@ -60,10 +60,13 @@
   --color-border: var(--p-grey-200);
   --color-star: var(--p-gold);
 
-  /* ---- Typography (shared family) ------------------------------------- */
-  --font-display: 'Bebas Neue', 'Arial Narrow', system-ui, sans-serif;
-  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* ---- Typography — the real Pottsville family (self-hosted) ----------
+     Reborn = uppercase display headings; Noah = body/UI (both geometric
+     sans). Mulish is the interim fallback for Noah's not-yet-supplied
+     upright weights (see fonts.css). */
+  --font-heading: 'Reborn', 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font-heading);
+  --font-sans: 'Noah', 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Type scale (matches Pottsville) */
   --fs-h1: clamp(2.4rem, 5.5vw, 4.5rem);

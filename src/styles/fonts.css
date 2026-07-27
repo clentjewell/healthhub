@@ -1,0 +1,54 @@
+/* =========================================================================
+   SELF-HOSTED BRAND FONTS — licensed Pottsville family (exact parity)
+   -------------------------------------------------------------------------
+   Reborn  → headings (uppercase display), 1 weight supplied (400).
+   Noah    → body / UI. Supplied so far: 700 (bold), 900 (black), 400 italic.
+
+   ⚠️  MISSING for full parity — Noah UPRIGHT text weights:
+       • Noah Regular 400  (primary body copy)   ← most important
+       • Noah Medium  500  (nav, labels)
+       • Noah SemiBold 600 (eyebrows, CTAs)
+   Until those arrive, body/UI upright text falls back to Mulish (a close
+   free geometric sans, loaded in BaseLayout). Bold/italic already render in
+   real Noah. When the weights arrive: drop the woff2 files in public/fonts/,
+   add the @font-face blocks below, and remove Mulish from BaseLayout +
+   the --font-sans fallback in tokens.css.
+   ========================================================================= */
+
+/* ---- Reborn (headings) ---- */
+@font-face {
+  font-family: 'Reborn';
+  src: url('/fonts/reborn.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---- Noah (body / UI) ---- */
+@font-face {
+  font-family: 'Noah';
+  src: url('/fonts/noah-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noah';
+  src: url('/fonts/noah-black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noah';
+  src: url('/fonts/noah-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* When Noah upright weights are supplied, add e.g.:
+@font-face { font-family:'Noah'; src:url('/fonts/noah-regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:'Noah'; src:url('/fonts/noah-medium.woff2')  format('woff2'); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:'Noah'; src:url('/fonts/noah-semibold.woff2')format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
+*/

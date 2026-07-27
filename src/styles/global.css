@@ -5,6 +5,7 @@
    ========================================================================= */
 
 @import './tokens.css';
+@import './fonts.css';
 
 *,
 *::before,
@@ -43,9 +44,11 @@ h2,
 h3,
 h4 {
   margin: 0;
-  font-family: var(--font-serif);
-  font-weight: 600;
+  font-family: var(--font-heading); /* Reborn */
+  font-weight: 400; /* Reborn is supplied in a single weight */
   line-height: var(--lh-heading);
+  letter-spacing: 0.01em;
+  text-transform: uppercase; /* Pottsville heading treatment */
   color: var(--color-heading);
   text-wrap: balance;
 }
