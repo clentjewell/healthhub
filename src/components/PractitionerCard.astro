@@ -5,61 +5,86 @@ interface Props {
   role: string;
   href: string;
   image?: string;
-  modalities?: string[];
+  serviceTitle?: string;
+  excerpt?: string;
   placeholder?: boolean;
 }
-const { name, role, href, image, modalities = [], placeholder } = Astro.props;
+const { name, role, href, image, serviceTitle, excerpt, placeholder } = Astro.props;
 ---
 
-<a class="prac-card" href={href}>
-  <div class="prac-media">
+<a class="pcard" href={href}>
+  <div class="pcard-media">
     {
       image ? (
-        <img src={image} alt={`Portrait of ${name}`} loading="lazy" />
+        <img src={image} alt={`Portrait of ${name}`} loading="lazy" width="320" height="400" />
       ) : (
         <PlaceholderImage label="Portrait" ratio="4/5" icon="👤" />
       )
     }
+    {serviceTitle && <span class="pcard-svc">{serviceTitle}</span>}
+    {placeholder && <span class="ph-badge">Placeholder</span>}
   </div>
-  <h3>{name}</h3>
-  <p class="role">{role}</p>
-  {modalities.length > 0 && <p class="modalities">{modalities.join(' · ')}</p>}
-  {placeholder && <span class="ph-badge">Placeholder</span>}
+  <div class="pcard-body">
+    <h3>{name}</h3>
+    <p class="pcard-role">{role}</p>
+    {excerpt && <p class="pcard-excerpt">{excerpt}</p>}
+    <span class="pcard-link">View profile →</span>
+  </div>
 </a>
 
 <style>
-  .prac-card {
-    position: relative;
-    display: block;
-    color: var(--color-text);
-  }
-  .prac-media {
+  .pcard {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     overflow: hidden;
-    margin-bottom: 16px;
+    color: var(--color-text);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   }
-  .prac-media img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/5; }
-  .prac-card h3 { font-size: 1.15rem; margin-bottom: 4px; }
-  .prac-card:hover h3 { color: var(--color-brand); }
-  .role {
-    font-family: var(--font-sans);
-    font-size: 13px;
-    letter-spacing: 0.04em;
-    color: var(--color-accent);
-    margin: 0;
-    text-transform: none;
+  .pcard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
   }
-  .modalities { font-size: 13px; color: var(--color-text-muted); margin: 6px 0 0; }
-  .ph-badge {
+  .pcard-media { position: relative; aspect-ratio: 4/5; overflow: hidden; }
+  .pcard-media img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform 0.4s ease; }
+  .pcard:hover .pcard-media img { transform: scale(1.04); }
+  .pcard-svc {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--color-text-muted);
-    padding: 3px 7px;
+    left: 12px;
+    bottom: 12px;
+    background: rgba(34, 73, 108, 0.92);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 5px 12px;
     border-radius: 999px;
   }
+  .ph-badge {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.92); color: var(--color-text-muted);
+    padding: 3px 7px; border-radius: 999px;
+  }
+  .pcard-body { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
+  .pcard-body h3 { font-size: 1.15rem; margin-bottom: 3px; }
+  .pcard:hover h3 { color: var(--color-brand); }
+  .pcard-role {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--color-accent);
+    margin: 0 0 12px;
+    text-transform: none;
+  }
+  .pcard-excerpt {
+    font-size: 13.5px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: 0 0 18px;
+    flex: 1;
+  }
+  .pcard-link { font-size: 13px; font-weight: 600; color: var(--color-brand); margin-top: auto; }
 </style>
