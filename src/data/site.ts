@@ -60,7 +60,6 @@ export const social = {
 /** Primary navigation for the Health Hub site. */
 export const nav = [
   { label: 'Home', href: '/' },
-  { label: 'Services', href: '/services' },
   { label: 'Practitioners', href: '/practitioners' },
   { label: 'Classes & Events', href: '/classes-events' },
   { label: 'Contact', href: '/contact' },

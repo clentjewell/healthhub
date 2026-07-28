@@ -1,27 +1,54 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import SectionHeading from '@components/SectionHeading.astro';
-import ServiceCard from '@components/ServiceCard.astro';
+import PractitionerCard from '@components/PractitionerCard.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
-import PlaceholderImage from '@components/PlaceholderImage.astro';
-import { site, nap, hours, bookingCta } from '@data/site';
+import { site, nap, hours, contact, bookingCta } from '@data/site';
 
-const services = (await getCollection('services'))
-  .filter((s) => !s.data.draft)
-  .sort((a, b) => a.data.order - b.data.order);
+const practitioners = (await getCollection('practitioners')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+function excerpt(body: string | undefined, max = 110): string {
+  if (!body) return '';
+  const line = body
+    .split('\n').map((l) => l.trim())
+    .find((l) => l && !l.startsWith('#') && !l.startsWith('*') && !l.startsWith('>') && !l.startsWith('!'));
+  if (!line) return '';
+  const clean = line.replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`]/g, '');
+  return clean.length <= max ? clean : clean.slice(0, clean.lastIndexOf(' ', max)).trimEnd() + '…';
+}
+
+const teaser = await Promise.all(
+  practitioners.slice(0, 4).map(async (p) => {
+    const svc = p.data.service ? await getEntry('services', p.data.service) : undefined;
+    return {
+      name: p.data.name, role: p.data.role, href: `/practitioners/${p.id}`,
+      image: p.data.image, serviceTitle: svc?.data.shortTitle ?? svc?.data.title,
+      excerpt: excerpt(p.body), placeholder: p.data.placeholder,
+    };
+  }),
+);
 
 const now = new Date();
 const events = (await getCollection('events'))
   .filter((e) => e.data.date >= now)
   .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf())
-  .slice(0, 3);
+  .slice(0, 2);
+
+const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapEmbedQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 ---
 
 <BaseLayout title="Home">
-  {/* Full-bleed hero with image */}
+  {/* Hero with background image slider */}
   <section class="hero">
+    <div class="hero-slides" aria-hidden="true">
+      <div class="hero-slide s1"></div>
+      <div class="hero-slide s2"></div>
+      <div class="hero-slide s3"></div>
+    </div>
     <div class="hero-overlay"></div>
     <div class="container hero-inner">
       <p class="eyebrow hero-eyebrow">Wellness studio · Hastings Point</p>
@@ -53,32 +80,24 @@ const events = (await getCollection('events'))
     </div>
   </section>
 
-  {/* Our Services (with images) — each links through to the practitioner who offers it */}
+  {/* Practitioners teaser */}
   <section class="section band-tint">
     <div class="container">
       <SectionHeading
-        eyebrow="What we offer"
-        title="Our Services"
-        lede="Each service is led by a dedicated practitioner or teacher."
+        eyebrow="Meet the team"
+        title="Our Practitioners"
+        lede="A multidisciplinary team — each leading their own service, from acupuncture and naturopathy to yoga, pilates, movement and sound."
       />
-      <div class="grid-services">
-        {
-          services.map((s) => (
-            <ServiceCard
-              title={s.data.shortTitle ?? s.data.title}
-              summary={s.data.summary}
-              href={s.data.provider ? `/practitioners/${s.data.provider}` : `/services/${s.id}`}
-              icon={s.data.icon}
-              image={s.data.image}
-              placeholder={s.data.placeholder}
-            />
-          ))
-        }
+      <div class="grid-practitioners">
+        {teaser.map((c) => <PractitionerCard {...c} />)}
       </div>
+      <p class="section-more">
+        <a href="/practitioners" class="btn btn-ghost">Meet all our practitioners</a>
+      </p>
     </div>
   </section>
 
-  {/* Events teaser */}
+  {/* Events teaser — 2 per row */}
   <section class="section">
     <div class="container">
       <SectionHeading
@@ -90,16 +109,10 @@ const events = (await getCollection('events'))
         {
           events.map((e) => (
             <EventCard
-              title={e.data.title}
-              date={e.data.date}
-              category={e.data.category}
-              summary={e.data.summary}
-              image={e.data.image}
-              location={e.data.location}
-              price={e.data.price}
-              bookingUrl={e.data.bookingUrl}
-              featured={e.data.featured}
-              placeholder={e.data.placeholder}
+              title={e.data.title} date={e.data.date} category={e.data.category}
+              summary={e.data.summary} image={e.data.image} location={e.data.location}
+              price={e.data.price} bookingUrl={e.data.bookingUrl}
+              featured={e.data.featured} placeholder={e.data.placeholder}
             />
           ))
         }
@@ -110,19 +123,29 @@ const events = (await getCollection('events'))
     </div>
   </section>
 
-  {/* Location */}
+  {/* Find us — copy left, map right */}
   <section class="section location band-tint">
     <div class="container location-grid">
-      <div>
+      <div class="location-copy">
         <SectionHeading eyebrow="Find us" title="Hastings Point, on the Tweed Coast" />
         <p class="location-nap">
           {nap.street}<br />
           {nap.locality} {nap.region} {nap.postcode}
         </p>
         <p class="location-hours"><strong>Open</strong> · {hours.label}</p>
-        <a href="/contact" class="btn btn-ghost">Contact &amp; directions</a>
+        <div class="location-actions">
+          <a href={nap.mapUrl} target="_blank" rel="noopener" class="btn btn-primary">Get directions</a>
+          <a href="/contact" class="btn btn-ghost">Contact us</a>
+        </div>
       </div>
-      <PlaceholderImage label="Map / studio image" ratio="4/3" icon="📍" />
+      <div class="location-map">
+        <iframe
+          title="Map to Health Hub Tweed Coast"
+          src={mapSrc}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen></iframe>
+      </div>
     </div>
   </section>
 
@@ -130,23 +153,41 @@ const events = (await getCollection('events'))
 </BaseLayout>
 
 <style>
+  /* ---- Hero + background slider ---- */
   .hero {
     position: relative;
     display: flex;
     align-items: center;
     min-height: min(70vh, 620px);
     padding-block: clamp(80px, 14vw, 160px);
-    background: url('/images/hero.webp') center/cover no-repeat;
     color: #fff;
+    overflow: hidden;
+    background: var(--hub-navy, #22496c);
+  }
+  .hero-slides { position: absolute; inset: 0; }
+  .hero-slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: 0;
+    animation: heroFade 21s infinite;
+  }
+  .hero-slide.s1 { background-image: url('/images/hero-1.webp'); animation-delay: 0s; }
+  .hero-slide.s2 { background-image: url('/images/hero-2.webp'); animation-delay: 7s; }
+  .hero-slide.s3 { background-image: url('/images/hero-3.webp'); animation-delay: 14s; }
+  @keyframes heroFade {
+    0% { opacity: 0; }
+    4% { opacity: 1; }
+    30% { opacity: 1; }
+    36% { opacity: 0; }
+    100% { opacity: 0; }
   }
   .hero-overlay {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     background: linear-gradient(
       100deg,
-      rgba(34, 73, 108, 0.82) 0%,
-      rgba(34, 73, 108, 0.55) 60%,
-      rgba(46, 159, 164, 0.35) 100%
+      rgba(34, 73, 108, 0.84) 0%,
+      rgba(34, 73, 108, 0.58) 60%,
+      rgba(46, 159, 164, 0.4) 100%
     );
   }
   .hero-inner { position: relative; z-index: 1; max-width: 720px; }
@@ -154,25 +195,34 @@ const events = (await getCollection('events'))
   .hero-eyebrow { color: color-mix(in srgb, var(--color-accent) 55%, white); }
   .hero-lede { color: rgba(255, 255, 255, 0.92); margin-top: 20px; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
-  .btn-hero-ghost {
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-  }
+  .btn-hero-ghost { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.6); }
   .btn-hero-ghost:hover { border-color: #fff; background: rgba(255, 255, 255, 0.12); color: #fff; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-slide { animation: none; }
+    .hero-slide.s1 { opacity: 1; }
+  }
 
   .welcome-copy { text-align: center; max-width: 62ch; margin-inline: auto; font-size: var(--fs-lede); }
   .band-tint { background: var(--color-surface-tint); }
-
-  .grid-services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-  .grid-events { grid-template-columns: 1fr; gap: 16px; max-width: 820px; display: grid; }
   .section-more { margin-top: 36px; text-align: center; }
+
+  .grid-practitioners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+
+  .grid-events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 
   .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
   .location-nap { font-size: var(--fs-lede); margin-bottom: 8px; }
   .location-hours { color: var(--color-text-muted); margin-bottom: 24px; }
+  .location-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .location-map iframe {
+    width: 100%; height: 380px; border: 0;
+    border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+  }
 
-  @media (max-width: 980px) { .grid-services { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 860px) { .location-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 520px) { .grid-services { grid-template-columns: 1fr; } }
+  @media (max-width: 1040px) { .grid-practitioners { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 860px) {
+    .location-grid { grid-template-columns: 1fr; }
+    .grid-events { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 460px) { .grid-practitioners { grid-template-columns: 1fr; } }
 </style>

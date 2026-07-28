@@ -47,9 +47,7 @@ const socials = [
       <div class="prac-hero-info">
         <p class="eyebrow">{role}</p>
         <h1>{name}</h1>
-        {svc && (
-          <a class="svc-chip" href={`/services/${svc.id}`}>{svc.data.shortTitle ?? svc.data.title} →</a>
-        )}
+        {svc && <span class="svc-chip">{svc.data.shortTitle ?? svc.data.title}</span>}
         {modalities.length > 0 && <p class="prac-modalities">{modalities.join(' · ')}</p>}
         <div class="prac-hero-actions">
           {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}

@@ -92,5 +92,6 @@ const anyPlaceholder =
     margin-top: 32px;
   }
   .band-tint { background: var(--color-surface-tint); }
-  .events-list { display: flex; flex-direction: column; gap: 16px; max-width: 820px; }
+  .events-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (max-width: 860px) { .events-list { grid-template-columns: 1fr; } }
 </style>
