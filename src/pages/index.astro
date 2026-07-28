@@ -51,16 +51,18 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
     </div>
     <div class="hero-overlay"></div>
     <div class="container hero-inner">
-      <p class="eyebrow hero-eyebrow">Wellness studio · Hastings Point</p>
-      <h1>Body, Mind &amp; Soul</h1>
-      <p class="lede hero-lede">
-        {site.name} — the community wellness studio arm of Pottsville Acupuncture.
-        Acupuncture and allied health, movement classes and events, all under one
-        roof on the Tweed Coast.
-      </p>
-      <div class="hero-actions">
-        <a href={bookingCta.href} class="btn btn-primary">{bookingCta.label}</a>
-        <a href="/classes-events" class="btn btn-hero-ghost">See the timetable</a>
+      <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow">Wellness studio · Hastings Point</p>
+        <h1>Body, Mind &amp; Soul</h1>
+        <p class="lede hero-lede">
+          {site.name} — the community wellness studio arm of Pottsville Acupuncture.
+          Acupuncture and allied health, movement classes and events, all under one
+          roof on the Tweed Coast.
+        </p>
+        <div class="hero-actions">
+          <a href={bookingCta.href} class="btn btn-primary">{bookingCta.label}</a>
+          <a href="/classes-events" class="btn btn-hero-ghost">See the timetable</a>
+        </div>
       </div>
     </div>
   </section>
@@ -190,7 +192,12 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
       rgba(46, 159, 164, 0.4) 100%
     );
   }
-  .hero-inner { position: relative; z-index: 1; max-width: 720px; }
+  /* Keep the container's width/padding so the hero text starts on the same
+     vertical line as the logo in the header; constrain the copy separately. */
+  /* `.hero` is a flex container, so the inner container must be told to fill
+     the line — otherwise it shrinks to its content and auto-margins centre it. */
+  .hero-inner { position: relative; z-index: 1; width: 100%; }
+  .hero-copy { max-width: 720px; }
   .hero :global(h1) { color: #fff; }
   .hero-eyebrow { color: color-mix(in srgb, var(--color-accent) 55%, white); }
   .hero-lede { color: rgba(255, 255, 255, 0.92); margin-top: 20px; }
@@ -204,7 +211,14 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
 
   .welcome-copy { text-align: center; max-width: 62ch; margin-inline: auto; font-size: var(--fs-lede); }
   .band-tint { background: var(--color-surface-tint); }
-  .section-more { margin-top: 36px; text-align: center; }
+  /* `max-width: none` overrides the global `p` clamp, otherwise the button
+     centres inside a 68ch box rather than the full container. */
+  .section-more {
+    margin-top: 36px;
+    max-width: none;
+    display: flex;
+    justify-content: center;
+  }
 
   .grid-practitioners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
 
