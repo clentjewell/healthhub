@@ -8,8 +8,8 @@ location: "Health Hub Tweed Coast, Hastings Point"
 price: "$65"
 featured: false
 placeholder: true
-summary: "A morning seminar on women's health — placeholder listing."
+summary: "A morning seminar on women's health — hormones, energy and practical support at every stage."
 ---
 
-**Placeholder event** — real event details are migrated from the live site's
-events calendar in Phase 3. <!-- TODO(content): confirm details + bookingUrl -->
+<!-- DEMO ENTRY: date and price are illustrative. Replace or delete in the CMS
+     before this is shown publicly. -->

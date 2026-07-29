@@ -3,16 +3,19 @@
  * Styled placeholder box for images not yet migrated (Phase 3).
  * Uses the brand tint so layouts read correctly before real imagery lands.
  */
+import Icon from './Icon.astro';
+
 interface Props {
   label?: string;
   ratio?: string; // e.g. "4/3", "4/5", "16/9"
-  icon?: string;
+  /** Icon name from Icon.astro — never an emoji. */
+  icon?: 'user' | 'calendar' | 'map-pin' | 'image' | 'clock';
 }
-const { label = 'Image', ratio = '4/3', icon } = Astro.props;
+const { label = 'Image', ratio = '4/3', icon = 'image' } = Astro.props;
 ---
 
 <div class="ph" style={`aspect-ratio:${ratio}`}>
-  {icon && <span class="ph-icon" aria-hidden="true">{icon}</span>}
+  <Icon name={icon} size={30} class="ph-icon" />
   <span class="ph-label">{label}</span>
 </div>
 
@@ -31,7 +34,7 @@ const { label = 'Image', ratio = '4/3', icon } = Astro.props;
     padding: 16px;
     overflow: hidden;
   }
-  .ph-icon { font-size: 2rem; line-height: 1; }
+  .ph-icon { opacity: 0.5; }
   .ph-label {
     font-size: 12px;
     letter-spacing: 0.06em;

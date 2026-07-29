@@ -1,5 +1,6 @@
 ---
 import { formatEventDate, formatEventTime, CATEGORY_LABEL } from '../lib/format';
+import Icon from './Icon.astro';
 interface Props {
   title: string;
   date: Date;
@@ -18,7 +19,7 @@ const { title, date, category, summary, image, location, price, bookingUrl, feat
 
 <article class:list={['event-card', { featured }]}>
   <div class="event-media">
-    {image ? <img src={image} alt={title} loading="lazy" /> : <div class="event-media-fallback" aria-hidden="true">🗓️</div>}
+    {image ? <img src={image} alt={title} loading="lazy" width="600" height="450" /> : <div class="event-media-fallback" aria-hidden="true"><Icon name="calendar" size={32} /></div>}
     <span class="event-date">
       <span class="event-day">{formatEventDate(date)}</span>
       <span class="event-time">{formatEventTime(date)}</span>
@@ -36,11 +37,11 @@ const { title, date, category, summary, image, location, price, bookingUrl, feat
       bookingUrl ? (
         <a class="btn btn-primary event-cta" href={bookingUrl}>Book</a>
       ) : (
-        <span class="event-todo">Booking link TODO</span>
+        <a class="btn btn-ghost event-cta" href="/booking">Enquire</a>
       )
     }
   </div>
-  {placeholder && <span class="ph-badge">Placeholder</span>}
+  {placeholder && import.meta.env.DEV && <span class="ph-badge">Placeholder</span>}
 </article>
 
 <style>
@@ -86,9 +87,10 @@ const { title, date, category, summary, image, location, price, bookingUrl, feat
   .event-body h3 { font-size: 1.2rem; margin-bottom: 8px; }
   .event-summary { font-size: 14px; color: var(--color-text-muted); margin: 0 0 12px; }
   .event-meta { display: flex; gap: 16px; font-size: 13px; color: var(--color-text-muted); margin: 0 0 16px; }
-  .event-price { font-weight: 600; color: var(--color-text); }
-  .event-cta { padding: 8px 18px; font-size: 13px; color: #fff; }
-  .event-todo { font-size: 12px; color: var(--color-text-muted); font-style: italic; }
+  .event-price { font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .event-cta { padding: 8px 18px; font-size: 13px; min-height: 40px; }
+  .event-cta.btn-primary { color: #fff; }
+  .event-cta.btn-ghost { color: var(--color-brand); }
   .ph-badge {
     position: absolute; top: 12px; right: 12px;
     font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;

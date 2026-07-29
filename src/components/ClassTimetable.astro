@@ -48,7 +48,7 @@ const byDay = DAY_ORDER.map((day) => ({
               {s.bookingUrl ? (
                 <a class="tt-book" href={s.bookingUrl}>Book →</a>
               ) : (
-                <span class="tt-book tt-todo">TODO</span>
+                <a class="tt-book" href="/booking">Enquire →</a>
               )}
             </li>
           ))}
@@ -87,6 +87,7 @@ const byDay = DAY_ORDER.map((day) => ({
     font-weight: 600;
     font-size: 14px;
     color: var(--color-text);
+    font-variant-numeric: tabular-nums;
   }
   .tt-end { color: var(--color-text-muted); font-weight: 400; }
   .tt-info { display: flex; flex-direction: column; gap: 2px; }

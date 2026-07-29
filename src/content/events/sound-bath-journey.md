@@ -8,8 +8,8 @@ location: "Health Hub Tweed Coast, Hastings Point"
 price: "$45"
 featured: true
 placeholder: true
-summary: "An evening sound bath to close out the week — placeholder listing."
+summary: "An immersive evening of crystal bowl sound, guided breath and deep rest. Bring a mat and a blanket."
 ---
 
-**Placeholder event** — real event details are migrated from the live site's
-events calendar in Phase 3. <!-- TODO(content): confirm details + bookingUrl -->
+<!-- DEMO ENTRY: date and price are illustrative. Replace or delete in the CMS
+     before this is shown publicly. -->

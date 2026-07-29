@@ -1,7 +1,6 @@
 ---
 title: "Yoga & Meditation"
 shortTitle: "Yoga & Meditation"
-icon: "🧘"
 order: 2
 summary: "These classes are taught in an inclusive and choice-based manner with a trauma-informed lens."
 image: "/images/services/yoga-meditation.webp"

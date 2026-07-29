@@ -164,7 +164,9 @@ const mapSrc = mapEmbedSrc(cfg);
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
     opacity: 0;
-    animation: heroFade 21s infinite;
+    /* Crossfade + a very slow scale (Ken Burns) for depth. Transform/opacity
+       only, so it stays off the layout/paint path. */
+    animation: heroFade 21s infinite, heroDrift 21s infinite;
   }
   .hero-slide.s1 { background-image: url('/images/hero-1.webp'); animation-delay: 0s; }
   .hero-slide.s2 { background-image: url('/images/hero-2.webp'); animation-delay: 7s; }
@@ -175,6 +177,11 @@ const mapSrc = mapEmbedSrc(cfg);
     30% { opacity: 1; }
     36% { opacity: 0; }
     100% { opacity: 0; }
+  }
+  @keyframes heroDrift {
+    0%   { transform: scale(1.02); }
+    36%  { transform: scale(1.08); }
+    100% { transform: scale(1.08); }
   }
   .hero-overlay {
     position: absolute; inset: 0;
@@ -198,11 +205,20 @@ const mapSrc = mapEmbedSrc(cfg);
   .btn-hero-ghost { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.6); }
   .btn-hero-ghost:hover { border-color: #fff; background: rgba(255, 255, 255, 0.12); color: #fff; }
   @media (prefers-reduced-motion: reduce) {
-    .hero-slide { animation: none; }
+    .hero-slide { animation: none; transform: none; }
     .hero-slide.s1 { opacity: 1; }
   }
 
-  .welcome-copy { text-align: center; max-width: 62ch; margin-inline: auto; font-size: var(--fs-lede); }
+  .welcome { padding-block: clamp(72px, 10vw, 128px); }
+  .welcome-copy { text-align: center; max-width: 58ch; margin-inline: auto; font-size: var(--fs-lede); }
+  /* A small gold mark from the logo's centre dot, used as a quiet section rule. */
+  .welcome .narrow::after {
+    content: '';
+    display: block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--hub-gold, #f2b01e);
+    margin: 44px auto 0;
+  }
   .band-tint { background: var(--color-surface-tint); }
   /* `max-width: none` overrides the global `p` clamp, otherwise the button
      centres inside a 68ch box rather than the full container. */
@@ -214,8 +230,24 @@ const mapSrc = mapEmbedSrc(cfg);
   }
 
   .grid-practitioners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
-
   .grid-events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  /* Staggered reveal — 60ms apart, transform/opacity only. Cards are visible
+     by default so they still render without JS or with reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .grid-practitioners > :global(*),
+    .grid-events > :global(*) {
+      animation: riseIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .grid-practitioners > :global(*:nth-child(1)), .grid-events > :global(*:nth-child(1)) { animation-delay: 0ms; }
+    .grid-practitioners > :global(*:nth-child(2)), .grid-events > :global(*:nth-child(2)) { animation-delay: 60ms; }
+    .grid-practitioners > :global(*:nth-child(3)) { animation-delay: 120ms; }
+    .grid-practitioners > :global(*:nth-child(4)) { animation-delay: 180ms; }
+  }
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
 
   .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
   .location-nap { font-size: var(--fs-lede); margin-bottom: 8px; }

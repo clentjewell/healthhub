@@ -1,7 +1,6 @@
 ---
 title: "Acupuncture & Traditional Chinese Medicine"
 shortTitle: "Acupuncture"
-icon: "🌿"
 order: 1
 summary: "Relieve your pain, restore your energy and revitalise your passion for living."
 image: "/images/services/acupuncture.webp"

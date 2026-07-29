@@ -112,7 +112,7 @@
 [data-theme='healthhub'] {
   --hub-blue: #34719f;          /* wordmark steel-blue — brand / headings */
   --hub-navy: #22496c;          /* deep — bands, hover */
-  --hub-turq: #2e9fa4;          /* turquoise accent (text-readable) */
+  --hub-turq: #1f7a80;          /* turquoise accent — AA on white (5.06:1) and on tint (4.55:1) */
   --hub-turq-bright: #45c2c6;   /* logo turquoise — decorative details */
   --hub-gold: #f2b01e;          /* chakra-dot gold spark */
 

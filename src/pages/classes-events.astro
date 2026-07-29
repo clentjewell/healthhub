@@ -28,7 +28,7 @@ const anyPlaceholder =
   <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
 
   {
-    anyPlaceholder && (
+    anyPlaceholder && import.meta.env.DEV && (
       <div class="container">
         <p class="ph-note">
           Timetable and events below are placeholder entries — real schedule is seeded from the

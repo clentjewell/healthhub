@@ -8,8 +8,8 @@ location: "Health Hub Tweed Coast, Hastings Point"
 price: "$120"
 featured: false
 placeholder: true
-summary: "A four-week beginner meditation course — placeholder listing."
+summary: "A four-week introduction to meditation for complete beginners. No experience needed."
 ---
 
-**Placeholder event** — real event details are migrated from the live site's
-events calendar in Phase 3. <!-- TODO(content): confirm details + bookingUrl -->
+<!-- DEMO ENTRY: date and price are illustrative. Replace or delete in the CMS
+     before this is shown publicly. -->

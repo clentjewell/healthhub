@@ -1,7 +1,6 @@
 ---
 title: "Embodied Movement & Dance"
 shortTitle: "Embodied Movement"
-icon: "💫"
 order: 5
 summary: "Through guided exploration, you will shift from thinking about the body to feeling it, opening access to the instinctive intelligence that lives beneath everyday cognition."
 image: "/images/services/embodied-movement-dance.webp"

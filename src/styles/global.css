@@ -115,7 +115,9 @@ a:hover {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  min-height: 44px; /* WCAG / HIG minimum touch target */
   padding: 14px 26px;
   border: none;
   border-radius: var(--radius-sm);
