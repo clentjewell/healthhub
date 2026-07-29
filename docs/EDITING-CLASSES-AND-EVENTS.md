@@ -76,18 +76,12 @@ GitHub doesn't yet allow browser-only sign-in, so the editor needs a tiny OAuth
 relay worker. Sveltia publishes a ready-made one. **Deploy the worker first** —
 the OAuth app needs its URL.
 
-**1a. Deploy the auth worker**
+**1a. Deploy the auth worker — ✅ DONE**
 
-Either use the one-click button on
-[sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth), or:
+Already deployed to: **`https://sveltia-cms-auth.clent.workers.dev`**
 
-```bash
-git clone https://github.com/sveltia/sveltia-cms-auth.git
-cd sveltia-cms-auth
-npx wrangler deploy
-```
-
-Note the URL it prints — `https://sveltia-cms-auth.<subdomain>.workers.dev`.
+(For reference, to redeploy or move it:
+`git clone https://github.com/sveltia/sveltia-cms-auth.git && cd sveltia-cms-auth && npx wrangler deploy`)
 
 **1b. Register it as a GitHub OAuth app**
 
@@ -97,7 +91,7 @@ Note the URL it prints — `https://sveltia-cms-auth.<subdomain>.workers.dev`.
 |---|---|
 | Application name | `Health Hub CMS` (anything) |
 | Homepage URL | `https://healthhubtweedcoast.com.au` |
-| **Authorization callback URL** | **`<WORKER_URL>/callback`** ← must end in `/callback` |
+| **Authorization callback URL** | **`https://sveltia-cms-auth.clent.workers.dev/callback`** |
 
 Then click **Generate a new client secret**, and keep the **Client ID** and
 **Client Secret**.
@@ -119,21 +113,12 @@ Save and deploy.
 > worker. Including `*.workers.dev` lets sign-in work on the preview URL too;
 > drop it once you're live on the real domain.
 
-**1d. Point the CMS at the worker**
+**1d. Point the CMS at the worker — ✅ DONE**
 
-In [`public/admin/config.yml`](../public/admin/config.yml), replace the
-placeholder:
+`base_url` in [`public/admin/config.yml`](../public/admin/config.yml) is already
+set to `https://sveltia-cms-auth.clent.workers.dev`.
 
-```diff
- backend:
-   name: github
-   repo: clentjewell/healthhub
-   branch: main
--  base_url: https://REPLACE-WITH-YOUR-AUTH-WORKER.workers.dev
-+  base_url: https://sveltia-cms-auth.<your-subdomain>.workers.dev
-```
-
-Commit and push — sign-in then works.
+Once 1b and 1c are done, sign-in works — nothing further to deploy.
 
 ### 2. Repository secrets for auto-deploy
 

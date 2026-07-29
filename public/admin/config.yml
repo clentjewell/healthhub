@@ -18,8 +18,10 @@ backend:
   name: github
   repo: clentjewell/healthhub
   branch: main
-  # URL of your deployed sveltia-cms-auth worker (see docs). Must be replaced.
-  base_url: https://REPLACE-WITH-YOUR-AUTH-WORKER.workers.dev
+  # Deployed sveltia-cms-auth worker. Its GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET
+  # variables must be set in the Cloudflare dashboard before sign-in works —
+  # see docs/EDITING-CLASSES-AND-EVENTS.md steps 2b–2c.
+  base_url: https://sveltia-cms-auth.clent.workers.dev
   commit_messages:
     create: 'content: create {{collection}} "{{slug}}"'
     update: 'content: update {{collection}} "{{slug}}"'
