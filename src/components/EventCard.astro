@@ -102,24 +102,30 @@ const {
   /* ---- Horizontal variant: text left, image right ---- */
   .event-card.is-horizontal {
     display: grid;
-    grid-template-columns: 1fr 230px;
+    grid-template-columns: 1fr 320px;
     align-items: stretch;
   }
   .event-card.is-horizontal .event-body { grid-column: 1; grid-row: 1; }
+  .event-card.is-horizontal .event-summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   .event-card.is-horizontal .event-media {
     grid-column: 2;
     grid-row: 1;
-    display: flex;
-    align-items: center;
+    align-self: stretch;
+    overflow: hidden;
     border-left: 1px solid var(--color-border);
   }
-  /* The flyers have times and phone numbers baked in, so show them whole
-     (letterboxed on the tint) rather than cropping words off. */
+  /* Fill the panel edge to edge — no letterboxing. This crops the sides of the
+     flyers, so the full artwork is on /events and the detail page. */
   .event-card.is-horizontal .event-media img {
     width: 100%;
-    height: auto;
-    max-height: 100%;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
   @media (max-width: 620px) {
     .event-card.is-horizontal { grid-template-columns: 1fr; }

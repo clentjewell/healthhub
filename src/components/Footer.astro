@@ -52,7 +52,6 @@ const socials = [
       <ul class="footer-nav">
         {s.phone && <li><a href={`tel:${s.phone.replace(/\s/g, '')}`}>{s.phone}</a></li>}
         {s.email && <li><a href={`mailto:${s.email}`}>{s.email}</a></li>}
-        {s.socialHandle && <li class="footer-handle">{s.socialHandle}</li>}
       </ul>
       {
         socials.length > 0 && (
@@ -150,7 +149,6 @@ const socials = [
     gap: 10px;
     font-size: 14px;
   }
-  .footer-handle { opacity: 0.85; }
   .footer-social { display: flex; gap: 10px; list-style: none; padding: 0; margin: 16px 0 0; }
   .footer-social a {
     display: inline-flex; align-items: center; justify-content: center;
