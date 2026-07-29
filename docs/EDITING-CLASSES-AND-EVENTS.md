@@ -70,32 +70,72 @@ is recorded in the repository history and can be restored.
 
 The editor needs a small sign-in helper and two secrets before first use.
 
-### 1. GitHub OAuth app
+### 1. Editor sign-in (do these four steps *in order*)
 
-1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**
-2. **Homepage URL:** `https://healthhubtweedcoast.com.au`
-3. **Authorization callback URL:** `https://<your-auth-worker>.workers.dev/callback`
-4. Note the **Client ID** and generate a **Client Secret**.
+GitHub doesn't yet allow browser-only sign-in, so the editor needs a tiny OAuth
+relay worker. Sveltia publishes a ready-made one. **Deploy the worker first** —
+the OAuth app needs its URL.
 
-### 2. Deploy the auth worker
+**1a. Deploy the auth worker**
 
-The editor commits as the signed-in user, so it needs an OAuth relay. Sveltia
-publishes a ready-made Cloudflare Worker for this:
+Either use the one-click button on
+[sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth), or:
 
 ```bash
 git clone https://github.com/sveltia/sveltia-cms-auth.git
 cd sveltia-cms-auth
 npx wrangler deploy
-# then add the secrets it needs:
-npx wrangler secret put GITHUB_CLIENT_ID
-npx wrangler secret put GITHUB_CLIENT_SECRET
-npx wrangler secret put ALLOWED_DOMAINS   # e.g. healthhubtweedcoast.com.au
 ```
 
-Copy the deployed worker URL into **`public/admin/config.yml`** →
-`backend.base_url`, replacing `https://REPLACE-WITH-YOUR-AUTH-WORKER.workers.dev`.
+Note the URL it prints — `https://sveltia-cms-auth.<subdomain>.workers.dev`.
 
-### 3. Repository secrets for auto-deploy
+**1b. Register it as a GitHub OAuth app**
+
+[Register a new OAuth application](https://github.com/settings/applications/new):
+
+| Field | Value |
+|---|---|
+| Application name | `Health Hub CMS` (anything) |
+| Homepage URL | `https://healthhubtweedcoast.com.au` |
+| **Authorization callback URL** | **`<WORKER_URL>/callback`** ← must end in `/callback` |
+
+Then click **Generate a new client secret**, and keep the **Client ID** and
+**Client Secret**.
+
+**1c. Give the worker its variables**
+
+Cloudflare dashboard → **Workers & Pages → `sveltia-cms-auth` → Settings →
+Variables and Secrets**:
+
+| Name | Value |
+|---|---|
+| `GITHUB_CLIENT_ID` | Client ID from 1b |
+| `GITHUB_CLIENT_SECRET` | Client Secret from 1b — click **Encrypt** |
+| `ALLOWED_DOMAINS` | `healthhubtweedcoast.com.au, *.workers.dev` |
+
+Save and deploy.
+
+> `ALLOWED_DOMAINS` is what stops anyone else pointing their own CMS at your
+> worker. Including `*.workers.dev` lets sign-in work on the preview URL too;
+> drop it once you're live on the real domain.
+
+**1d. Point the CMS at the worker**
+
+In [`public/admin/config.yml`](../public/admin/config.yml), replace the
+placeholder:
+
+```diff
+ backend:
+   name: github
+   repo: clentjewell/healthhub
+   branch: main
+-  base_url: https://REPLACE-WITH-YOUR-AUTH-WORKER.workers.dev
++  base_url: https://sveltia-cms-auth.<your-subdomain>.workers.dev
+```
+
+Commit and push — sign-in then works.
+
+### 2. Repository secrets for auto-deploy
 
 Repo → **Settings → Secrets and variables → Actions** → add:
 
@@ -108,7 +148,7 @@ These power [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml),
 which rebuilds and redeploys on every push to `main` — including the CMS's own
 commits. That workflow *is* the "publish" step.
 
-### Adding an editor
+### 3. Adding an editor
 
 Invite them as a **collaborator with write access** to the `clentjewell/healthhub`
 repository. Anyone with write access can use the editor; anyone without it can
