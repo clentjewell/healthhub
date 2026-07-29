@@ -1,0 +1,60 @@
+# Homepage content — editable in the CMS under "Pages → Home".
+metaTitle: Home
+metaDescription: >-
+  Health Hub Tweed Coast — a community wellness studio at Hastings Point.
+  Acupuncture, allied health, movement classes and events on the Tweed Coast.
+
+hero:
+  eyebrow: Wellness studio · Hastings Point
+  heading: Body, Mind & Soul
+  lede: >-
+    Health Hub Tweed Coast — the community wellness studio arm of Pottsville
+    Acupuncture. Acupuncture and allied health, movement classes and events, all
+    under one roof on the Tweed Coast.
+  primaryLabel: Make a Booking
+  primaryHref: /booking
+  secondaryLabel: See the timetable
+  secondaryHref: /classes-events
+
+welcome:
+  eyebrow: Welcome
+  heading: Welcome to Health Hub Tweed Coast
+  paragraphs:
+    - >-
+      We are a group of therapists, practitioners and teachers who have come
+      together with the sole purpose to help you and your family heal and live
+      full lives.
+    - >-
+      Receive the care you deserve, delivered collaboratively from a group of
+      dedicated and talented practitioners and therapists.
+
+practitioners:
+  eyebrow: Meet the team
+  heading: Our Practitioners
+  lede: >-
+    A multidisciplinary team — each leading their own service, from acupuncture
+    and naturopathy to yoga, pilates, movement and sound.
+  linkLabel: Meet all our practitioners
+
+events:
+  eyebrow: On the calendar
+  heading: Upcoming at the Hub
+  lede: A taste of what's coming up. See the full weekly timetable and events.
+  linkLabel: View timetable & events
+
+location:
+  eyebrow: Find us
+  heading: Hastings Point, on the Tweed Coast
+  directionsLabel: Get directions
+  contactLabel: Contact us
+
+cta:
+  heading: Two ways in
+  leftHeading: Book a treatment
+  leftBody: Acupuncture and allied-health appointments with our practitioners.
+  leftLabel: Make a booking
+  leftHref: /booking
+  rightHeading: Join a class
+  rightBody: Yoga, pilates, sound and events in the studio — all levels welcome.
+  rightLabel: See the timetable
+  rightHref: /classes-events

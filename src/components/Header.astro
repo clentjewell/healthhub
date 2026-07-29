@@ -3,7 +3,12 @@
  * Site header — logo, primary nav, booking CTA, mobile toggle.
  * Nav + booking CTA read from the single source of truth (site.ts).
  */
-import { site, nav, bookingCta } from '@data/site';
+import { getSettings } from '../lib/content';
+
+const s = await getSettings();
+const siteName = `${s.brandName} ${s.brandTagline}`;
+const nav = s.navItems;
+const bookingCta = { label: s.bookingLabel, href: s.bookingHref };
 
 const current = Astro.url.pathname;
 const isActive = (href: string) =>
@@ -12,8 +17,8 @@ const isActive = (href: string) =>
 
 <header class="site-header">
   <div class="nav-inner">
-    <a href="/" class="logo" aria-label={`${site.name} — home`}>
-      <img src="/images/logo.png" alt={site.name} class="logo-img" width="220" height="46" />
+    <a href="/" class="logo" aria-label={`${siteName} — home`}>
+      <img src="/images/logo.png" alt={siteName} class="logo-img" width="220" height="46" />
     </a>
 
     <button

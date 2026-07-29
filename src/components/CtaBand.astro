@@ -4,26 +4,25 @@
  * Two visually distinct, unambiguous paths — reused across pages, and mirrors
  * the dual-CTA pattern the /hub/ proposal needs (Prompt 2).
  */
-import { bookingCta } from '@data/site';
-interface Props {
-  heading?: string;
-}
-const { heading = 'Two ways in' } = Astro.props;
+import { getPage } from '../lib/content';
+
+const home = await getPage('home');
+const cta = home.cta!;
 ---
 
 <section class="cta-band">
   <div class="container">
-    <h2>{heading}</h2>
+    <h2>{cta.heading}</h2>
     <div class="cta-grid">
       <div class="cta-col">
-        <h3>Book a treatment</h3>
-        <p>Acupuncture and allied-health appointments with our practitioners.</p>
-        <a href={bookingCta.href} class="btn btn-light">Make a booking</a>
+        <h3>{cta.leftHeading}</h3>
+        {cta.leftBody && <p>{cta.leftBody}</p>}
+        <a href={cta.leftHref} class="btn btn-light">{cta.leftLabel}</a>
       </div>
       <div class="cta-col">
-        <h3>Join a class</h3>
-        <p>Yoga, pilates, sound and events in the studio — all levels welcome.</p>
-        <a href="/classes-events" class="btn btn-outline-light">See the timetable</a>
+        <h3>{cta.rightHeading}</h3>
+        {cta.rightBody && <p>{cta.rightBody}</p>}
+        <a href={cta.rightHref} class="btn btn-outline-light">{cta.rightLabel}</a>
       </div>
     </div>
   </div>

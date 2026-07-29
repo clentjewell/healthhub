@@ -1,31 +1,26 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PageHeader from '@components/PageHeader.astro';
-import { nap, hours, social, contact, fullAddress } from '@data/site';
+import { getSettings, getPage, mapEmbedSrc } from '../lib/content';
 
-const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapEmbedQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+const cfg = await getSettings();
+const page = await getPage('contact');
+const mapSrc = mapEmbedSrc(cfg);
 ---
 
-<BaseLayout
-  title="Contact"
-  description={`Contact Health Hub Tweed Coast — ${fullAddress}. Open ${hours.label}.`}
->
-  <PageHeader
-    eyebrow="Say hello"
-    title="Contact"
-    lede="Questions, bookings or class enquiries — we'd love to hear from you."
-  />
+<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+  <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
 
   <section class="section">
     <div class="container contact-grid">
       {/* Form */}
       <div class="contact-form-wrap">
-        <h2>Send a message</h2>
+        <h2>{page.formHeading}</h2>
         <form
           class="contact-form"
           method="POST"
-          action={contact.formEndpoint || '#'}
-          data-endpoint-set={contact.formEndpoint ? 'true' : 'false'}
+          action={cfg.contactFormEndpoint || '#'}
+          data-endpoint-set={cfg.contactFormEndpoint ? 'true' : 'false'}
         >
           <div class="field">
             <label for="name">Name</label>
@@ -43,12 +38,12 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
             <label for="message">Message</label>
             <textarea id="message" name="message" rows="5" required></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Send message</button>
+          <button type="submit" class="btn btn-primary">{page.submitLabel}</button>
           {
-            !contact.formEndpoint && (
+            !cfg.contactFormEndpoint && (
               <p class="todo-note">
-                Form endpoint not configured — set <code>contact.formEndpoint</code> in
-                <code>site.ts</code> (TODO).
+                Form endpoint not configured — set <strong>Contact form endpoint</strong>
+                in the CMS under Settings.
               </p>
             )
           }
@@ -61,37 +56,36 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
         <div class="detail">
           <h3>Visit</h3>
           <address>
-            {nap.street}<br />
-            {nap.locality} {nap.region} {nap.postcode}
+            {cfg.street}<br />
+            {cfg.locality} {cfg.region} {cfg.postcode}
           </address>
-          <a href={nap.mapUrl} target="_blank" rel="noopener">Get directions →</a>
+          <a href={cfg.mapUrl} target="_blank" rel="noopener">Get directions →</a>
         </div>
         <div class="detail">
           <h3>Open</h3>
-          <p>{hours.label}</p>
+          <p>{cfg.hoursLabel}</p>
         </div>
         <div class="detail">
           <h3>Follow</h3>
           <p>
-            {social.instagram
-              ? <a href={social.instagram} target="_blank" rel="noopener">Instagram {social.handle}</a>
-              : social.handle}
+            {cfg.instagram
+              ? <a href={cfg.instagram} target="_blank" rel="noopener">Instagram {cfg.socialHandle}</a>
+              : cfg.socialHandle}
           </p>
-          {nap.phone && <p><a href={`tel:${nap.phone.replace(/\s/g, '')}`}>{nap.phone}</a></p>}
-          {nap.email && <p><a href={`mailto:${nap.email}`}>{nap.email}</a></p>}
-          {(!nap.phone || !nap.email) && <p class="todo-note">Phone / email — TODO (Phase 3).</p>}
+          {cfg.phone && <p><a href={`tel:${cfg.phone.replace(/\s/g, '')}`}>{cfg.phone}</a></p>}
+          {cfg.email && <p><a href={`mailto:${cfg.email}`}>{cfg.email}</a></p>}
         </div>
       </aside>
     </div>
 
-    <div class="container map-wrap">
+    {page.showMap !== false && <div class="container map-wrap">
       <iframe
         title="Map to Health Hub Tweed Coast"
         src={mapSrc}
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
         allowfullscreen></iframe>
-    </div>
+    </div>}
   </section>
 </BaseLayout>
 

@@ -6,6 +6,9 @@ import SectionHeading from '@components/SectionHeading.astro';
 import ClassTimetable from '@components/ClassTimetable.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
+import { getPage } from '../lib/content';
+
+const page = await getPage('classes-events');
 
 const classes = (await getCollection('classes'))
   .filter((c) => c.data.active)
@@ -21,15 +24,8 @@ const anyPlaceholder =
   events.some((e) => e.data.placeholder);
 ---
 
-<BaseLayout
-  title="Classes & Events"
-  description="Weekly timetable and upcoming events at Health Hub Tweed Coast — yoga, pilates, sound and more."
->
-  <PageHeader
-    eyebrow="What's on"
-    title="Classes & Events"
-    lede="Our weekly studio timetable and upcoming one-off events, workshops and courses."
-  />
+<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+  <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
 
   {
     anyPlaceholder && (
@@ -45,7 +41,7 @@ const anyPlaceholder =
   {/* Weekly timetable */}
   <section class="section">
     <div class="container">
-      <SectionHeading eyebrow="Every week" title="Weekly Timetable" />
+      <SectionHeading eyebrow={page.timetableEyebrow} title={page.timetableHeading!} />
       <ClassTimetable classes={classes} />
     </div>
   </section>
@@ -53,7 +49,7 @@ const anyPlaceholder =
   {/* Upcoming events */}
   <section class="section band-tint">
     <div class="container">
-      <SectionHeading eyebrow="Coming up" title="Upcoming Events" />
+      <SectionHeading eyebrow={page.eventsEyebrow} title={page.eventsHeading!} />
       {
         events.length > 0 ? (
           <div class="events-list">
@@ -73,7 +69,7 @@ const anyPlaceholder =
             ))}
           </div>
         ) : (
-          <p>No upcoming events listed right now — check back soon.</p>
+          <p>{page.emptyEventsText}</p>
         )
       }
     </div>

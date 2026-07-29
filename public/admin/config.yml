@@ -2,16 +2,12 @@
 # Health Hub Tweed Coast — content editor configuration
 #
 # Powers the /admin editor (Sveltia CMS; this file is also Decap-compatible).
-# Editors change classes/events here → the CMS commits to GitHub → GitHub
-# Actions rebuilds and redeploys the site automatically.
+# Editors change content here → the CMS commits to GitHub → GitHub Actions
+# rebuilds and redeploys the site automatically.
 #
-# ⚠️  SETUP REQUIRED BEFORE FIRST LOGIN — see docs/EDITING-CLASSES-AND-EVENTS.md
-#     ("One-time setup"). You must deploy the auth worker and put its URL in
-#     `base_url` below, otherwise signing in will fail.
-#
-# The field definitions below intentionally mirror src/content.config.ts. If a
-# field is added/renamed there, mirror it here or the CMS will write content
-# the build rejects.
+# ⚠️  The field definitions below intentionally mirror src/content.config.ts.
+#     If a field is added/renamed there, mirror it here (and vice versa) or the
+#     CMS will write content the build rejects.
 # =============================================================================
 
 backend:
@@ -20,7 +16,7 @@ backend:
   branch: main
   # Deployed sveltia-cms-auth worker. Its GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET
   # variables must be set in the Cloudflare dashboard before sign-in works —
-  # see docs/EDITING-CLASSES-AND-EVENTS.md steps 2b–2c.
+  # see docs/EDITING-THE-WEBSITE.md steps 2b–2c.
   base_url: https://sveltia-cms-auth.clent.workers.dev
   commit_messages:
     create: 'content: create {{collection}} "{{slug}}"'
@@ -29,16 +25,199 @@ backend:
     uploadMedia: 'content: upload image "{{path}}"'
     deleteMedia: 'content: delete image "{{path}}"'
 
-# Uploaded event images land beside the ones migrated from the old site.
-media_folder: public/images/events
-public_folder: /images/events
+media_folder: public/images/uploads
+public_folder: /images/uploads
 
 site_url: https://healthhubtweedcoast.com.au
 
 collections:
-  # ---------------------------------------------------------------------------
+  # ===========================================================================
+  # PAGES — text on the fixed pages. Layout stays in the templates.
+  # ===========================================================================
+  - name: pages
+    label: Pages
+    description: Wording on each page. Add/remove pages is a developer task.
+    editor: { preview: false }
+    files:
+      - name: home
+        label: Home
+        file: src/content/pages/home.yml
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text, hint: 'Around 150 characters — shows in Google results.' }
+          - label: Hero (top of page)
+            name: hero
+            widget: object
+            fields:
+              - { label: Small label above heading, name: eyebrow, widget: string, required: false }
+              - { label: Heading, name: heading, widget: string }
+              - { label: Intro paragraph, name: lede, widget: text, required: false }
+              - { label: Main button text, name: primaryLabel, widget: string, required: false }
+              - { label: Main button link, name: primaryHref, widget: string, required: false, default: /booking }
+              - { label: Second button text, name: secondaryLabel, widget: string, required: false }
+              - { label: Second button link, name: secondaryHref, widget: string, required: false, default: /classes-events }
+          - label: Welcome section
+            name: welcome
+            widget: object
+            fields:
+              - { label: Small label, name: eyebrow, widget: string, required: false }
+              - { label: Heading, name: heading, widget: string }
+              - label: Paragraphs
+                name: paragraphs
+                widget: list
+                field: { label: Paragraph, name: paragraph, widget: text }
+          - label: Practitioners section
+            name: practitioners
+            widget: object
+            fields:
+              - { label: Small label, name: eyebrow, widget: string, required: false }
+              - { label: Heading, name: heading, widget: string }
+              - { label: Intro, name: lede, widget: text, required: false }
+              - { label: Button text, name: linkLabel, widget: string, required: false }
+          - label: Events section
+            name: events
+            widget: object
+            fields:
+              - { label: Small label, name: eyebrow, widget: string, required: false }
+              - { label: Heading, name: heading, widget: string }
+              - { label: Intro, name: lede, widget: text, required: false }
+              - { label: Button text, name: linkLabel, widget: string, required: false }
+          - label: Find us section
+            name: location
+            widget: object
+            fields:
+              - { label: Small label, name: eyebrow, widget: string, required: false }
+              - { label: Heading, name: heading, widget: string }
+              - { label: Directions button text, name: directionsLabel, widget: string, required: false }
+              - { label: Contact button text, name: contactLabel, widget: string, required: false }
+          - label: "\"Two ways in\" band (shown on most pages)"
+            name: cta
+            widget: object
+            fields:
+              - { label: Heading, name: heading, widget: string }
+              - { label: Left heading, name: leftHeading, widget: string }
+              - { label: Left text, name: leftBody, widget: text, required: false }
+              - { label: Left button text, name: leftLabel, widget: string }
+              - { label: Left button link, name: leftHref, widget: string }
+              - { label: Right heading, name: rightHeading, widget: string }
+              - { label: Right text, name: rightBody, widget: text, required: false }
+              - { label: Right button text, name: rightLabel, widget: string }
+              - { label: Right button link, name: rightHref, widget: string }
+
+      - name: practitioners_page
+        label: Practitioners (page wording)
+        file: src/content/pages/practitioners.yml
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text }
+          - { label: Small label, name: eyebrow, widget: string, required: false }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Intro paragraph, name: lede, widget: text, required: false }
+
+      - name: classes_events
+        label: Classes & Events (page wording)
+        file: src/content/pages/classes-events.yml
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text }
+          - { label: Small label, name: eyebrow, widget: string, required: false }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Intro paragraph, name: lede, widget: text, required: false }
+          - { label: Timetable small label, name: timetableEyebrow, widget: string, required: false }
+          - { label: Timetable heading, name: timetableHeading, widget: string }
+          - { label: Events small label, name: eventsEyebrow, widget: string, required: false }
+          - { label: Events heading, name: eventsHeading, widget: string }
+          - { label: Text when there are no events, name: emptyEventsText, widget: string, required: false }
+
+      - name: booking
+        label: Make a Booking
+        file: src/content/pages/booking.yml
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text }
+          - { label: Small label, name: eyebrow, widget: string, required: false }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Intro paragraph, name: lede, widget: text, required: false }
+          - label: Extra note below the list
+            name: extraNote
+            widget: text
+            required: false
+            hint: Leave blank to hide. Good for practitioners who aren't listed above.
+
+      - name: contact
+        label: Contact
+        file: src/content/pages/contact.yml
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text }
+          - { label: Small label, name: eyebrow, widget: string, required: false }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Intro paragraph, name: lede, widget: text, required: false }
+          - { label: Form heading, name: formHeading, widget: string, required: false }
+          - { label: Send button text, name: submitLabel, widget: string, required: false }
+          - { label: Show the map, name: showMap, widget: boolean, default: true }
+
+  # ===========================================================================
+  # PRACTITIONERS — add, edit and remove team members
+  # ===========================================================================
+  - name: practitioners
+    label: Practitioners
+    label_singular: Practitioner
+    description: >-
+      Team members. Each has their own page. "Order" controls where they appear
+      in the list (1 shows first).
+    folder: src/content/practitioners
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: '{{name}}'
+    summary: '{{order}}. {{name}} — {{role}}'
+    sortable_fields: [order, name, role]
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Role / title, name: role, widget: string, hint: 'e.g. Naturopath, Yin & Hatha Yoga Teacher' }
+      - { label: Order, name: order, widget: number, value_type: int, min: 1, default: 99, hint: Lower numbers appear first. }
+      - { label: Photo, name: image, widget: image, required: false, hint: 'Portrait orientation works best (roughly 4:5).' }
+      - { label: Service they lead, name: service, widget: string, required: false, hint: 'Optional tag shown on their card, e.g. naturopathy, yoga-meditation.' }
+      - { label: Phone, name: phone, widget: string, required: false }
+      - { label: Booking link, name: bookingUrl, widget: string, required: false, hint: 'Full https:// link. Leave blank if they take bookings by phone.' }
+      - { label: Facebook, name: facebook, widget: string, required: false }
+      - { label: Instagram, name: instagram, widget: string, required: false }
+      - { label: Website, name: website, widget: string, required: false }
+      - label: Sessions & Fees
+        name: feeGroups
+        widget: list
+        required: false
+        label_singular: Fee group
+        summary: '{{fields.title}}'
+        hint: >-
+          Each group is a box on their page. Use a group with several options for
+          a class with passes; use title + price for a single service.
+        fields:
+          - { label: Group title, name: title, widget: string }
+          - { label: Single price, name: price, widget: string, required: false, hint: 'Use for a one-off service, e.g. $146' }
+          - { label: Description, name: note, widget: text, required: false }
+          - label: Options
+            name: items
+            widget: list
+            required: false
+            label_singular: Option
+            summary: '{{fields.label}} — {{fields.price}}'
+            fields:
+              - { label: Option, name: label, widget: string, hint: 'e.g. Casual class, 5 Class Pass' }
+              - { label: Price, name: price, widget: string, required: false }
+      - label: Profile / bio
+        name: body
+        widget: markdown
+        required: false
+        hint: Their full bio. Use headings to break up long content.
+      - { label: Modalities (internal), name: modalities, widget: hidden, default: [] }
+      - { label: Placeholder flag (internal), name: placeholder, widget: hidden, default: false }
+
+  # ===========================================================================
   # WEEKLY TIMETABLE — recurring classes (one file per class session)
-  # ---------------------------------------------------------------------------
+  # ===========================================================================
   - name: classes
     label: Weekly Timetable
     label_singular: Class
@@ -47,6 +226,7 @@ collections:
       a week needs two entries. Times use the 24-hour clock (e.g. 18:00 = 6pm).
     folder: src/content/classes
     create: true
+    delete: true
     extension: md
     format: frontmatter
     slug: '{{day}}-{{title}}'
@@ -98,9 +278,9 @@ collections:
       - { label: Notes (optional), name: body, widget: markdown, required: false }
       - { label: Placeholder flag (internal), name: placeholder, widget: hidden, default: false }
 
-  # ---------------------------------------------------------------------------
+  # ===========================================================================
   # UPCOMING EVENTS — one-off dated happenings
-  # ---------------------------------------------------------------------------
+  # ===========================================================================
   - name: events
     label: Upcoming Events
     label_singular: Event
@@ -109,6 +289,7 @@ collections:
       showing on the website once their date has passed — no need to delete them.
     folder: src/content/events
     create: true
+    delete: true
     extension: md
     format: frontmatter
     slug: '{{title}}'
@@ -149,7 +330,6 @@ collections:
         name: image
         widget: image
         required: false
-        media_folder: ''
         hint: Landscape works best (roughly 4:3). Large photos are fine — they're optimised automatically.
       - { label: Instructor / host, name: instructor, widget: string, required: false }
       - { label: Location, name: location, widget: string, required: false, default: 'Health Hub Tweed Coast, Hastings Point' }
@@ -166,3 +346,60 @@ collections:
         hint: Highlights the card with a coloured border.
       - { label: Full details (optional), name: body, widget: markdown, required: false }
       - { label: Placeholder flag (internal), name: placeholder, widget: hidden, default: false }
+
+  # ===========================================================================
+  # SETTINGS — header, footer, address, hours, socials
+  # ===========================================================================
+  - name: settings
+    label: Settings
+    editor: { preview: false }
+    files:
+      - name: general
+        label: General (header, footer, contact details)
+        file: src/content/settings/general.yml
+        description: >-
+          Used across the whole site — the address and hours here also feed
+          Google's business listing data.
+        fields:
+          - { label: Brand name, name: brandName, widget: string }
+          - { label: Brand tagline, name: brandTagline, widget: string }
+
+          - { label: Street address, name: street, widget: string }
+          - { label: Suburb, name: locality, widget: string }
+          - { label: State, name: region, widget: string }
+          - { label: Postcode, name: postcode, widget: string }
+          - { label: Phone, name: phone, widget: string, required: false }
+          - { label: Email, name: email, widget: string, required: false }
+          - { label: Google Maps link (Get directions button), name: mapUrl, widget: string }
+          - { label: Address for the embedded map, name: mapQuery, widget: string, hint: 'Plain address, e.g. 87-89 Tweed Coast Road, Hastings Point NSW 2489' }
+
+          - { label: Opening hours (as shown), name: hoursLabel, widget: string, hint: 'e.g. Monday – Sunday, 8:00am – 6:30pm' }
+          - { label: Opens at, name: hoursOpen, widget: string, hint: '24-hour HH:MM — used for Google', pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Use 24-hour HH:MM'] }
+          - { label: Closes at, name: hoursClose, widget: string, hint: '24-hour HH:MM — used for Google', pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Use 24-hour HH:MM'] }
+
+          - { label: Social handle, name: socialHandle, widget: string, required: false }
+          - { label: Instagram URL, name: instagram, widget: string, required: false }
+          - { label: Facebook URL, name: facebook, widget: string, required: false }
+
+          - label: Header menu
+            name: navItems
+            widget: list
+            label_singular: Menu item
+            summary: '{{fields.label}} → {{fields.href}}'
+            hint: >-
+              Links must point at pages that exist — /, /practitioners,
+              /classes-events, /contact, /booking.
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: Link, name: href, widget: string }
+          - { label: Header button text, name: bookingLabel, widget: string }
+          - { label: Header button link, name: bookingHref, widget: string }
+
+          - { label: Footer intro text, name: footerBlurb, widget: text }
+          - { label: Footer small print, name: footerNote, widget: string, required: false }
+
+          - label: Contact form endpoint
+            name: contactFormEndpoint
+            widget: string
+            required: false
+            hint: Where the contact form submits. Leave blank until it's set up.

@@ -138,4 +138,125 @@ const events = defineCollection({
   }),
 });
 
-export const collections = { services, practitioners, classes, events };
+/**
+ * Site-wide settings (header menu, footer text, NAP, hours, socials).
+ * One entry: `general`. Edited in the CMS under Settings.
+ */
+const settings = defineCollection({
+  loader: glob({ pattern: '**/*.yml', base: './src/content/settings' }),
+  schema: z.object({
+    brandName: z.string(),
+    brandTagline: z.string(),
+
+    street: z.string(),
+    locality: z.string(),
+    region: z.string(),
+    postcode: z.string(),
+    phone: optionalText,
+    email: optionalText,
+    mapUrl: z.string(),
+    mapQuery: z.string(),
+
+    hoursLabel: z.string(),
+    hoursOpen: z.string().regex(/^\d{2}:\d{2}$/),
+    hoursClose: z.string().regex(/^\d{2}:\d{2}$/),
+
+    socialHandle: optionalText,
+    instagram: optionalUrl,
+    facebook: optionalUrl,
+
+    navItems: z.array(z.object({ label: z.string(), href: z.string() })).default([]),
+    bookingLabel: z.string().default('Make a Booking'),
+    bookingHref: z.string().default('/booking'),
+
+    footerBlurb: z.string(),
+    footerNote: optionalText,
+
+    contactFormEndpoint: optionalText,
+  }),
+});
+
+/** Reusable bits of page copy. */
+const section = z.object({
+  eyebrow: optionalText,
+  heading: z.string(),
+  lede: optionalText,
+  linkLabel: optionalText,
+});
+
+/**
+ * Editable page copy — one YAML file per page, edited in the CMS under Pages.
+ * Only text lives here; layout stays in the templates.
+ */
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.yml', base: './src/content/pages' }),
+  schema: z.object({
+    metaTitle: z.string(),
+    metaDescription: z.string(),
+
+    // Simple pages (booking / contact / classes-events / practitioners index)
+    eyebrow: optionalText,
+    heading: optionalText,
+    lede: optionalText,
+
+    // Booking
+    extraNote: optionalText,
+
+    // Contact
+    formHeading: optionalText,
+    submitLabel: optionalText,
+    showMap: z.boolean().optional(),
+
+    // Classes & Events
+    timetableEyebrow: optionalText,
+    timetableHeading: optionalText,
+    eventsEyebrow: optionalText,
+    eventsHeading: optionalText,
+    emptyEventsText: optionalText,
+
+    // Home
+    hero: z
+      .object({
+        eyebrow: optionalText,
+        heading: z.string(),
+        lede: optionalText,
+        primaryLabel: optionalText,
+        primaryHref: optionalText,
+        secondaryLabel: optionalText,
+        secondaryHref: optionalText,
+      })
+      .optional(),
+    welcome: z
+      .object({
+        eyebrow: optionalText,
+        heading: z.string(),
+        paragraphs: z.array(z.string()).default([]),
+      })
+      .optional(),
+    practitioners: section.optional(),
+    events: section.optional(),
+    location: z
+      .object({
+        eyebrow: optionalText,
+        heading: z.string(),
+        directionsLabel: optionalText,
+        contactLabel: optionalText,
+      })
+      .optional(),
+    cta: z
+      .object({
+        heading: z.string(),
+        leftHeading: z.string(),
+        leftBody: optionalText,
+        leftLabel: z.string(),
+        leftHref: z.string(),
+        rightHeading: z.string(),
+        rightBody: optionalText,
+        rightLabel: z.string(),
+        rightHref: z.string(),
+      })
+      .optional(),
+  }),
+});
+
+export const collections = { settings, pages, services, practitioners, classes, events };

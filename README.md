@@ -38,7 +38,10 @@ Static output, no adapter required.
 
 ```
 src/
-  data/site.ts        Single source of truth — NAP, hours, nav, socials
+  data/site.ts        Build config only — canonical domain + SEO fallbacks
+  content/settings/   CMS-editable: NAP, hours, header menu, footer
+  content/pages/      CMS-editable: page wording
+  lib/content.ts      Typed accessors for settings + page copy
   styles/tokens.css   Pottsville baseline + Health Hub sibling theme
   styles/global.css   Base element styles + helpers
   layouts/            BaseLayout (Health Hub theme, meta/OG scaffold)
@@ -52,9 +55,11 @@ public/               Static assets, robots.txt, favicon
 1. ✅ **Scaffold + design system** — Astro, Cloudflare config, theme, base layout, header/footer w/ NAP.
 2. ✅ **Templates + content collections** — page templates, classes/events schemas.
 3. ✅ **Content migration** — real copy, bios, images (WebP), booking pathways from the live site.
-4. ✅ **Self-serve events** — git-based CMS at `/admin` + auto-deploy on commit.
-   See [`docs/EDITING-CLASSES-AND-EVENTS.md`](docs/EDITING-CLASSES-AND-EVENTS.md).
-   *Needs one-time setup (auth worker + repo secrets) before first login.*
+4. ✅ **Self-serve CMS** — git-based editor at `/admin` + auto-deploy on commit.
+   Covers page wording, practitioners (add/edit/delete), timetable, events, and
+   header/footer/contact settings.
+   See [`docs/EDITING-THE-WEBSITE.md`](docs/EDITING-THE-WEBSITE.md).
+   *Needs one-time auth setup before first login.*
 5. ⬜ SEO layer (JSON-LD, meta/OG, sitemap, robots, llms.txt, redirect map).
 6. ⬜ Launch prep (preview build, visual + link + redirect checks). DNS is manual.
 
@@ -66,4 +71,5 @@ the open design decisions.
 > 87–89 Tweed Coast Road, Hastings Point NSW 2489 · Mon–Sun 8:00am–6:30pm ·
 > [@healthhubtweedcoast](https://www.instagram.com/healthhubtweedcoast/)
 
-Edit these in **one place**: `src/data/site.ts`.
+Edit these in **one place**: the CMS under **Settings → General**
+(`src/content/settings/general.yml`).

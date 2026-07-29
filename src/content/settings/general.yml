@@ -1,0 +1,53 @@
+# =============================================================================
+# Site-wide settings — editable in the CMS under "Settings → General".
+#
+# This is the single source of truth for the address, hours, phone, socials,
+# the header menu and the footer text. The LocalBusiness schema (SEO) reads
+# from here too, so the address only ever needs changing in one place.
+# =============================================================================
+
+brandName: Health Hub
+brandTagline: Tweed Coast
+
+# ---- Address & contact (NAP) ------------------------------------------------
+street: 87–89 Tweed Coast Road
+locality: Hastings Point
+region: NSW
+postcode: '2489'
+phone: 0415 919 521
+email: ''
+mapUrl: https://www.google.com/maps/search/?api=1&query=87-89+Tweed+Coast+Road+Hastings+Point+NSW+2489
+mapQuery: 87-89 Tweed Coast Road, Hastings Point NSW 2489
+
+# ---- Opening hours ----------------------------------------------------------
+hoursLabel: Monday – Sunday, 8:00am – 6:30pm
+hoursOpen: '08:00'
+hoursClose: '18:30'
+
+# ---- Social ----------------------------------------------------------------
+socialHandle: '@healthhubtweedcoast'
+instagram: https://www.instagram.com/healthhubtweedcoast/
+facebook: https://www.facebook.com/HealthHubTweedCoast/
+
+# ---- Header ----------------------------------------------------------------
+navItems:
+  - label: Home
+    href: /
+  - label: Practitioners
+    href: /practitioners
+  - label: Classes & Events
+    href: /classes-events
+  - label: Contact
+    href: /contact
+bookingLabel: Make a Booking
+bookingHref: /booking
+
+# ---- Footer ----------------------------------------------------------------
+footerBlurb: >-
+  The community wellness studio arm of Pottsville Acupuncture — movement, allied
+  health and events on the Tweed Coast.
+footerNote: Made on the Tweed Coast.
+
+# ---- Integrations ----------------------------------------------------------
+# Where the contact form posts. Leave blank until the endpoint is confirmed.
+contactFormEndpoint: ''

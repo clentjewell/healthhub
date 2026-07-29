@@ -5,7 +5,15 @@ import SectionHeading from '@components/SectionHeading.astro';
 import PractitionerCard from '@components/PractitionerCard.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
-import { site, nap, hours, contact, bookingCta } from '@data/site';
+import { getSettings, getPage, mapEmbedSrc } from '../lib/content';
+
+const cfg = await getSettings();
+const page = await getPage('home');
+const hero = page.hero!;
+const welcome = page.welcome!;
+const pracSec = page.practitioners!;
+const eventsSec = page.events!;
+const loc = page.location!;
 
 const practitioners = (await getCollection('practitioners')).sort(
   (a, b) => a.data.order - b.data.order,
@@ -38,10 +46,10 @@ const events = (await getCollection('events'))
   .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf())
   .slice(0, 2);
 
-const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapEmbedQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+const mapSrc = mapEmbedSrc(cfg);
 ---
 
-<BaseLayout title="Home">
+<BaseLayout title={page.metaTitle} description={page.metaDescription}>
   {/* Hero with background image slider */}
   <section class="hero">
     <div class="hero-slides" aria-hidden="true">
@@ -52,16 +60,16 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
     <div class="hero-overlay"></div>
     <div class="container hero-inner">
       <div class="hero-copy">
-        <p class="eyebrow hero-eyebrow">Wellness studio · Hastings Point</p>
-        <h1>Body, Mind &amp; Soul</h1>
-        <p class="lede hero-lede">
-          {site.name} — the community wellness studio arm of Pottsville Acupuncture.
-          Acupuncture and allied health, movement classes and events, all under one
-          roof on the Tweed Coast.
-        </p>
+        {hero.eyebrow && <p class="eyebrow hero-eyebrow">{hero.eyebrow}</p>}
+        <h1>{hero.heading}</h1>
+        {hero.lede && <p class="lede hero-lede">{hero.lede}</p>}
         <div class="hero-actions">
-          <a href={bookingCta.href} class="btn btn-primary">{bookingCta.label}</a>
-          <a href="/classes-events" class="btn btn-hero-ghost">See the timetable</a>
+          {hero.primaryLabel && (
+            <a href={hero.primaryHref ?? cfg.bookingHref} class="btn btn-primary">{hero.primaryLabel}</a>
+          )}
+          {hero.secondaryLabel && (
+            <a href={hero.secondaryHref ?? '/classes-events'} class="btn btn-hero-ghost">{hero.secondaryLabel}</a>
+          )}
         </div>
       </div>
     </div>
@@ -70,31 +78,20 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
   {/* Welcome */}
   <section class="section welcome">
     <div class="narrow">
-      <SectionHeading eyebrow="Welcome" title="Welcome to Health Hub Tweed Coast" align="center" />
-      <p class="welcome-copy">
-        We are a group of therapists, practitioners and teachers who have come together
-        with the sole purpose to help you and your family heal and live full lives.
-      </p>
-      <p class="welcome-copy">
-        Receive the care you deserve, delivered collaboratively from a group of dedicated
-        and talented practitioners and therapists.
-      </p>
+      <SectionHeading eyebrow={welcome.eyebrow} title={welcome.heading} align="center" />
+      {welcome.paragraphs.map((p) => <p class="welcome-copy">{p}</p>)}
     </div>
   </section>
 
   {/* Practitioners teaser */}
   <section class="section band-tint">
     <div class="container">
-      <SectionHeading
-        eyebrow="Meet the team"
-        title="Our Practitioners"
-        lede="A multidisciplinary team — each leading their own service, from acupuncture and naturopathy to yoga, pilates, movement and sound."
-      />
+      <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
       <div class="grid-practitioners">
         {teaser.map((c) => <PractitionerCard {...c} />)}
       </div>
       <p class="section-more">
-        <a href="/practitioners" class="btn btn-ghost">Meet all our practitioners</a>
+        <a href="/practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
       </p>
     </div>
   </section>
@@ -102,11 +99,7 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
   {/* Events teaser — 2 per row */}
   <section class="section">
     <div class="container">
-      <SectionHeading
-        eyebrow="On the calendar"
-        title="Upcoming at the Hub"
-        lede="A taste of what's coming up. See the full weekly timetable and events."
-      />
+      <SectionHeading eyebrow={eventsSec.eyebrow} title={eventsSec.heading} lede={eventsSec.lede} />
       <div class="grid-events">
         {
           events.map((e) => (
@@ -120,7 +113,7 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
         }
       </div>
       <p class="section-more">
-        <a href="/classes-events" class="btn btn-ghost">View timetable &amp; events</a>
+        <a href="/classes-events" class="btn btn-ghost">{eventsSec.linkLabel}</a>
       </p>
     </div>
   </section>
@@ -129,15 +122,15 @@ const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(contact.mapE
   <section class="section location band-tint">
     <div class="container location-grid">
       <div class="location-copy">
-        <SectionHeading eyebrow="Find us" title="Hastings Point, on the Tweed Coast" />
+        <SectionHeading eyebrow={loc.eyebrow} title={loc.heading} />
         <p class="location-nap">
-          {nap.street}<br />
-          {nap.locality} {nap.region} {nap.postcode}
+          {cfg.street}<br />
+          {cfg.locality} {cfg.region} {cfg.postcode}
         </p>
-        <p class="location-hours"><strong>Open</strong> · {hours.label}</p>
+        <p class="location-hours"><strong>Open</strong> · {cfg.hoursLabel}</p>
         <div class="location-actions">
-          <a href={nap.mapUrl} target="_blank" rel="noopener" class="btn btn-primary">Get directions</a>
-          <a href="/contact" class="btn btn-ghost">Contact us</a>
+          <a href={cfg.mapUrl} target="_blank" rel="noopener" class="btn btn-primary">{loc.directionsLabel}</a>
+          <a href="/contact" class="btn btn-ghost">{loc.contactLabel}</a>
         </div>
       </div>
       <div class="location-map">

@@ -1,33 +1,34 @@
 ---
 /**
- * Site footer — carries the canonical NAP block (from site.ts) plus
- * navigation and social. This is the human-readable NAP; the machine-readable
- * LocalBusiness JSON-LD (Phase 5) reads from the same site.ts source.
+ * Site footer — carries the canonical NAP block plus navigation and social.
+ * All of it is CMS-editable via the `settings` collection; the LocalBusiness
+ * JSON-LD (Phase 5) reads from that same source.
  */
-import { site, nap, hours, social, nav, bookingCta, fullAddress } from '@data/site';
+import { getSettings, formatAddress } from '../lib/content';
 
+const s = await getSettings();
+const nav = s.navItems;
+const bookingCta = { label: s.bookingLabel, href: s.bookingHref };
+const fullAddress = formatAddress(s);
 const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
   <div class="container footer-grid">
     <div class="footer-brand">
-      <span class="logo-name">{site.shortName}</span>
-      <small>{site.tagline}</small>
-      <p class="footer-blurb">
-        The community wellness studio arm of Pottsville Acupuncture — movement,
-        allied health and events on the Tweed Coast.
-      </p>
+      <span class="logo-name">{s.brandName}</span>
+      <small>{s.brandTagline}</small>
+      <p class="footer-blurb">{s.footerBlurb}</p>
     </div>
 
     <div class="footer-col">
       <h2 class="footer-h">Visit</h2>
       <address class="nap">
-        <span>{nap.street}</span>
-        <span>{nap.locality} {nap.region} {nap.postcode}</span>
-        <a href={nap.mapUrl} target="_blank" rel="noopener">Get directions</a>
+        <span>{s.street}</span>
+        <span>{s.locality} {s.region} {s.postcode}</span>
+        <a href={s.mapUrl} target="_blank" rel="noopener">Get directions</a>
       </address>
-      <p class="hours"><strong>Open</strong><br />{hours.label}</p>
+      <p class="hours"><strong>Open</strong><br />{s.hoursLabel}</p>
     </div>
 
     <div class="footer-col">
@@ -41,16 +42,16 @@ const year = new Date().getFullYear();
     <div class="footer-col">
       <h2 class="footer-h">Connect</h2>
       <ul class="footer-nav">
-        {nap.phone && <li><a href={`tel:${nap.phone.replace(/\s/g, '')}`}>{nap.phone}</a></li>}
-        {nap.email && <li><a href={`mailto:${nap.email}`}>{nap.email}</a></li>}
-        {social.instagram && <li><a href={social.instagram} target="_blank" rel="noopener">Instagram {social.handle}</a></li>}
+        {s.phone && <li><a href={`tel:${s.phone.replace(/\s/g, '')}`}>{s.phone}</a></li>}
+        {s.email && <li><a href={`mailto:${s.email}`}>{s.email}</a></li>}
+        {s.instagram && <li><a href={s.instagram} target="_blank" rel="noopener">Instagram {s.socialHandle}</a></li>}
       </ul>
     </div>
   </div>
 
   <div class="container footer-base">
-    <p>&copy; {year} {nap.legalName}. {fullAddress}.</p>
-    <p class="footer-fine">Made on the Tweed Coast.</p>
+    <p>&copy; {year} {s.brandName} {s.brandTagline}. {fullAddress}.</p>
+    {s.footerNote && <p class="footer-fine">{s.footerNote}</p>}
   </div>
 </footer>
 

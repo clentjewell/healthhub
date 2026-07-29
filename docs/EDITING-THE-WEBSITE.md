@@ -1,8 +1,22 @@
-# Editing classes & events
+# Editing the website
 
-The Hub team can update the **weekly timetable** and **upcoming events** without
-a developer. You edit in a simple web form; the website rebuilds itself and goes
-live a couple of minutes later.
+The Hub team can update most of the website without a developer — page wording,
+practitioners, the weekly timetable, events, and the contact details in the
+header and footer. You edit in a simple web form; the website rebuilds itself
+and goes live a couple of minutes later.
+
+## What you can edit
+
+| In the editor | Covers |
+|---|---|
+| **Pages** | Wording on Home, Practitioners, Classes & Events, Booking, Contact |
+| **Practitioners** | Add / edit / remove team members, their photo, bio, fees, links |
+| **Weekly Timetable** | Recurring classes |
+| **Upcoming Events** | One-off events, workshops, courses |
+| **Settings** | Address, hours, phone, socials, header menu, footer text |
+
+Page *layout* and design stay in code — the editor changes content, not the
+structure. Adding a brand-new page is still a developer task.
 
 **Editor address:** `https://healthhubtweedcoast.com.au/admin/`
 *(on the preview site: `https://healthhub-tweed-coast.clent.workers.dev/admin/`)*
@@ -17,6 +31,41 @@ live a couple of minutes later.
 2. Click **Sign in with GitHub** and use the GitHub account you were invited with.
 
 If you don't have an account yet, ask us to invite you — see *Adding an editor* below.
+
+### Editing page wording
+
+Open **Pages** and pick the page. Each section is grouped and labelled the way
+it appears on the site — e.g. Home has *Hero*, *Welcome*, *Practitioners*,
+*Events*, *Find us* and the *"Two ways in"* band. Change the text, **Save**,
+then **Publish**.
+
+> The *"Two ways in"* band lives under **Pages → Home**, but it shows at the
+> bottom of most pages — editing it changes all of them.
+
+### Adding or removing a practitioner
+
+1. Open **Practitioners** → **New Practitioner**.
+2. Fill in **Name**, **Role/title** and **Order** (lower numbers show first).
+3. Add a **Photo** (portrait orientation works best), **Phone**, **Booking
+   link** and their social links.
+4. **Sessions & Fees** — each group becomes a box on their page:
+   - a group with **Options** suits classes with passes (e.g. *Casual $24,
+     5-pass $110*)
+   - a group with a single **price** suits a one-off service (e.g.
+     *Initial Consultation — $146*)
+5. Write their bio in **Profile / bio**, then **Save** → **Publish**.
+
+To remove someone, open their entry and use **Delete**.
+
+### Editing the header, footer & contact details
+
+Open **Settings → General**. This is the one place the address, hours, phone
+and socials live — changing them here updates the footer, contact page, the
+homepage "Find us" section and the business details Google reads.
+
+You can also reorder or rename the **header menu** here. Menu links must point
+at pages that exist (`/`, `/practitioners`, `/classes-events`, `/contact`,
+`/booking`).
 
 ### Adding a class to the weekly timetable
 
@@ -163,8 +212,21 @@ Editor saves in /admin  →  CMS commits to main (GitHub API)
 - A failed build does **not** deploy, so a malformed edit can't take the live
   site down; it just leaves the previous version in place.
 
+### Content architecture
+
+| Content | Lives in | Collection |
+|---|---|---|
+| Page wording | `src/content/pages/*.yml` | `pages` (file collection) |
+| Header/footer/NAP | `src/content/settings/general.yml` | `settings` (file collection) |
+| Practitioners | `src/content/practitioners/*.md` | `practitioners` (folder) |
+| Classes / events | `src/content/{classes,events}/*.md` | folders |
+
+`src/data/site.ts` deliberately holds **only** build config (canonical domain and
+SEO fallbacks) — never content. Components read editable content through
+`src/lib/content.ts` (`getSettings()` / `getPage()`), which throws if an entry is
+missing so a broken edit fails the build instead of rendering `undefined`.
+
 ### Not yet self-serve
 
-Practitioner profiles, service copy and page content are still developer-edited.
-Adding a `practitioners` collection to `config.yml` is straightforward if the
-team wants to manage bios themselves later.
+Adding or removing whole pages, and changing layout/design, remain developer
+tasks. The hero slideshow images are also fixed in code.

@@ -1,85 +1,21 @@
 /**
- * Single source of truth for site-wide constants.
+ * Build-time site configuration.
  *
- * NAP (Name / Address / Phone) lives here ONLY. The header, footer,
- * contact page, and the LocalBusiness JSON-LD (Phase 5) all read from
- * this file so the address and hours can never drift out of sync.
+ * Only values that are NOT content live here — the canonical domain and the
+ * SEO fallbacks used to build absolute URLs. Everything editable (address,
+ * hours, phone, socials, header menu, footer text, page copy) lives in the
+ * CMS-backed collections:
+ *
+ *   src/content/settings/general.yml   → Settings in the CMS
+ *   src/content/pages/*.yml            → Pages in the CMS
+ *
+ * Read those via `src/lib/content.ts` (`getSettings()` / `getPage()`).
  */
-
 export const site = {
   name: 'Health Hub Tweed Coast',
-  shortName: 'Health Hub',
-  // Health Hub is the community / studio arm of the Pottsville Acupuncture brand.
-  tagline: 'Tweed Coast',
   domain: 'healthhubtweedcoast.com.au',
   url: 'https://healthhubtweedcoast.com.au',
+  /** Fallback meta description for pages that don't set their own. */
   description:
     'Health Hub Tweed Coast — a community wellness studio at Hastings Point. Acupuncture, allied health, movement classes and events on the Tweed Coast.',
 } as const;
-
-/** NAP — Name, Address, Phone. The canonical address block. */
-export const nap = {
-  legalName: 'Health Hub Tweed Coast',
-  street: '87–89 Tweed Coast Road',
-  locality: 'Hastings Point',
-  region: 'NSW',
-  postcode: '2489',
-  country: 'Australia',
-  countryCode: 'AU',
-  // General studio contact (from live contact page).
-  phone: '0415 919 521',
-  // TODO(content): public reception email not published on the live site — confirm.
-  email: '',
-  /** Google Maps place link — TODO(content): confirm exact place URL (Phase 3). */
-  mapUrl: 'https://www.google.com/maps/search/?api=1&query=87-89+Tweed+Coast+Road+Hastings+Point+NSW+2489',
-  /** Geo coordinates for JSON-LD — TODO(seo): confirm precise lat/lng (Phase 5). */
-  geo: { lat: -28.359, lng: 153.578 },
-} as const;
-
-/** Opening hours — Mon–Sun 08:00–18:30. */
-export const hours = {
-  label: 'Monday – Sunday, 8:00am – 6:30pm',
-  // Machine-readable form for schema.org OpeningHoursSpecification (Phase 5).
-  spec: [
-    {
-      days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      opens: '08:00',
-      closes: '18:30',
-    },
-  ],
-} as const;
-
-/** Social handles. */
-export const social = {
-  handle: '@healthhubtweedcoast',
-  // TODO(content): confirm live social URLs (Phase 3).
-  instagram: 'https://www.instagram.com/healthhubtweedcoast/',
-  facebook: 'https://www.facebook.com/HealthHubTweedCoast/',
-} as const;
-
-/** Primary navigation for the Health Hub site. */
-export const nav = [
-  { label: 'Home', href: '/' },
-  { label: 'Practitioners', href: '/practitioners' },
-  { label: 'Classes & Events', href: '/classes-events' },
-  { label: 'Contact', href: '/contact' },
-] as const;
-
-/** Primary booking call-to-action (Halaxy pathways live on /booking). */
-export const bookingCta = { label: 'Make a Booking', href: '/booking' } as const;
-
-/** Booking / contact integration config. */
-export const booking = {
-  /** General Halaxy booking URL (all practitioners). TODO(booking): confirm (Phase 3). */
-  halaxyUrl: '',
-} as const;
-
-export const contact = {
-  /** Form POST endpoint (Maxxim site-apps). TODO: set real endpoint. */
-  formEndpoint: '',
-  /** Google Maps embed query (no API key needed). */
-  mapEmbedQuery: '87-89 Tweed Coast Road, Hastings Point NSW 2489',
-} as const;
-
-export const fullAddress =
-  `${nap.street}, ${nap.locality} ${nap.region} ${nap.postcode}`;
