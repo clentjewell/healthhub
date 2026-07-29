@@ -1,0 +1,195 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import CtaBand from '@components/CtaBand.astro';
+import Icon from '@components/Icon.astro';
+import { CATEGORY_LABEL } from '../../lib/format';
+import { getSettings, formatAddress } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events');
+  return events.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const {
+  title, category, summary, schedule, image, price,
+  instructor, instructorPhone, instructorWebsite, location, bookingUrl,
+} = entry.data;
+
+const cfg = await getSettings();
+const telHref = instructorPhone ? `tel:${instructorPhone.replace(/\s/g, '')}` : undefined;
+
+// Sibling offerings, for the "more" strip at the bottom.
+const others = (await getCollection('events'))
+  .filter((e) => e.data.active && e.id !== entry.id)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+---
+
+<BaseLayout title={title} description={summary} path={`/events/${entry.id}`}>
+  <article>
+    {/* Hero */}
+    <header class="ev-hero">
+      <div class="container ev-hero-inner">
+        <div class="ev-hero-copy">
+          <p class="eyebrow">{CATEGORY_LABEL[category] ?? category}</p>
+          <h1>{title}</h1>
+          <p class="lede">{summary}</p>
+          <div class="ev-facts">
+            {schedule && (
+              <p class="ev-fact"><Icon name="clock" size={17} /><span>{schedule}</span></p>
+            )}
+            {location && (
+              <p class="ev-fact"><Icon name="map-pin" size={17} /><span>{location}</span></p>
+            )}
+            {price && <p class="ev-fact ev-price"><span>{price}</span></p>}
+          </div>
+          <div class="ev-actions">
+            {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
+            {telHref && <a href={telHref} class="btn btn-ghost">Call {instructorPhone}</a>}
+            {!bookingUrl && !telHref && <a href="/booking" class="btn btn-primary">Enquire</a>}
+          </div>
+        </div>
+        {image && (
+          <div class="ev-hero-media">
+            <img src={image} alt={title} width="940" height="788" />
+          </div>
+        )}
+      </div>
+    </header>
+
+    {/* Detail */}
+    <div class="section ev-body">
+      <div class="ev-body-inner">
+        <div class="prose">
+          <Content />
+        </div>
+
+        <aside class="ev-aside">
+          <h2 class="ev-aside-h">Details</h2>
+          <dl class="ev-dl">
+            {instructor && (<><dt>Led by</dt><dd>{instructor}</dd></>)}
+            {schedule && (<><dt>When</dt><dd>{schedule}</dd></>)}
+            {price && (<><dt>Cost</dt><dd class="tabular">{price}</dd></>)}
+            <dt>Where</dt>
+            <dd>{formatAddress(cfg)}</dd>
+            {instructorPhone && (<><dt>Contact</dt><dd><a href={telHref}>{instructorPhone}</a></dd></>)}
+            {instructorWebsite && (
+              <><dt>Website</dt>
+              <dd><a href={instructorWebsite} target="_blank" rel="noopener">Visit site →</a></dd></>
+            )}
+          </dl>
+          <a href={bookingUrl ?? '/booking'} class="btn btn-primary ev-aside-cta">
+            {bookingUrl ? 'Book online' : 'Enquire'}
+          </a>
+        </aside>
+      </div>
+    </div>
+
+    {/* More offerings */}
+    {others.length > 0 && (
+      <section class="section ev-more">
+        <div class="container">
+          <h2 class="ev-more-h">More at the Hub</h2>
+          <ul class="ev-more-list">
+            {others.map((o) => (
+              <li>
+                <a href={`/events/${o.id}`}>
+                  {o.data.image && <img src={o.data.image} alt={o.data.title} loading="lazy" width="940" height="788" />}
+                  <span class="ev-more-cat">{CATEGORY_LABEL[o.data.category] ?? o.data.category}</span>
+                  <span class="ev-more-title">{o.data.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p class="ev-more-all"><a href="/events" class="btn btn-ghost">See all classes &amp; events</a></p>
+        </div>
+      </section>
+    )}
+  </article>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .ev-hero {
+    background: var(--color-surface-tint);
+    border-bottom: 1px solid var(--color-border);
+    padding-block: clamp(40px, 7vw, 80px);
+  }
+  .ev-hero-inner { display: grid; grid-template-columns: 1fr 420px; gap: 56px; align-items: center; }
+  .ev-hero-media img {
+    width: 100%; height: auto; border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+  .ev-facts { display: flex; flex-direction: column; gap: 8px; margin-top: 26px; }
+  .ev-fact {
+    display: flex; align-items: center; gap: 9px; margin: 0;
+    font-size: 15px; color: var(--color-text); font-weight: 500;
+  }
+  .ev-fact :global(svg) { color: var(--color-accent); flex-shrink: 0; }
+  .ev-price span { font-weight: 700; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .ev-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+  .ev-body-inner {
+    max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter);
+    display: grid; grid-template-columns: 1fr 320px; gap: 56px; align-items: start;
+  }
+  .ev-aside {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); padding: 26px; position: sticky; top: 96px;
+  }
+  .ev-aside-h { font-size: 1.1rem; margin-bottom: 16px; }
+  .ev-dl { margin: 0 0 22px; display: grid; grid-template-columns: 1fr; gap: 2px; }
+  .ev-dl dt {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--color-text-muted); font-weight: 600; margin-top: 14px;
+  }
+  .ev-dl dt:first-child { margin-top: 0; }
+  .ev-dl dd { margin: 0; font-size: 14.5px; color: var(--color-text); }
+  .ev-dl dd.tabular { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--color-accent); }
+  .ev-aside-cta { width: 100%; }
+
+  .ev-more { background: var(--color-surface-tint); }
+  .ev-more-h { font-size: 1.5rem; margin-bottom: 24px; }
+  .ev-more-list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .ev-more-list a {
+    display: block; background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); overflow: hidden; color: var(--color-text);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .ev-more-list a:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .ev-more-list img { width: 100%; height: auto; display: block; }
+  .ev-more-cat {
+    display: block; padding: 14px 18px 0;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--color-accent); font-weight: 600;
+  }
+  .ev-more-title { display: block; padding: 4px 18px 18px; font-weight: 600; }
+  .ev-more-all { margin-top: 28px; display: flex; justify-content: center; max-width: none; }
+
+  @media (max-width: 980px) {
+    .ev-hero-inner { grid-template-columns: 1fr; }
+    .ev-hero-media { order: -1; max-width: 520px; }
+    .ev-body-inner { grid-template-columns: 1fr; }
+    .ev-aside { position: static; }
+    .ev-more-list { grid-template-columns: 1fr; }
+  }
+
+  /* Prose — same treatment as practitioner bios */
+  .prose :global(h2), .prose :global(h3), .prose :global(h4) {
+    font-family: var(--font-sans); text-transform: none; letter-spacing: 0;
+    color: var(--color-heading); font-weight: 700; line-height: 1.3; margin: 1.7em 0 0.5em;
+  }
+  .prose :global(h2) { font-size: 1.35rem; }
+  .prose :global(h3) { font-size: 1.1rem; }
+  .prose :global(p) { color: var(--color-text); margin: 0 0 1em; max-width: none; }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 1.2em; padding-left: 1.3em; }
+  .prose :global(li) { margin-bottom: 0.4em; }
+  .prose :global(strong) { color: var(--color-heading); font-weight: 700; }
+</style>

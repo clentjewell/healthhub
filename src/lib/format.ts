@@ -33,15 +33,10 @@ export const DAY_ORDER = [
 ] as const;
 
 export const CATEGORY_LABEL: Record<string, string> = {
-  yoga: 'Yoga',
-  pilates: 'Pilates',
-  sound: 'Sound',
-  movement: 'Movement',
-  meditation: 'Meditation',
+  course: 'Class',
   workshop: 'Workshop',
   seminar: 'Seminar',
   'sound-bath': 'Sound Bath',
-  course: 'Course',
   community: 'Community',
   other: 'Class',
 };

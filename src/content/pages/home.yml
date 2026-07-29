@@ -14,7 +14,7 @@ hero:
   primaryLabel: Make a Booking
   primaryHref: /booking
   secondaryLabel: See the timetable
-  secondaryHref: /classes-events
+  secondaryHref: /events
 
 welcome:
   eyebrow: Welcome
@@ -57,4 +57,4 @@ cta:
   rightHeading: Join a class
   rightBody: Yoga, pilates, sound and events in the studio — all levels welcome.
   rightLabel: See the timetable
-  rightHref: /classes-events
+  rightHref: /events

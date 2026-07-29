@@ -40,11 +40,11 @@ const teaser = await Promise.all(
   }),
 );
 
-const now = new Date();
+// Four of the studio's offerings, in manual order.
 const events = (await getCollection('events'))
-  .filter((e) => e.data.date >= now)
-  .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf())
-  .slice(0, 2);
+  .filter((e) => e.data.active)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
 
 const mapSrc = mapEmbedSrc(cfg);
 ---
@@ -68,7 +68,7 @@ const mapSrc = mapEmbedSrc(cfg);
             <a href={hero.primaryHref ?? cfg.bookingHref} class="btn btn-primary">{hero.primaryLabel}</a>
           )}
           {hero.secondaryLabel && (
-            <a href={hero.secondaryHref ?? '/classes-events'} class="btn btn-hero-ghost">{hero.secondaryLabel}</a>
+            <a href={hero.secondaryHref ?? '/events'} class="btn btn-hero-ghost">{hero.secondaryLabel}</a>
           )}
         </div>
       </div>
@@ -96,7 +96,7 @@ const mapSrc = mapEmbedSrc(cfg);
     </div>
   </section>
 
-  {/* Events teaser — 2 per row */}
+  {/* Events teaser — 4 of the studio's offerings */}
   <section class="section">
     <div class="container">
       <SectionHeading eyebrow={eventsSec.eyebrow} title={eventsSec.heading} lede={eventsSec.lede} />
@@ -104,16 +104,15 @@ const mapSrc = mapEmbedSrc(cfg);
         {
           events.map((e) => (
             <EventCard
-              title={e.data.title} date={e.data.date} category={e.data.category}
-              summary={e.data.summary} image={e.data.image} location={e.data.location}
-              price={e.data.price} bookingUrl={e.data.bookingUrl}
-              featured={e.data.featured} placeholder={e.data.placeholder}
+              title={e.data.title} href={`/events/${e.id}`} category={e.data.category}
+              summary={e.data.summary} schedule={e.data.schedule} image={e.data.image}
+              price={e.data.price} instructor={e.data.instructor} featured={e.data.featured}
             />
           ))
         }
       </div>
       <p class="section-more">
-        <a href="/classes-events" class="btn btn-ghost">{eventsSec.linkLabel}</a>
+        <a href="/events" class="btn btn-ghost">{eventsSec.linkLabel}</a>
       </p>
     </div>
   </section>
@@ -230,7 +229,7 @@ const mapSrc = mapEmbedSrc(cfg);
   }
 
   .grid-practitioners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
-  .grid-events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-events { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 
   /* Staggered reveal — 60ms apart, transform/opacity only. Cards are visible
      by default so they still render without JS or with reduced motion. */
@@ -241,8 +240,8 @@ const mapSrc = mapEmbedSrc(cfg);
     }
     .grid-practitioners > :global(*:nth-child(1)), .grid-events > :global(*:nth-child(1)) { animation-delay: 0ms; }
     .grid-practitioners > :global(*:nth-child(2)), .grid-events > :global(*:nth-child(2)) { animation-delay: 60ms; }
-    .grid-practitioners > :global(*:nth-child(3)) { animation-delay: 120ms; }
-    .grid-practitioners > :global(*:nth-child(4)) { animation-delay: 180ms; }
+    .grid-practitioners > :global(*:nth-child(3)), .grid-events > :global(*:nth-child(3)) { animation-delay: 120ms; }
+    .grid-practitioners > :global(*:nth-child(4)), .grid-events > :global(*:nth-child(4)) { animation-delay: 180ms; }
   }
   @keyframes riseIn {
     from { opacity: 0; transform: translateY(14px); }
@@ -258,10 +257,12 @@ const mapSrc = mapEmbedSrc(cfg);
     border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   }
 
-  @media (max-width: 1040px) { .grid-practitioners { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 860px) {
-    .location-grid { grid-template-columns: 1fr; }
-    .grid-events { grid-template-columns: 1fr; }
+  @media (max-width: 1040px) {
+    .grid-practitioners { grid-template-columns: repeat(2, 1fr); }
+    .grid-events { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (max-width: 460px) { .grid-practitioners { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) { .location-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) {
+    .grid-practitioners, .grid-events { grid-template-columns: 1fr; }
+  }
 </style>

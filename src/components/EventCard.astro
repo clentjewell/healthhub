@@ -1,104 +1,94 @@
 ---
-import { formatEventDate, formatEventTime, CATEGORY_LABEL } from '../lib/format';
 import Icon from './Icon.astro';
+import { CATEGORY_LABEL } from '../lib/format';
+
 interface Props {
   title: string;
-  date: Date;
+  href: string;
   category: string;
   summary: string;
+  schedule?: string;
   image?: string;
-  location?: string;
   price?: string;
-  bookingUrl?: string;
+  instructor?: string;
   featured?: boolean;
-  placeholder?: boolean;
 }
-const { title, date, category, summary, image, location, price, bookingUrl, featured, placeholder } =
+const { title, href, category, summary, schedule, image, price, instructor, featured } =
   Astro.props;
 ---
 
-<article class:list={['event-card', { featured }]}>
+<a class:list={['event-card', { featured }]} href={href}>
   <div class="event-media">
-    {image ? <img src={image} alt={title} loading="lazy" width="600" height="450" /> : <div class="event-media-fallback" aria-hidden="true"><Icon name="calendar" size={32} /></div>}
-    <span class="event-date">
-      <span class="event-day">{formatEventDate(date)}</span>
-      <span class="event-time">{formatEventTime(date)}</span>
-    </span>
+    {
+      image ? (
+        <img src={image} alt={title} loading="lazy" width="940" height="788" />
+      ) : (
+        <div class="event-media-fallback" aria-hidden="true"><Icon name="calendar" size={32} /></div>
+      )
+    }
   </div>
   <div class="event-body">
     <p class="event-cat">{CATEGORY_LABEL[category] ?? category}</p>
     <h3>{title}</h3>
+    {schedule && (
+      <p class="event-when"><Icon name="clock" size={14} /><span>{schedule}</span></p>
+    )}
     <p class="event-summary">{summary}</p>
     <p class="event-meta">
-      {location && <span>{location}</span>}
+      {instructor && <span>{instructor}</span>}
       {price && <span class="event-price">{price}</span>}
     </p>
-    {
-      bookingUrl ? (
-        <a class="btn btn-primary event-cta" href={bookingUrl}>Book</a>
-      ) : (
-        <a class="btn btn-ghost event-cta" href="/booking">Enquire</a>
-      )
-    }
+    <span class="event-link">View details →</span>
   </div>
-  {placeholder && import.meta.env.DEV && <span class="ph-badge">Placeholder</span>}
-</article>
+</a>
 
 <style>
   .event-card {
-    position: relative;
-    display: grid;
-    grid-template-columns: 190px 1fr;
-    gap: 0;
+    display: flex;
+    flex-direction: column;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     overflow: hidden;
+    color: var(--color-text);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   }
-  .event-card.featured {
-    border-color: var(--color-accent);
+  .event-card:hover {
+    transform: translateY(-4px);
     box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
   }
-  .event-media { position: relative; min-height: 180px; background: var(--color-surface-tint); }
-  .event-media img { width: 100%; height: 100%; object-fit: cover; }
+  .event-card.featured { border-color: var(--color-accent); }
+
+  /* These are promo graphics with text baked in — show the whole frame. */
+  .event-media { background: var(--color-surface-tint); }
+  .event-media img {
+    width: 100%; height: auto; display: block;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .event-card:hover .event-media img { transform: scale(1.03); }
   .event-media-fallback {
     display: flex; align-items: center; justify-content: center;
-    height: 100%; font-size: 2rem; color: var(--color-text-muted);
+    aspect-ratio: 940/788; color: var(--color-text-muted);
   }
-  .event-date {
-    position: absolute;
-    left: 12px;
-    bottom: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    background: rgba(34, 73, 108, 0.92);
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-  }
-  .event-day { font-family: var(--font-heading); font-size: 0.95rem; text-transform: uppercase; color: #fff; }
-  .event-time { font-size: 12px; opacity: 0.9; }
-  .event-body { padding: 24px; }
+
+  .event-body { display: flex; flex-direction: column; flex: 1; padding: 22px 24px 24px; }
   .event-cat {
     font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--color-accent); font-weight: 600; margin: 0 0 6px;
   }
-  .event-body h3 { font-size: 1.2rem; margin-bottom: 8px; }
-  .event-summary { font-size: 14px; color: var(--color-text-muted); margin: 0 0 12px; }
-  .event-meta { display: flex; gap: 16px; font-size: 13px; color: var(--color-text-muted); margin: 0 0 16px; }
-  .event-price { font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
-  .event-cta { padding: 8px 18px; font-size: 13px; min-height: 40px; }
-  .event-cta.btn-primary { color: #fff; }
-  .event-cta.btn-ghost { color: var(--color-brand); }
-  .ph-badge {
-    position: absolute; top: 12px; right: 12px;
-    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-    background: rgba(255, 255, 255, 0.92); color: var(--color-text-muted);
-    padding: 3px 7px; border-radius: 999px;
+  .event-card h3 { font-size: 1.2rem; margin-bottom: 8px; }
+  .event-card:hover h3 { color: var(--color-brand); }
+  .event-when {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--color-text);
+    margin: 0 0 10px; font-variant-numeric: tabular-nums;
   }
-  @media (max-width: 620px) {
-    .event-card { grid-template-columns: 1fr; }
-    .event-media { min-height: 160px; }
+  .event-summary { font-size: 14px; color: var(--color-text-muted); line-height: 1.55; margin: 0 0 14px; flex: 1; }
+  .event-meta {
+    display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline;
+    font-size: 13px; color: var(--color-text-muted); margin: 0 0 16px;
   }
+  .event-price { font-weight: 700; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .event-link { font-size: 13px; font-weight: 600; color: var(--color-brand); margin-top: auto; }
 </style>

@@ -4,19 +4,13 @@ import { glob } from 'astro/loaders';
 /**
  * Content collections for Health Hub Tweed Coast.
  *
- * `classes` (weekly timetable) and `events` (dated) are the self-serve
- * data that Phase 4's git-based CMS will edit, and the SAME shape the
- * Pottsville `/hub/` proposal teaser reads from (Prompt 2). Keep their
- * schemas stable and CMS-friendly (flat, enum-constrained).
- *
- * Every collection carries a `placeholder` flag so Phase-2 seed data is
- * never mistaken for real content — pages badge it and it's easy to purge
- * in Phase 3.
+ * `events` holds the studio's classes/events — the same nine listings the live
+ * site has, each with its own page. It's the self-serve data the CMS edits, and
+ * the shape the Pottsville `/hub/` proposal teaser will read from (Prompt 2).
+ * Schemas stay flat and enum-constrained so they're CMS-friendly.
  */
 
-const CATEGORY_CLASS = ['yoga', 'pilates', 'sound', 'movement', 'meditation', 'other'] as const;
 const CATEGORY_EVENT = ['workshop', 'seminar', 'sound-bath', 'course', 'community', 'other'] as const;
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
 /**
  * CMS-safe optional URL.
@@ -98,42 +92,34 @@ const practitioners = defineCollection({
   }),
 });
 
-/** Weekly timetable — recurring class sessions. */
-const classes = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/classes' }),
-  schema: z.object({
-    title: z.string(),
-    day: z.enum(DAYS),
-    /** 24h "HH:MM". */
-    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 09:00'),
-    endTime: z.preprocess(
-      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-      z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 10:15').optional(),
-    ),
-    instructor: optionalText,
-    category: z.enum(CATEGORY_CLASS).default('other'),
-    level: optionalText,
-    bookingUrl: optionalUrl,
-    active: z.boolean().default(true),
-    placeholder: z.boolean().default(false),
-  }),
-});
-
-/** Upcoming events — one-off dated happenings (seminars, sound baths, courses). */
+/**
+ * Classes & events — the studio's offerings, mirroring the live site's nine
+ * listings. These are RECURRING, so they are never hidden once a date passes:
+ * `schedule` is the human-readable "when", and `date` is only an optional
+ * "next session" hint. Ordering is manual via `order`.
+ */
 const events = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/events' }),
   schema: z.object({
     title: z.string(),
-    date: z.coerce.date(),
-    endDate: z.coerce.date().optional(),
+    order: z.number().default(99),
+    /** Human-readable schedule, e.g. "Thursdays 11:00am – 12:00pm". */
+    schedule: optionalText,
+    /** Optional next-session date — displayed only, never used to hide an entry. */
+    date: z.coerce.date().optional(),
     category: z.enum(CATEGORY_EVENT).default('other'),
+    /** Who runs it, plus their own contact details. */
     instructor: optionalText,
+    instructorPhone: optionalText,
+    instructorWebsite: optionalUrl,
     location: optionalText,
     price: optionalText,
     bookingUrl: optionalUrl,
     image: optionalText,
     summary: z.string(),
     featured: z.boolean().default(false),
+    /** Show on the site. Turn off to hide without deleting. */
+    active: z.boolean().default(true),
     placeholder: z.boolean().default(false),
   }),
 });
@@ -194,7 +180,7 @@ const pages = defineCollection({
     metaTitle: z.string(),
     metaDescription: z.string(),
 
-    // Simple pages (booking / contact / classes-events / practitioners index)
+    // Simple pages (booking / contact / events / practitioners index)
     eyebrow: optionalText,
     heading: optionalText,
     lede: optionalText,
@@ -208,10 +194,6 @@ const pages = defineCollection({
     showMap: z.boolean().optional(),
 
     // Classes & Events
-    timetableEyebrow: optionalText,
-    timetableHeading: optionalText,
-    eventsEyebrow: optionalText,
-    eventsHeading: optionalText,
     emptyEventsText: optionalText,
 
     // Home
@@ -259,4 +241,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { settings, pages, services, practitioners, classes, events };
+export const collections = { settings, pages, services, practitioners, events };

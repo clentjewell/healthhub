@@ -14,7 +14,7 @@ export async function getSettings() {
   return entry.data;
 }
 
-export type PageId = 'home' | 'booking' | 'contact' | 'classes-events' | 'practitioners';
+export type PageId = 'home' | 'booking' | 'contact' | 'events' | 'practitioners';
 
 export async function getPage(id: PageId) {
   const entry = await getEntry('pages', id);

@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+import EventCard from '@components/EventCard.astro';
+import CtaBand from '@components/CtaBand.astro';
+import { getPage } from '../../lib/content';
+
+const page = await getPage('events');
+
+// Recurring offerings — ordered manually, never hidden by date.
+const events = (await getCollection('events'))
+  .filter((e) => e.data.active)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+  <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
+
+  <section class="section">
+    <div class="container">
+      {
+        events.length > 0 ? (
+          <div class="events-grid">
+            {events.map((e) => (
+              <EventCard
+                title={e.data.title}
+                href={`/events/${e.id}`}
+                category={e.data.category}
+                summary={e.data.summary}
+                schedule={e.data.schedule}
+                image={e.data.image}
+                price={e.data.price}
+                instructor={e.data.instructor}
+                featured={e.data.featured}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>{page.emptyEventsText}</p>
+        )
+      }
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .events-grid > :global(*) { animation: riseIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .events-grid > :global(*:nth-child(2)) { animation-delay: 60ms; }
+    .events-grid > :global(*:nth-child(3)) { animation-delay: 120ms; }
+    .events-grid > :global(*:nth-child(4)) { animation-delay: 180ms; }
+    .events-grid > :global(*:nth-child(5)) { animation-delay: 240ms; }
+    .events-grid > :global(*:nth-child(6)) { animation-delay: 300ms; }
+  }
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (max-width: 980px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .events-grid { grid-template-columns: 1fr; } }
+</style>
