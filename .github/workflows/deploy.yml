@@ -1,0 +1,44 @@
+name: Build & Deploy
+
+# This is what makes the CMS self-serve: when an editor saves a class or event,
+# the CMS commits to `main`, this workflow runs, and the site is rebuilt and
+# redeployed automatically.
+#
+# Requires two repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   — token with the "Edit Cloudflare Workers" template
+#   CLOUDFLARE_ACCOUNT_ID  — your Cloudflare account ID
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # allows a manual rebuild from the Actions tab
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      # Deploys dist/ per wrangler.toml. A failed build stops here, so a bad
+      # content edit can never take the live site down — it just isn't deployed.
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

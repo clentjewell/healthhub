@@ -49,10 +49,12 @@ public/               Static assets, robots.txt, favicon
 
 ## Build phases (review-gated)
 
-1. ✅ **Scaffold + design system** — Astro, CF Pages config, theme, base layout, header/footer w/ NAP.
-2. ⬜ Templates with placeholder content + events collection schema.
-3. ⬜ Content migration from the live site (copy, bios, images, schedule, booking links).
-4. ⬜ Self-serve events (git-based CMS + auth + rebuild).
+1. ✅ **Scaffold + design system** — Astro, Cloudflare config, theme, base layout, header/footer w/ NAP.
+2. ✅ **Templates + content collections** — page templates, classes/events schemas.
+3. ✅ **Content migration** — real copy, bios, images (WebP), booking pathways from the live site.
+4. ✅ **Self-serve events** — git-based CMS at `/admin` + auto-deploy on commit.
+   See [`docs/EDITING-CLASSES-AND-EVENTS.md`](docs/EDITING-CLASSES-AND-EVENTS.md).
+   *Needs one-time setup (auth worker + repo secrets) before first login.*
 5. ⬜ SEO layer (JSON-LD, meta/OG, sitemap, robots, llms.txt, redirect map).
 6. ⬜ Launch prep (preview build, visual + link + redirect checks). DNS is manual.
 

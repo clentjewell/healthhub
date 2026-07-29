@@ -1,0 +1,166 @@
+# =============================================================================
+# Health Hub Tweed Coast — content editor configuration
+#
+# Powers the /admin editor (Sveltia CMS; this file is also Decap-compatible).
+# Editors change classes/events here → the CMS commits to GitHub → GitHub
+# Actions rebuilds and redeploys the site automatically.
+#
+# ⚠️  SETUP REQUIRED BEFORE FIRST LOGIN — see docs/EDITING-CLASSES-AND-EVENTS.md
+#     ("One-time setup"). You must deploy the auth worker and put its URL in
+#     `base_url` below, otherwise signing in will fail.
+#
+# The field definitions below intentionally mirror src/content.config.ts. If a
+# field is added/renamed there, mirror it here or the CMS will write content
+# the build rejects.
+# =============================================================================
+
+backend:
+  name: github
+  repo: clentjewell/healthhub
+  branch: main
+  # URL of your deployed sveltia-cms-auth worker (see docs). Must be replaced.
+  base_url: https://REPLACE-WITH-YOUR-AUTH-WORKER.workers.dev
+  commit_messages:
+    create: 'content: create {{collection}} "{{slug}}"'
+    update: 'content: update {{collection}} "{{slug}}"'
+    delete: 'content: delete {{collection}} "{{slug}}"'
+    uploadMedia: 'content: upload image "{{path}}"'
+    deleteMedia: 'content: delete image "{{path}}"'
+
+# Uploaded event images land beside the ones migrated from the old site.
+media_folder: public/images/events
+public_folder: /images/events
+
+site_url: https://healthhubtweedcoast.com.au
+
+collections:
+  # ---------------------------------------------------------------------------
+  # WEEKLY TIMETABLE — recurring classes (one file per class session)
+  # ---------------------------------------------------------------------------
+  - name: classes
+    label: Weekly Timetable
+    label_singular: Class
+    description: >-
+      Recurring weekly classes. One entry per session — a class that runs twice
+      a week needs two entries. Times use the 24-hour clock (e.g. 18:00 = 6pm).
+    folder: src/content/classes
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{day}}-{{title}}'
+    summary: '{{day}} {{startTime}} — {{title}}'
+    sortable_fields: [day, startTime, title]
+    fields:
+      - { label: Class name, name: title, widget: string, hint: 'e.g. Hatha & Yin Yoga' }
+      - label: Day
+        name: day
+        widget: select
+        options: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+      - label: Start time
+        name: startTime
+        widget: string
+        hint: '24-hour HH:MM — 09:00 for 9am, 18:00 for 6pm'
+        pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Use 24-hour HH:MM, e.g. 09:00 or 18:30']
+      - label: End time
+        name: endTime
+        widget: string
+        required: false
+        hint: '24-hour HH:MM. Leave blank if the finish time varies.'
+        pattern: ['^(([01][0-9]|2[0-3]):[0-5][0-9])?$', 'Use 24-hour HH:MM, e.g. 10:15']
+      - { label: Instructor, name: instructor, widget: string, required: false }
+      - label: Category
+        name: category
+        widget: select
+        default: other
+        hint: Controls the small coloured label on the timetable.
+        options:
+          - { label: Yoga, value: yoga }
+          - { label: Pilates, value: pilates }
+          - { label: Sound, value: sound }
+          - { label: Movement, value: movement }
+          - { label: Meditation, value: meditation }
+          - { label: Other, value: other }
+      - { label: Level, name: level, widget: string, required: false, hint: 'e.g. All levels, Gentle, Small group' }
+      - label: Booking link
+        name: bookingUrl
+        widget: string
+        required: false
+        hint: >-
+          Full https:// link to book this class. Leave blank if people book by
+          phone — the timetable then shows no button.
+      - label: Show on the timetable
+        name: active
+        widget: boolean
+        default: true
+        hint: Turn off to hide a class without deleting it (e.g. paused for school holidays).
+      - { label: Notes (optional), name: body, widget: markdown, required: false }
+      - { label: Placeholder flag (internal), name: placeholder, widget: hidden, default: false }
+
+  # ---------------------------------------------------------------------------
+  # UPCOMING EVENTS — one-off dated happenings
+  # ---------------------------------------------------------------------------
+  - name: events
+    label: Upcoming Events
+    label_singular: Event
+    description: >-
+      One-off events, workshops, courses and seminars. Events automatically stop
+      showing on the website once their date has passed — no need to delete them.
+    folder: src/content/events
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{title}}'
+    summary: '{{date}} — {{title}}'
+    sortable_fields: [date, title, category]
+    fields:
+      - { label: Event name, name: title, widget: string }
+      - label: Date & start time
+        name: date
+        widget: datetime
+        date_format: 'DD MMM YYYY'
+        time_format: 'HH:mm'
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+        hint: Enter the local (Tweed Coast) date and time.
+      - label: Finish (optional)
+        name: endDate
+        widget: datetime
+        required: false
+        date_format: 'DD MMM YYYY'
+        time_format: 'HH:mm'
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      - label: Category
+        name: category
+        widget: select
+        default: other
+        options:
+          - { label: Workshop, value: workshop }
+          - { label: Seminar, value: seminar }
+          - { label: Sound Bath, value: sound-bath }
+          - { label: Course, value: course }
+          - { label: Community, value: community }
+          - { label: Other, value: other }
+      - label: Short summary
+        name: summary
+        widget: text
+        hint: One or two sentences — this is what shows on the event card.
+      - label: Image
+        name: image
+        widget: image
+        required: false
+        media_folder: ''
+        hint: Landscape works best (roughly 4:3). Large photos are fine — they're optimised automatically.
+      - { label: Instructor / host, name: instructor, widget: string, required: false }
+      - { label: Location, name: location, widget: string, required: false, default: 'Health Hub Tweed Coast, Hastings Point' }
+      - { label: Price, name: price, widget: string, required: false, hint: 'e.g. $45 or $25 per person' }
+      - label: Booking link
+        name: bookingUrl
+        widget: string
+        required: false
+        hint: Full https:// link. Leave blank if people book by phone.
+      - label: Feature this event
+        name: featured
+        widget: boolean
+        default: false
+        hint: Highlights the card with a coloured border.
+      - { label: Full details (optional), name: body, widget: markdown, required: false }
+      - { label: Placeholder flag (internal), name: placeholder, widget: hidden, default: false }

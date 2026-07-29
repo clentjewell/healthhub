@@ -18,6 +18,24 @@ const CATEGORY_CLASS = ['yoga', 'pilates', 'sound', 'movement', 'meditation', 'o
 const CATEGORY_EVENT = ['workshop', 'seminar', 'sound-bath', 'course', 'community', 'other'] as const;
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
+/**
+ * CMS-safe optional URL.
+ *
+ * A git-based CMS writes cleared fields as an empty string (`bookingUrl: ""`),
+ * which `z.string().url()` rejects — that would fail the build the first time
+ * an editor blanks a booking link. Treat empty/whitespace as "not set".
+ */
+const optionalUrl = z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+  z.string().url().optional(),
+);
+
+/** Same idea for plain optional text fields. */
+const optionalText = z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+  z.string().optional(),
+);
+
 /** Per-service pages (per-service preferred for SEO). */
 const services = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/services' }),
@@ -30,10 +48,10 @@ const services = defineCollection({
     icon: z.string().optional(),
     image: z.string().optional(),
     /** Practitioner (id) who offers this service — services are 1:1 with a provider. */
-    provider: z.string().optional(),
+    provider: optionalText,
     /** Booking pathway for this service (varies per provider — not all Halaxy). */
-    bookingUrl: z.string().url().optional(),
-    bookingPhone: z.string().optional(),
+    bookingUrl: optionalUrl,
+    bookingPhone: optionalText,
     draft: z.boolean().default(false),
     placeholder: z.boolean().default(false),
   }),
@@ -49,15 +67,15 @@ const practitioners = defineCollection({
     order: z.number().default(99),
     image: z.string().optional(),
     /** Per-practitioner booking link (platform varies; empty = phone/contact only). */
-    bookingUrl: z.string().url().optional(),
-    phone: z.string().optional(),
+    bookingUrl: optionalUrl,
+    phone: optionalText,
     /** Service (id) this practitioner offers. */
-    service: z.string().optional(),
+    service: optionalText,
     modalities: z.array(z.string()).default([]),
     /** Social / external links shown in the profile hero. */
-    facebook: z.string().url().optional(),
-    instagram: z.string().url().optional(),
-    website: z.string().url().optional(),
+    facebook: optionalUrl,
+    instagram: optionalUrl,
+    website: optionalUrl,
     /**
      * Fees grouped by category (each group renders as a box). A group is
      * either a single priced service (title + price + note) or a category
@@ -87,12 +105,15 @@ const classes = defineCollection({
     title: z.string(),
     day: z.enum(DAYS),
     /** 24h "HH:MM". */
-    startTime: z.string().regex(/^\d{2}:\d{2}$/),
-    endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-    instructor: z.string().optional(),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 09:00'),
+    endTime: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 10:15').optional(),
+    ),
+    instructor: optionalText,
     category: z.enum(CATEGORY_CLASS).default('other'),
-    level: z.string().optional(),
-    bookingUrl: z.string().url().optional(),
+    level: optionalText,
+    bookingUrl: optionalUrl,
     active: z.boolean().default(true),
     placeholder: z.boolean().default(false),
   }),
@@ -106,11 +127,11 @@ const events = defineCollection({
     date: z.coerce.date(),
     endDate: z.coerce.date().optional(),
     category: z.enum(CATEGORY_EVENT).default('other'),
-    instructor: z.string().optional(),
-    location: z.string().optional(),
-    price: z.string().optional(),
-    bookingUrl: z.string().url().optional(),
-    image: z.string().optional(),
+    instructor: optionalText,
+    location: optionalText,
+    price: optionalText,
+    bookingUrl: optionalUrl,
+    image: optionalText,
     summary: z.string(),
     featured: z.boolean().default(false),
     placeholder: z.boolean().default(false),
