@@ -12,12 +12,19 @@ interface Props {
   price?: string;
   instructor?: string;
   featured?: boolean;
+  /**
+   * 'stacked'    — image above text (the 3-up grid on /events)
+   * 'horizontal' — text left, image right (homepage teaser)
+   */
+  layout?: 'stacked' | 'horizontal';
 }
-const { title, href, category, summary, schedule, image, price, instructor, featured } =
-  Astro.props;
+const {
+  title, href, category, summary, schedule, image, price, instructor, featured,
+  layout = 'stacked',
+} = Astro.props;
 ---
 
-<a class:list={['event-card', { featured }]} href={href}>
+<a class:list={['event-card', `is-${layout}`, { featured }]} href={href}>
   <div class="event-media">
     {
       image ? (
@@ -91,4 +98,35 @@ const { title, href, category, summary, schedule, image, price, instructor, feat
   }
   .event-price { font-weight: 700; color: var(--color-accent); font-variant-numeric: tabular-nums; }
   .event-link { font-size: 13px; font-weight: 600; color: var(--color-brand); margin-top: auto; }
+
+  /* ---- Horizontal variant: text left, image right ---- */
+  .event-card.is-horizontal {
+    display: grid;
+    grid-template-columns: 1fr 230px;
+    align-items: stretch;
+  }
+  .event-card.is-horizontal .event-body { grid-column: 1; grid-row: 1; }
+  .event-card.is-horizontal .event-media {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--color-border);
+  }
+  /* The flyers have times and phone numbers baked in, so show them whole
+     (letterboxed on the tint) rather than cropping words off. */
+  .event-card.is-horizontal .event-media img {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  @media (max-width: 620px) {
+    .event-card.is-horizontal { grid-template-columns: 1fr; }
+    .event-card.is-horizontal .event-media {
+      grid-column: 1; grid-row: 1;
+      border-left: none; border-bottom: 1px solid var(--color-border);
+    }
+    .event-card.is-horizontal .event-body { grid-row: 2; }
+  }
 </style>

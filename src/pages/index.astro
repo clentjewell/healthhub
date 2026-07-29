@@ -107,6 +107,7 @@ const mapSrc = mapEmbedSrc(cfg);
               title={e.data.title} href={`/events/${e.id}`} category={e.data.category}
               summary={e.data.summary} schedule={e.data.schedule} image={e.data.image}
               price={e.data.price} instructor={e.data.instructor} featured={e.data.featured}
+              layout="horizontal"
             />
           ))
         }
@@ -229,7 +230,7 @@ const mapSrc = mapEmbedSrc(cfg);
   }
 
   .grid-practitioners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
-  .grid-events { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .grid-events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 
   /* Staggered reveal — 60ms apart, transform/opacity only. Cards are visible
      by default so they still render without JS or with reduced motion. */
@@ -257,10 +258,8 @@ const mapSrc = mapEmbedSrc(cfg);
     border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   }
 
-  @media (max-width: 1040px) {
-    .grid-practitioners { grid-template-columns: repeat(2, 1fr); }
-    .grid-events { grid-template-columns: repeat(2, 1fr); }
-  }
+  @media (max-width: 1040px) { .grid-practitioners { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px) { .grid-events { grid-template-columns: 1fr; } }
   @media (max-width: 860px) { .location-grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .grid-practitioners, .grid-events { grid-template-columns: 1fr; }
