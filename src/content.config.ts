@@ -80,6 +80,8 @@ const practitioners = defineCollection({
       .array(
         z.object({
           title: z.string(),
+          /** e.g. "75 minutes" — shown under the name. */
+          duration: optionalText,
           price: z.string().optional(),
           note: z.string().optional(),
           items: z

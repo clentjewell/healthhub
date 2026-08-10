@@ -192,6 +192,7 @@ collections:
           a class with passes; use title + price for a single service.
         fields:
           - { label: Group title, name: title, widget: string }
+          - { label: Duration, name: duration, widget: string, required: false, hint: 'e.g. 75 minutes' }
           - { label: Single price, name: price, widget: string, required: false, hint: 'Use for a one-off service, e.g. $146' }
           - { label: Description, name: note, widget: text, required: false }
           - label: Options
