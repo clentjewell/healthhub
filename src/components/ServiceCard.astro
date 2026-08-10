@@ -1,0 +1,85 @@
+---
+/**
+ * A service on the homepage's Our Services grid.
+ *
+ * Services deliberately have no pages of their own — each one is delivered by a
+ * single practitioner, so the card links straight to that practitioner's
+ * profile, where the fees and booking pathway live. Mirrors how the live
+ * WordPress site wires its service tiles.
+ */
+import PlaceholderImage from './PlaceholderImage.astro';
+
+interface Props {
+  title: string;
+  summary: string;
+  href: string;
+  /** Practitioner's name, shown as the "who delivers this" line. */
+  provider?: string;
+  image?: string;
+}
+const { title, summary, href, provider, image } = Astro.props;
+---
+
+<a class="svc-card" href={href}>
+  <div class="svc-media">
+    {
+      image ? (
+        <img src={image} alt={title} loading="lazy" width="360" height="240" />
+      ) : (
+        <PlaceholderImage label={title} ratio="3/2" icon="image" />
+      )
+    }
+  </div>
+  <div class="svc-body">
+    <h3>{title}</h3>
+    <p class="svc-summary">{summary}</p>
+    {provider && <p class="svc-provider">with {provider}</p>}
+    <span class="svc-link">View profile &amp; fees →</span>
+  </div>
+</a>
+
+<style>
+  .svc-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    color: var(--color-text);
+    transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+  }
+  .svc-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+  }
+
+  .svc-media { aspect-ratio: 3/2; overflow: hidden; background: var(--color-surface-tint); }
+  .svc-media img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: saturate(0.92) contrast(1.02);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+  }
+  .svc-card:hover .svc-media img { transform: scale(1.04); filter: saturate(1) contrast(1); }
+
+  .svc-body { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
+  .svc-body h3 { font-size: 1.1rem; line-height: 1.3; margin-bottom: 8px; }
+  .svc-card:hover h3 { color: var(--color-brand); }
+  .svc-summary {
+    font-size: 13.5px; line-height: 1.55; color: var(--color-text-muted);
+    margin: 0 0 14px; flex: 1;
+    /* Summaries vary from one line to five, so clamp them to keep every card's
+       provider line and link on the same baseline. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .svc-provider {
+    font-family: var(--font-sans);
+    font-size: 12.5px; font-weight: 600; color: var(--color-accent);
+    margin: 0 0 12px; text-transform: none;
+  }
+  .svc-link { font-size: 13px; font-weight: 600; color: var(--color-brand); margin-top: auto; }
+</style>

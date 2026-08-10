@@ -275,6 +275,7 @@ const pages = defineCollection({
         paragraphs: z.array(z.string()).default([]),
       })
       .optional(),
+    services: section.optional(),
     practitioners: section.optional(),
     events: section.optional(),
     location: z

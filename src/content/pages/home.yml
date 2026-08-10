@@ -28,6 +28,13 @@ welcome:
       Receive the care you deserve, delivered collaboratively from a group of
       dedicated and talented practitioners and therapists.
 
+services:
+  eyebrow: What we offer
+  heading: Our Services
+  lede: >-
+    Each service is led by the practitioner who provides it — choose a service to
+    meet them, see their fees and book directly.
+
 practitioners:
   eyebrow: Meet the team
   heading: Our Practitioners

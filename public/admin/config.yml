@@ -66,6 +66,16 @@ collections:
                 name: paragraphs
                 widget: list
                 field: { label: Paragraph, name: paragraph, widget: text }
+          - label: Services section
+            name: services
+            widget: object
+            hint: >-
+              Wording only. The tiles themselves come from each practitioner's
+              service, so there is nothing to add here when the team changes.
+            fields:
+              - { label: Small label, name: eyebrow, widget: string, required: false }
+              - { label: Heading, name: heading, widget: string }
+              - { label: Intro, name: lede, widget: text, required: false }
           - label: Practitioners section
             name: practitioners
             widget: object

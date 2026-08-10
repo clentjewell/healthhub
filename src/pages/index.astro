@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import SectionHeading from '@components/SectionHeading.astro';
 import PractitionerCarousel from '@components/PractitionerCarousel.astro';
+import ServiceCard from '@components/ServiceCard.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
 import { getSettings, getPage, mapEmbedSrc } from '../lib/content';
@@ -11,6 +12,7 @@ const cfg = await getSettings();
 const page = await getPage('home');
 const hero = page.hero!;
 const welcome = page.welcome!;
+const svcSec = page.services!;
 const pracSec = page.practitioners!;
 const eventsSec = page.events!;
 const loc = page.location!;
@@ -28,6 +30,33 @@ function excerpt(body: string | undefined, max = 110): string {
   const clean = line.replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`]/g, '');
   return clean.length <= max ? clean : clean.slice(0, clean.lastIndexOf(' ', max)).trimEnd() + '…';
 }
+
+/**
+ * Services have no pages of their own — each is delivered by one practitioner,
+ * so every tile links to that practitioner's profile. A service whose provider
+ * is missing or misspelt would otherwise render a dead link, so fail the build.
+ */
+const services = await Promise.all(
+  (await getCollection('services'))
+    .filter((s) => !s.data.draft)
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (s) => {
+      if (!s.data.provider) {
+        throw new Error(`Service "${s.id}" has no provider — it cannot link anywhere.`);
+      }
+      const who = await getEntry('practitioners', s.data.provider);
+      if (!who) {
+        throw new Error(`Service "${s.id}" names provider "${s.data.provider}", which is not a practitioner.`);
+      }
+      return {
+        title: s.data.title,
+        summary: s.data.summary,
+        image: s.data.image,
+        href: `/our-practitioner/${who.id}`,
+        provider: who.data.name,
+      };
+    }),
+);
 
 // All of them — the carousel scrolls, so there is no reason to hold any back.
 const teaser = await Promise.all(
@@ -81,6 +110,16 @@ const mapSrc = mapEmbedSrc(cfg);
     <div class="narrow">
       <SectionHeading eyebrow={welcome.eyebrow} title={welcome.heading} align="center" />
       {welcome.paragraphs.map((p) => <p class="welcome-copy">{p}</p>)}
+    </div>
+  </section>
+
+  {/* Our Services — no service pages; every tile goes to its practitioner */}
+  <section class="section">
+    <div class="container">
+      <SectionHeading eyebrow={svcSec.eyebrow} title={svcSec.heading} lede={svcSec.lede} />
+      <div class="grid-services">
+        {services.map((s) => <ServiceCard {...s} />)}
+      </div>
     </div>
   </section>
 
@@ -232,6 +271,7 @@ const mapSrc = mapEmbedSrc(cfg);
     justify-content: center;
   }
 
+  .grid-services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
   .grid-events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 
   /* Staggered reveal — 60ms apart. Cards are visible by default so they still
@@ -262,6 +302,8 @@ const mapSrc = mapEmbedSrc(cfg);
     border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   }
 
+  @media (max-width: 1040px) { .grid-services { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 900px) { .grid-events { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .grid-services { grid-template-columns: 1fr; } }
   @media (max-width: 860px) { .location-grid { grid-template-columns: 1fr; } }
 </style>
