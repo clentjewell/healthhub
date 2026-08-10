@@ -1,12 +1,12 @@
 ---
 title: "Hatha & Yin Yoga"
-order: 3
+order: 4
 category: "course"
 schedule: "Monday, Tuesday & Wednesday evenings — 75 minutes"
 summary: "Asana, pranayama, meditation and yoga philosophy. Hatha to invigorate and balance; Yin to rest, release and restore."
 image: "/images/events/hatha-yin-yoga.webp"
 instructor: "Shannon O’Hara"
-instructorPhone: "0418255493"
+instructorPhone: "0418 255 493"
 price: "$24"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true

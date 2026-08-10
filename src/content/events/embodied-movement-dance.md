@@ -1,6 +1,6 @@
 ---
 title: "Embodied Movement & Dance"
-order: 5
+order: 6
 category: "workshop"
 schedule: "Thursdays 11:00am – 12:00pm, plus evening workshops"
 summary: "Guided exploration that shifts you from thinking about the body to feeling it — movement, breath and presence."

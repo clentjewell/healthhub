@@ -1,6 +1,6 @@
 ---
 title: "Senior’s Yoga"
-order: 2
+order: 3
 category: "course"
 schedule: "Tuesday & Thursday 9:30am – 10:30am"
 summary: "A gentle class of mindful movement and meditation with chairs and props — tailored to injuries or reduced movement."

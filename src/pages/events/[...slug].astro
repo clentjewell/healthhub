@@ -15,11 +15,19 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const {
   title, category, summary, schedule, image, price,
-  instructor, instructorPhone, instructorWebsite, location, bookingUrl,
+  instructor, instructorPhone, instructorEmail, instructorWebsite, location, bookingUrl,
 } = entry.data;
 
 const cfg = await getSettings();
-const telHref = instructorPhone ? `tel:${instructorPhone.replace(/\s/g, '')}` : undefined;
+
+/**
+ * Keep only the number from the phone field. Editors (and the WP migration)
+ * sometimes append an email or note to it, which would otherwise end up inside
+ * the `tel:` href and make the link undialable.
+ */
+const phone = instructorPhone?.match(/\+?\d[\d\s()-]{5,}/)?.[0].trim();
+const telHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : undefined;
+const mailHref = instructorEmail ? `mailto:${instructorEmail.trim()}` : undefined;
 
 // Sibling offerings, for the "more" strip at the bottom.
 const others = (await getCollection('events'))
@@ -48,7 +56,7 @@ const others = (await getCollection('events'))
           </div>
           <div class="ev-actions">
             {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
-            {telHref && <a href={telHref} class="btn btn-ghost">Call {instructorPhone}</a>}
+            {telHref && <a href={telHref} class="btn btn-ghost">Call {phone}</a>}
             {!bookingUrl && !telHref && <a href="/booking" class="btn btn-primary">Enquire</a>}
           </div>
         </div>
@@ -75,7 +83,8 @@ const others = (await getCollection('events'))
             {price && (<><dt>Cost</dt><dd class="tabular">{price}</dd></>)}
             <dt>Where</dt>
             <dd>{formatAddress(cfg)}</dd>
-            {instructorPhone && (<><dt>Contact</dt><dd><a href={telHref}>{instructorPhone}</a></dd></>)}
+            {telHref && (<><dt>Phone</dt><dd><a href={telHref}>{phone}</a></dd></>)}
+            {mailHref && (<><dt>Email</dt><dd><a href={mailHref} class="ev-email">{instructorEmail}</a></dd></>)}
             {instructorWebsite && (
               <><dt>Website</dt>
               <dd><a href={instructorWebsite} target="_blank" rel="noopener">Visit site →</a></dd></>
@@ -150,6 +159,8 @@ const others = (await getCollection('events'))
   .ev-dl dt:first-child { margin-top: 0; }
   .ev-dl dd { margin: 0; font-size: 14.5px; color: var(--color-text); }
   .ev-dl dd.tabular { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--color-accent); }
+  /* Long addresses must wrap rather than overflow the 320px sidebar. */
+  .ev-email { overflow-wrap: anywhere; }
   .ev-aside-cta { width: 100%; }
 
   .ev-more { background: var(--color-surface-tint); }

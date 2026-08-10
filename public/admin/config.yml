@@ -258,8 +258,9 @@ collections:
         required: false
         hint: The class flyer or a photo. Shown whole, so text on the image stays readable.
       - { label: Led by, name: instructor, widget: string, required: false }
-      - { label: Their phone, name: instructorPhone, widget: string, required: false }
-      - { label: Their website, name: instructorWebsite, widget: string, required: false }
+      - { label: Their phone, name: instructorPhone, widget: string, required: false, hint: 'Number only — put an email in the field below, not here.' }
+      - { label: Their email, name: instructorEmail, widget: string, required: false }
+      - { label: Their website, name: instructorWebsite, widget: string, required: false, hint: 'Full address with no spaces, e.g. https://example.com/' }
       - { label: Cost, name: price, widget: string, required: false, hint: 'e.g. $24 or $18 per class' }
       - { label: Location, name: location, widget: string, required: false, default: 'Health Hub Tweed Coast, Hastings Point' }
       - label: Booking link

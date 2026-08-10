@@ -1,6 +1,6 @@
 ---
 title: "Yoga & Meditation"
-order: 1
+order: 2
 category: "course"
 schedule: "Tuesday, Thursday, Friday & Sunday — see class times"
 summary: "Inclusive, choice-based yoga and meditation taught with a trauma-informed lens, drawing on Hatha, Ashtanga and Yin."

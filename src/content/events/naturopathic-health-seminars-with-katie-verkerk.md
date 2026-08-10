@@ -1,6 +1,6 @@
 ---
 title: "Function & Flow Exercise Class"
-order: 6
+order: 7
 category: "course"
 schedule: "Small-group classes — see times"
 summary: "A full-body functional workout blending strength, mobility, stability and coordination in a small, supportive group."

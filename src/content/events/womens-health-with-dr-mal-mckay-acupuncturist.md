@@ -1,13 +1,14 @@
 ---
 title: "Women’s Health with Dr Mal McKay Acupuncturist"
-order: 8
+order: 9
 category: "seminar"
 schedule: "By appointment — see details"
 summary: "Women's health support with Dr Mal McKay, drawing on over 30 years of acupuncture and Chinese medicine practice."
 image: "/images/events/womens-health-with-dr-mal-mckay-acupuncturist.webp"
 instructor: "Dr Malcolm McKay"
-instructorPhone: "0420437156 Email: health@pottsvilleacupuncture.com.au"
-instructorWebsite: "https://pottsvilleacupuncture.com.au/ Yoga & Meditation"
+instructorPhone: "0420 437 156"
+instructorEmail: "health@pottsvilleacupuncture.com.au"
+instructorWebsite: "https://pottsvilleacupuncture.com.au/"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 ---

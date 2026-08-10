@@ -21,7 +21,14 @@ const CATEGORY_EVENT = ['workshop', 'seminar', 'sound-bath', 'course', 'communit
  */
 const optionalUrl = z.preprocess(
   (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-  z.string().url().optional(),
+  z
+    .string()
+    .url()
+    // `z.string().url()` accepts "https://example.com/ Some Title" — a shape the
+    // WP migration produced by running two fields together. A URL with internal
+    // whitespace is always a mistake, so fail the build instead of shipping it.
+    .refine((v) => !/\s/.test(v.trim()), { message: 'URL must not contain spaces' })
+    .optional(),
 );
 
 /** Same idea for plain optional text fields. */
@@ -113,6 +120,7 @@ const events = defineCollection({
     /** Who runs it, plus their own contact details. */
     instructor: optionalText,
     instructorPhone: optionalText,
+    instructorEmail: optionalText,
     instructorWebsite: optionalUrl,
     location: optionalText,
     price: optionalText,

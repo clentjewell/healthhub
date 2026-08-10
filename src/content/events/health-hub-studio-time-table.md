@@ -1,6 +1,6 @@
 ---
 title: "Health Hub Studio Time Table"
-order: 9
+order: 1
 category: "community"
 schedule: "All classes, all week"
 summary: "The full weekly studio timetable — every class running at the Hub, at a glance."

@@ -1,6 +1,6 @@
 ---
 title: "Pilates and Body Balance"
-order: 4
+order: 5
 category: "course"
 schedule: "Chair Pilates 8:15am · Mat Pilates 8:45am"
 summary: "Safely conditions body and mind for muscle control, strength and flexibility — quality of movement over quantity."

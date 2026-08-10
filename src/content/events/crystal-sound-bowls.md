@@ -1,6 +1,6 @@
 ---
 title: "Crystal Sound Bowls"
-order: 7
+order: 8
 category: "sound-bath"
 schedule: "Sundays 5:00pm – 6:00pm"
 summary: "Crystal bowl sound to quiet the mind, ease tension and create a sense of grounding and lightness."
