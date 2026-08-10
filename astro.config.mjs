@@ -9,6 +9,11 @@ export default defineConfig({
   site: 'https://healthhubtweedcoast.com.au',
   output: 'static',
   trailingSlash: 'ignore',
+  redirects: {
+    // The booking page lives at /make-a-booking to match the URL the live
+    // WordPress site already uses. This keeps the earlier preview path working.
+    '/booking': '/make-a-booking',
+  },
   integrations: [
     sitemap({
       // The Pottsville-styled proposal page must never be indexed on this

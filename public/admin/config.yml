@@ -53,7 +53,7 @@ collections:
               - { label: Heading, name: heading, widget: string }
               - { label: Intro paragraph, name: lede, widget: text, required: false }
               - { label: Main button text, name: primaryLabel, widget: string, required: false }
-              - { label: Main button link, name: primaryHref, widget: string, required: false, default: /booking }
+              - { label: Main button link, name: primaryHref, widget: string, required: false, default: /make-a-booking }
               - { label: Second button text, name: secondaryLabel, widget: string, required: false }
               - { label: Second button link, name: secondaryHref, widget: string, required: false, default: /events }
           - label: Welcome section
@@ -319,7 +319,7 @@ collections:
             summary: '{{fields.label}} → {{fields.href}}'
             hint: >-
               Links must point at pages that exist — /, /practitioners,
-              /events, /contact, /booking.
+              /events, /contact, /make-a-booking.
             fields:
               - { label: Label, name: label, widget: string }
               - { label: Link, name: href, widget: string }

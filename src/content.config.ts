@@ -163,7 +163,7 @@ const settings = defineCollection({
 
     navItems: z.array(z.object({ label: z.string(), href: z.string() })).default([]),
     bookingLabel: z.string().default('Make a Booking'),
-    bookingHref: z.string().default('/booking'),
+    bookingHref: z.string().default('/make-a-booking'),
 
     footerBlurb: z.string(),
     footerNote: optionalText,

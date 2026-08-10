@@ -12,7 +12,7 @@ hero:
     Acupuncture. Acupuncture and allied health, movement classes and events, all
     under one roof on the Tweed Coast.
   primaryLabel: Make a Booking
-  primaryHref: /booking
+  primaryHref: /make-a-booking
   secondaryLabel: See the timetable
   secondaryHref: /events
 
@@ -53,7 +53,7 @@ cta:
   leftHeading: Book a treatment
   leftBody: Acupuncture and allied-health appointments with our practitioners.
   leftLabel: Make a booking
-  leftHref: /booking
+  leftHref: /make-a-booking
   rightHeading: Join a class
   rightBody: Yoga, pilates, sound and events in the studio — all levels welcome.
   rightLabel: See the timetable

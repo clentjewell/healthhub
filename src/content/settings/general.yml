@@ -40,7 +40,7 @@ navItems:
   - label: Contact
     href: /contact
 bookingLabel: Make a Booking
-bookingHref: /booking
+bookingHref: /make-a-booking
 
 # ---- Footer ----------------------------------------------------------------
 footerBlurb: >-

@@ -57,7 +57,7 @@ const others = (await getCollection('events'))
           <div class="ev-actions">
             {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
             {telHref && <a href={telHref} class="btn btn-ghost">Call {phone}</a>}
-            {!bookingUrl && !telHref && <a href="/booking" class="btn btn-primary">Enquire</a>}
+            {!bookingUrl && !telHref && <a href="/make-a-booking" class="btn btn-primary">Enquire</a>}
           </div>
         </div>
         {image && (
@@ -90,7 +90,7 @@ const others = (await getCollection('events'))
               <dd><a href={instructorWebsite} target="_blank" rel="noopener">Visit site →</a></dd></>
             )}
           </dl>
-          <a href={bookingUrl ?? '/booking'} class="btn btn-primary ev-aside-cta">
+          <a href={bookingUrl ?? '/make-a-booking'} class="btn btn-primary ev-aside-cta">
             {bookingUrl ? 'Book online' : 'Enquire'}
           </a>
         </aside>
