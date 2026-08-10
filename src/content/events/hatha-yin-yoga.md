@@ -10,6 +10,16 @@ instructorPhone: "0418 255 493"
 price: "$24"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+sessions:
+  - day: Monday
+    start: "07:30"
+    end: "08:45"
+  - day: Tuesday
+    start: "18:00"
+    end: "19:15"
+  - day: Wednesday
+    start: "18:00"
+    end: "19:15"
 ---
 ### Hatha & Yin Yoga
 

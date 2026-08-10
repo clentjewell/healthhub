@@ -127,10 +127,60 @@ const events = defineCollection({
     bookingUrl: optionalUrl,
     image: optionalText,
     summary: z.string(),
+    /**
+     * Weekly slots, used to build the "Add to calendar" links (see
+     * lib/calendar.ts). Left empty for by-appointment offerings and for the
+     * timetable overview — no sessions means no calendar links, rather than a
+     * guess at when something runs.
+     */
+    sessions: z
+      .array(
+        z.object({
+          day: z.enum([
+            'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+          ]),
+          start: z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 18:00'),
+          end: z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 19:15'),
+        }),
+      )
+      .default([]),
+    /** Renders the full weekly timetable table on this event's page. */
+    showTimetable: z.boolean().default(false),
     featured: z.boolean().default(false),
     /** Show on the site. Turn off to hide without deleting. */
     active: z.boolean().default(true),
     placeholder: z.boolean().default(false),
+  }),
+});
+
+/**
+ * The weekly studio timetable — one entry, `weekly`, rendered as a table on the
+ * timetable event page. Held as data rather than prose so it stays a real table
+ * (and stays editable) instead of the flattened page-builder markup the
+ * WordPress version produced.
+ */
+const timetable = defineCollection({
+  loader: glob({ pattern: '**/*.yml', base: './src/content/timetable' }),
+  schema: z.object({
+    note: optionalText,
+    days: z
+      .array(
+        z.object({
+          day: z.string(),
+          sessions: z
+            .array(
+              z.object({
+                name: z.string(),
+                /** Displayed as-is, e.g. "8:30am–7:30pm". */
+                time: z.string(),
+                /** Optional link to the event or practitioner page. */
+                href: optionalText,
+              }),
+            )
+            .default([]),
+        }),
+      )
+      .default([]),
   }),
 });
 
@@ -251,4 +301,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { settings, pages, services, practitioners, events };
+export const collections = { settings, pages, services, practitioners, events, timetable };

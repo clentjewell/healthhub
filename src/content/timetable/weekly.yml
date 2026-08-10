@@ -1,0 +1,69 @@
+# The weekly studio timetable — editable in the CMS under "Timetable".
+# Mirrors the grid published on the live site. Sessions are listed in start-time
+# order within each day; each one links to the class or practitioner page.
+note: >-
+  Class times can change with school holidays and public holidays — check with
+  the practitioner running the session before your first visit.
+days:
+  - day: Monday
+    sessions:
+      - name: Yin Yang Yoga
+        time: 7:30–8:45am
+        href: /event/hatha-yin-yoga/
+      - name: Acupuncture Consultations
+        time: 8:30am–7:30pm
+        href: /our-practitioner/dr-malcolm-mckay/
+  - day: Tuesday
+    sessions:
+      - name: Acupuncture Consultations
+        time: 8:30am–7:30pm
+        href: /our-practitioner/dr-malcolm-mckay/
+      - name: Seniors Yoga
+        time: 9:30–10:30am
+        href: /event/seniors-yoga/
+      - name: Hatha Yoga
+        time: 6:00–7:15pm
+        href: /event/hatha-yin-yoga/
+  - day: Wednesday
+    sessions:
+      - name: Functional Group Exercise
+        time: 6:00–6:45am
+        href: /event/naturopathic-health-seminars-with-katie-verkerk/
+      - name: Pilates & Body Balance
+        time: 8:15–8:45am
+        href: /event/pilates-and-body-balance/
+      - name: Mat Pilates & Stretches
+        time: 8:45–9:30am
+        href: /event/pilates-and-body-balance/
+      - name: Yin Yoga
+        time: 6:00–7:15pm
+        href: /event/hatha-yin-yoga/
+  - day: Thursday
+    sessions:
+      - name: Acupuncture Consultations
+        time: 8:30am–7:30pm
+        href: /our-practitioner/dr-malcolm-mckay/
+      - name: Seniors Yoga
+        time: 9:30–10:30am
+        href: /event/seniors-yoga/
+      - name: Embodied Movement & Dance
+        time: 11:00am–12:00pm
+        href: /event/embodied-movement-dance/
+  - day: Friday
+    sessions:
+      - name: Acupuncture Consultations
+        time: 8:30am–7:30pm
+        href: /our-practitioner/dr-malcolm-mckay/
+      - name: Yoga & Meditation
+        time: 9:30–10:45am
+        href: /event/yoga-meditation/
+  - day: Saturday
+    sessions: []
+  - day: Sunday
+    sessions:
+      - name: Yoga & Meditation
+        time: 8:00–9:15am
+        href: /event/yoga-meditation/
+      - name: Sound Bowls
+        time: 5:00–6:00pm
+        href: /event/crystal-sound-bowls/

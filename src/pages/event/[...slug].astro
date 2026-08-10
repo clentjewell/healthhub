@@ -3,8 +3,12 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import CtaBand from '@components/CtaBand.astro';
 import Icon from '@components/Icon.astro';
+import AddToCalendar from '@components/AddToCalendar.astro';
+import Timetable from '@components/Timetable.astro';
 import { CATEGORY_LABEL } from '../../lib/format';
 import { getSettings, formatAddress } from '../../lib/content';
+import { sessionLabel } from '../../lib/calendar';
+import { site } from '../../data/site';
 
 export async function getStaticPaths() {
   const events = await getCollection('events');
@@ -16,9 +20,13 @@ const { Content } = await render(entry);
 const {
   title, category, summary, schedule, image, price,
   instructor, instructorPhone, instructorEmail, instructorWebsite, location, bookingUrl,
+  sessions, showTimetable,
 } = entry.data;
 
 const cfg = await getSettings();
+
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const calSessions = sessions.map((s) => ({ day: DAYS.indexOf(s.day), start: s.start, end: s.end }));
 
 /**
  * Keep only the number from the phone field. Editors (and the WP migration)
@@ -58,6 +66,14 @@ const others = (await getCollection('events'))
             {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
             {telHref && <a href={telHref} class="btn btn-ghost">Call {phone}</a>}
             {!bookingUrl && !telHref && <a href="/make-a-booking" class="btn btn-primary">Enquire</a>}
+            <AddToCalendar
+              title={title}
+              slug={entry.id}
+              summary={summary}
+              location={location ?? formatAddress(cfg)}
+              sessions={calSessions}
+              siteUrl={site.url}
+            />
           </div>
         </div>
         {image && (
@@ -71,8 +87,10 @@ const others = (await getCollection('events'))
     {/* Detail */}
     <div class="section ev-body">
       <div class="ev-body-inner">
-        <div class="prose">
-          <Content />
+        <div class="ev-main">
+          <div class="prose">
+            <Content />
+          </div>
         </div>
 
         <aside class="ev-aside">
@@ -80,6 +98,16 @@ const others = (await getCollection('events'))
           <dl class="ev-dl">
             {instructor && (<><dt>Led by</dt><dd>{instructor}</dd></>)}
             {schedule && (<><dt>When</dt><dd>{schedule}</dd></>)}
+            {
+              sessions.length > 0 && (
+                <><dt>Class times</dt>
+                <dd>
+                  <ul class="ev-sessions">
+                    {calSessions.map((s) => <li>{sessionLabel(s)}</li>)}
+                  </ul>
+                </dd></>
+              )
+            }
             {price && (<><dt>Cost</dt><dd class="tabular">{price}</dd></>)}
             <dt>Where</dt>
             <dd>{formatAddress(cfg)}</dd>
@@ -96,6 +124,16 @@ const others = (await getCollection('events'))
         </aside>
       </div>
     </div>
+
+    {/* The timetable needs the full container width — seven day columns do not
+        fit beside the 320px sidebar. */}
+    {
+      showTimetable && (
+        <div class="ev-timetable">
+          <div class="container"><Timetable /></div>
+        </div>
+      )
+    }
 
     {/* More offerings */}
     {others.length > 0 && (
@@ -146,6 +184,11 @@ const others = (await getCollection('events'))
     max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter);
     display: grid; grid-template-columns: 1fr 320px; gap: 56px; align-items: start;
   }
+  /* A grid track's automatic minimum is its content's min-content width, so the
+     wide timetable would stretch the whole page instead of scrolling inside its
+     own box. `min-width: 0` lets the column shrink and the table scroll. */
+  .ev-main { min-width: 0; }
+  .ev-timetable { padding-bottom: clamp(48px, 7vw, 88px); }
   .ev-aside {
     background: var(--color-surface); border: 1px solid var(--color-border);
     border-radius: var(--radius-md); padding: 26px; position: sticky; top: 96px;
@@ -161,6 +204,11 @@ const others = (await getCollection('events'))
   .ev-dl dd.tabular { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--color-accent); }
   /* Long addresses must wrap rather than overflow the 320px sidebar. */
   .ev-email { overflow-wrap: anywhere; }
+  .ev-sessions {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 3px;
+    font-variant-numeric: tabular-nums;
+  }
   .ev-aside-cta { width: 100%; }
 
   .ev-more { background: var(--color-surface-tint); }

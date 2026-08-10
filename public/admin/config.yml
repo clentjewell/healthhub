@@ -268,6 +268,27 @@ collections:
         widget: string
         required: false
         hint: Full https:// link. Leave blank and visitors get an "Enquire" button instead.
+      - label: Class times
+        name: sessions
+        widget: list
+        required: false
+        label_singular: session
+        summary: '{{fields.day}} {{fields.start}}–{{fields.end}}'
+        hint: >-
+          Add one row per weekly slot. These drive the "Add to calendar" button —
+          leave empty for by-appointment offerings and no button is shown.
+        fields:
+          - label: Day
+            name: day
+            widget: select
+            options: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+          - { label: Starts, name: start, widget: string, hint: '24-hour, e.g. 18:00' }
+          - { label: Ends, name: end, widget: string, hint: '24-hour, e.g. 19:15' }
+      - label: Show the weekly timetable table on this page
+        name: showTimetable
+        widget: boolean
+        default: false
+        hint: Used by the Studio Time Table page. The table itself is edited under Timetable.
       - label: Show on the site
         name: active
         widget: boolean
@@ -281,6 +302,43 @@ collections:
   # ===========================================================================
   # SETTINGS — header, footer, address, hours, socials
   # ===========================================================================
+  - name: timetable
+    label: Timetable
+    editor: { preview: false }
+    files:
+      - name: weekly
+        label: Weekly studio timetable
+        file: src/content/timetable/weekly.yml
+        description: >-
+          The table shown on the Studio Time Table page. List each day's
+          sessions in the order they run.
+        fields:
+          - label: Note under the table
+            name: note
+            widget: text
+            required: false
+          - label: Days
+            name: days
+            widget: list
+            label_singular: day
+            summary: '{{fields.day}}'
+            fields:
+              - { label: Day, name: day, widget: string }
+              - label: Sessions
+                name: sessions
+                widget: list
+                required: false
+                label_singular: session
+                summary: '{{fields.name}} — {{fields.time}}'
+                fields:
+                  - { label: Class name, name: name, widget: string }
+                  - { label: Time, name: time, widget: string, hint: 'Shown as written, e.g. 9:30–10:30am' }
+                  - label: Links to
+                    name: href
+                    widget: string
+                    required: false
+                    hint: 'e.g. /event/seniors-yoga/ — leave blank for no link.'
+
   - name: settings
     label: Settings
     editor: { preview: false }

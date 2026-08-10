@@ -11,6 +11,13 @@ instructorWebsite: "https://moniquecarole.com/"
 price: "$10"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+sessions:
+  - day: Wednesday
+    start: "08:15"
+    end: "08:45"
+  - day: Wednesday
+    start: "08:45"
+    end: "09:30"
 ---
 ### Pilates and Body Balance
 

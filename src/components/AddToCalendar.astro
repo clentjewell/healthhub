@@ -1,0 +1,190 @@
+---
+/**
+ * "Add to calendar" dropdown, matching the four options the live WordPress site
+ * offers: Google Calendar, iCalendar, Outlook 365 and Outlook Live.
+ *
+ * Links are rendered at build time so the control works without JavaScript. A
+ * small script then recomputes the dates on load, because the Google/Outlook
+ * URLs pin a concrete start date — without the refresh, those dates would drift
+ * into the past between deploys. The .ics is a real file at /event/{slug}.ics
+ * and needs no refresh: its entries repeat weekly.
+ */
+import Icon from './Icon.astro';
+import { googleUrl, outlookUrl, sessionLabel, soonest, type Session } from '../lib/calendar';
+
+interface Props {
+  title: string;
+  slug: string;
+  summary: string;
+  location: string;
+  sessions: Session[];
+  /** Absolute site URL, for the event link inside the calendar entry. */
+  siteUrl: string;
+}
+const { title, slug, summary, location, sessions, siteUrl } = Astro.props;
+
+const ev = { title, slug, description: summary, location, url: `${siteUrl}/event/${slug}/`, sessions };
+const first = soonest(sessions);
+
+const links = [
+  { label: 'Google Calendar', href: googleUrl(ev), external: true },
+  { label: 'iCalendar', href: `/event/${slug}.ics`, external: false },
+  { label: 'Outlook 365', href: outlookUrl(ev, 'office'), external: true },
+  { label: 'Outlook Live', href: outlookUrl(ev, 'live'), external: true },
+].filter((l) => l.href) as { label: string; href: string; external: boolean }[];
+
+const payload = JSON.stringify({
+  title,
+  details: `${summary}\n\n${ev.url}`,
+  location,
+  sessions,
+});
+---
+
+{
+  sessions.length > 0 && (
+    <div class="atc" data-atc={payload}>
+      <button type="button" class="atc-btn" aria-expanded="false" aria-controls={`atc-${slug}`}>
+        <Icon name="calendar" size={16} />
+        <span>Add to calendar</span>
+        <svg class="atc-caret" viewBox="0 0 12 8" aria-hidden="true">
+          <path d="M1.21.85L6 5.64 10.79.85 11.94 2 6 7.94.06 2z" fill="currentColor" />
+        </svg>
+      </button>
+      <div class="atc-menu" id={`atc-${slug}`} hidden>
+        <ul>
+          {links.map((l) => (
+            <li>
+              <a
+                href={l.href}
+                data-atc-kind={l.label}
+                {...(l.external ? { target: '_blank', rel: 'noopener' } : { download: `${slug}.ics` })}
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        {sessions.length > 1 && (
+          <p class="atc-note">
+            Runs {sessions.length} times a week. <strong>iCalendar</strong> adds every session;
+            the others add {first && sessionLabel(first)}.
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .atc { position: relative; display: inline-block; }
+  .atc-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    min-height: 44px; padding: 10px 18px;
+    background: var(--color-surface); color: var(--color-brand);
+    border: 1px solid var(--color-border); border-radius: 999px;
+    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+  }
+  .atc-btn:hover { border-color: var(--color-brand); background: var(--color-surface-tint); }
+  .atc-btn :global(svg) { flex-shrink: 0; }
+  .atc-caret { width: 10px; height: 7px; transition: transform var(--transition); }
+  .atc-btn[aria-expanded='true'] .atc-caret { transform: rotate(180deg); }
+
+  .atc-menu {
+    position: absolute; z-index: 20; top: calc(100% + 8px); left: 0;
+    min-width: 240px; padding: 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+  .atc-menu[hidden] { display: none; }
+  .atc-menu ul { list-style: none; margin: 0; padding: 0; }
+  .atc-menu a {
+    display: block; padding: 11px 14px; border-radius: calc(var(--radius-md) - 4px);
+    font-size: 14px; color: var(--color-text);
+  }
+  .atc-menu a:hover,
+  .atc-menu a:focus-visible { background: var(--color-surface-tint); color: var(--color-brand); }
+  .atc-note {
+    margin: 6px 0 2px; padding: 8px 14px 4px;
+    border-top: 1px solid var(--color-surface-tint);
+    font-size: 12px; line-height: 1.5; color: var(--color-text-muted); max-width: 30ch;
+  }
+</style>
+
+<script>
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const BYDAY = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  function nextOccurrence(day: number) {
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    d.setDate(d.getDate() + ((day - d.getDay() + 7) % 7));
+    return d;
+  }
+  const compact = (d: Date, t: string) =>
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${t.replace(':', '')}00`;
+  const iso = (d: Date, t: string) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${t}:00`;
+
+  document.querySelectorAll<HTMLElement>('.atc').forEach((root) => {
+    const btn = root.querySelector<HTMLButtonElement>('.atc-btn')!;
+    const menu = root.querySelector<HTMLElement>('.atc-menu')!;
+
+    const close = () => {
+      menu.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    };
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      menu.hidden = open;
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target as Node)) close();
+    });
+    root.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === 'Escape') { close(); btn.focus(); }
+    });
+
+    // Re-point the single-event links at the next occurrence from *today*, so a
+    // page served long after the last build still offers a future date.
+    const data = JSON.parse(root.dataset.atc || '{}');
+    const sessions: { day: string; start: string; end: string }[] = data.sessions ?? [];
+    if (sessions.length === 0) return;
+    const next = sessions
+      .map((s) => ({ s, at: nextOccurrence(DAYS.indexOf(s.day)) }))
+      .sort((a, b) => a.at.getTime() - b.at.getTime() || a.s.start.localeCompare(b.s.start))[0];
+    const { s, at } = next;
+    const dayIdx = DAYS.indexOf(s.day);
+
+    root.querySelectorAll<HTMLAnchorElement>('a[data-atc-kind]').forEach((a) => {
+      const kind = a.dataset.atcKind;
+      if (kind === 'Google Calendar') {
+        const p = new URLSearchParams({
+          action: 'TEMPLATE',
+          text: data.title,
+          dates: `${compact(at, s.start)}/${compact(at, s.end)}`,
+          details: data.details,
+          location: data.location,
+          ctz: 'Australia/Sydney',
+        });
+        a.href = `https://calendar.google.com/calendar/render?${p}&recur=RRULE:FREQ=WEEKLY;BYDAY=${BYDAY[dayIdx]}`;
+      } else if (kind === 'Outlook 365' || kind === 'Outlook Live') {
+        const p = new URLSearchParams({
+          path: '/calendar/action/compose',
+          rru: 'addevent',
+          subject: data.title,
+          startdt: iso(at, s.start),
+          enddt: iso(at, s.end),
+          location: data.location,
+          body: data.details,
+        });
+        const host = kind === 'Outlook 365' ? 'outlook.office.com' : 'outlook.live.com';
+        a.href = `https://${host}/owa/?${p}`;
+      }
+    });
+  });
+</script>

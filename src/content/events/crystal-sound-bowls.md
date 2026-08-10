@@ -9,6 +9,10 @@ instructor: "Pearl Blinco-Doffiny"
 instructorPhone: "0467 512 368"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+sessions:
+  - day: Sunday
+    start: "17:00"
+    end: "18:00"
 ---
 ### Crystal Sound Bowls
 

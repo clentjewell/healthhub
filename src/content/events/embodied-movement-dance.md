@@ -11,6 +11,10 @@ instructorWebsite: "https://www.yourwisdomyourway.com/"
 price: "$24"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+sessions:
+  - day: Thursday
+    start: "11:00"
+    end: "12:00"
 ---
 ### Embodied Movement & Dance
 

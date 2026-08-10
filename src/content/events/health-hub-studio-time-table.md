@@ -7,67 +7,12 @@ summary: "The full weekly studio timetable — every class running at the Hub, a
 image: "/images/events/health-hub-studio-time-table.webp"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+showTimetable: true
 ---
-### Health Hub Studio Time Table
+Everything running at the studio each week, in one place. Classes are led by the
+Hub's own practitioners, so booking, pricing and cancellations are arranged
+directly with whoever runs the session — the contact list sits below the table.
 
-## Book Here
-
-## Monday
-
-## Tuesday
-
-## Wednesday
-
-## Thursday
-
-## Friday
-
-## Saturday
-
-## Sunday
-
-**Acupuncture**
-
-**Consultations**
-
-**8:30am-7:30pm**
-
-**6:00-6:45am**
-
-**Yoga & Meditation**
-
-**8:00-9:15am**
-
-**Yin Yang**
-
-**Yoga**
-
-**7:30-8:45am**
-
-**9:30-10:30am**
-
-**& Body**
-
-**Balance**
-
-**8:15-8:45am**
-
-**Mat Pilates & Stretches**
-
-**8:45-9:30am**
-
-**9:30-10:45am**
-
-**Embodied**
-
-**Movement**
-
-**& Dance**
-
-**11:00-12:00pm**
-
-**6:00-7:15pm**
-
-**Sound Bowls**
-
-**5:00-6:00pm**
+Most classes are drop-in friendly, but numbers are limited by the size of the
+studio. If it is your first time, message the practitioner beforehand: they will
+tell you what to bring and whether the class suits where you are starting from.

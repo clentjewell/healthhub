@@ -11,6 +11,13 @@ instructorWebsite: "https://www.omneyoga.com/"
 price: "$18"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+sessions:
+  - day: Tuesday
+    start: "09:30"
+    end: "10:30"
+  - day: Thursday
+    start: "09:30"
+    end: "10:30"
 ---
 ### Senior’s Yoga
 

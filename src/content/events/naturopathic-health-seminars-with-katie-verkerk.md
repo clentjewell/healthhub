@@ -10,6 +10,10 @@ instructorPhone: "0434 570 512"
 instructorWebsite: "https://visibook.com/functionandflow?pp=calintro"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
+sessions:
+  - day: Wednesday
+    start: "06:00"
+    end: "06:45"
 ---
 ### Function & Flow Exercise Class
 
