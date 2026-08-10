@@ -88,7 +88,12 @@ const mapSrc = mapEmbedSrc(cfg);
   <section class="section band-tint">
     <div class="container">
       <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
-      <PractitionerCarousel cards={teaser} label={pracSec.heading} />
+    </div>
+    {/* Outside .container: the track runs the full viewport width and scrolls
+        off the right edge. Its own inset keeps the first card in line with the
+        heading above. */}
+    <PractitionerCarousel cards={teaser} label={pracSec.heading} />
+    <div class="container">
       <p class="section-more">
         <a href="/our-practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
       </p>

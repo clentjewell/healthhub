@@ -71,23 +71,34 @@ const { cards, label = 'Our practitioners' } = Astro.props;
 </div>
 
 <style>
-  .pcar { position: relative; }
+  .pcar {
+    position: relative;
+    /* Distance from the viewport edge to where `.container` content starts, so
+       the first card lines up with the section heading even though the track
+       itself spans the full width. Collapses to the plain gutter once the
+       viewport is narrower than the container. */
+    --pcar-inset: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+  }
 
   /* ---- Track ---- */
   .pcar-track {
     display: flex;
     gap: 24px;
     margin: 0;
-    /* Room for the cards' lift and shadow, which would otherwise be clipped by
-       the scroll container. */
-    padding: 8px 4px 20px;
+    /* Block padding leaves room for the cards' lift and shadow, which would
+       otherwise be clipped by the scroll container. */
+    padding-block: 8px 20px;
+    /* Asymmetric on purpose: the left inset lines the first card up with the
+       heading, while the right side stops at the plain gutter so the cards run
+       out to the screen edge instead of stopping on the container line. */
+    padding-inline: var(--pcar-inset) var(--gutter);
     list-style: none;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    /* Match the inline padding: without this, snapping the first card's edge to
-       the scrollport leaves scrollLeft resting at 4px instead of 0, and the
-       "at the start" test for the arrows never matches. */
-    scroll-padding-inline: 4px;
+    /* Must match the inline padding: without it, snapping the first card's edge
+       to the scrollport leaves scrollLeft resting at the padding width instead
+       of 0, and the "at the start" test for the arrows never matches. */
+    scroll-padding-inline: var(--pcar-inset) var(--gutter);
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -123,8 +134,10 @@ const { cards, label = 'Our practitioners' } = Astro.props;
     cursor: pointer;
     transition: background var(--transition), color var(--transition), opacity var(--transition);
   }
-  .pcar-prev { left: -14px; }
-  .pcar-next { right: -14px; }
+  /* Each arrow sits on the edge its cards run to: prev on the first card's left
+     edge, next against the screen edge the cards scroll out towards. */
+  .pcar-prev { left: max(4px, calc(var(--pcar-inset) - 22px)); }
+  .pcar-next { right: max(4px, calc(var(--gutter) - 22px)); }
   .pcar-nav:hover { background: var(--color-brand); color: #fff; }
   .pcar-nav:disabled { opacity: 0.32; cursor: default; }
   .pcar-nav:disabled:hover { background: var(--color-surface); color: var(--color-brand); }
