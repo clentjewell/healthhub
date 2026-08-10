@@ -33,7 +33,13 @@ const {
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · Wellness Studio, Hastings Point`;
-const canonical = new URL(path, site.url).href;
+/**
+ * Canonicals always carry a trailing slash, matching both the sitemap and the
+ * URLs the live WordPress site serves — so a page never advertises a canonical
+ * that differs from the address it is actually indexed under.
+ */
+const canonicalPath = path === '/' ? '/' : `${path.replace(/\/+$/, '')}/`;
+const canonical = new URL(canonicalPath, site.url).href;
 const ogImageUrl = new URL(ogImage, site.url).href;
 ---
 

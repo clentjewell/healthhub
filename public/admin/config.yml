@@ -318,7 +318,7 @@ collections:
             label_singular: Menu item
             summary: '{{fields.label}} → {{fields.href}}'
             hint: >-
-              Links must point at pages that exist — /, /practitioners,
+              Links must point at pages that exist — /, /our-practitioners,
               /events, /contact, /make-a-booking.
             fields:
               - { label: Label, name: label, widget: string }

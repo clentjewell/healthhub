@@ -16,7 +16,7 @@ const rows = await Promise.all(
     const svc = p.data.service ? await getEntry('services', p.data.service) : undefined;
     return {
       name: p.data.name,
-      href: `/practitioners/${p.id}`,
+      href: `/our-practitioner/${p.id}`,
       image: p.data.image,
       service: svc?.data.title ?? p.data.role,
       bookingUrl: p.data.bookingUrl,

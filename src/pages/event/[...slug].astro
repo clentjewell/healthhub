@@ -36,7 +36,7 @@ const others = (await getCollection('events'))
   .slice(0, 3);
 ---
 
-<BaseLayout title={title} description={summary} path={`/events/${entry.id}`}>
+<BaseLayout title={title} description={summary} path={`/event/${entry.id}`}>
   <article>
     {/* Hero */}
     <header class="ev-hero">
@@ -105,7 +105,7 @@ const others = (await getCollection('events'))
           <ul class="ev-more-list">
             {others.map((o) => (
               <li>
-                <a href={`/events/${o.id}`}>
+                <a href={`/event/${o.id}`}>
                   {o.data.image && <img src={o.data.image} alt={o.data.title} loading="lazy" width="940" height="788" />}
                   <span class="ev-more-cat">{CATEGORY_LABEL[o.data.category] ?? o.data.category}</span>
                   <span class="ev-more-title">{o.data.title}</span>

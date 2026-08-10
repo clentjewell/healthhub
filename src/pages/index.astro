@@ -33,7 +33,7 @@ const teaser = await Promise.all(
   practitioners.slice(0, 4).map(async (p) => {
     const svc = p.data.service ? await getEntry('services', p.data.service) : undefined;
     return {
-      name: p.data.name, role: p.data.role, href: `/practitioners/${p.id}`,
+      name: p.data.name, role: p.data.role, href: `/our-practitioner/${p.id}`,
       image: p.data.image, serviceTitle: svc?.data.shortTitle ?? svc?.data.title,
       excerpt: excerpt(p.body), placeholder: p.data.placeholder,
     };
@@ -91,7 +91,7 @@ const mapSrc = mapEmbedSrc(cfg);
         {teaser.map((c) => <PractitionerCard {...c} />)}
       </div>
       <p class="section-more">
-        <a href="/practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
+        <a href="/our-practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
       </p>
     </div>
   </section>
@@ -104,7 +104,7 @@ const mapSrc = mapEmbedSrc(cfg);
         {
           events.map((e) => (
             <EventCard
-              title={e.data.title} href={`/events/${e.id}`} category={e.data.category}
+              title={e.data.title} href={`/event/${e.id}`} category={e.data.category}
               summary={e.data.summary} schedule={e.data.schedule} image={e.data.image}
               price={e.data.price} instructor={e.data.instructor} featured={e.data.featured}
               layout="horizontal"

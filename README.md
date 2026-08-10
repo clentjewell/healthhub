@@ -60,8 +60,33 @@ public/               Static assets, robots.txt, favicon
    header/footer/contact settings.
    See [`docs/EDITING-THE-WEBSITE.md`](docs/EDITING-THE-WEBSITE.md).
    *Needs one-time auth setup before first login.*
-5. ⬜ SEO layer (JSON-LD, meta/OG, sitemap, robots, llms.txt, redirect map).
-6. ⬜ Launch prep (preview build, visual + link + redirect checks). DNS is manual.
+5. ⬜ SEO layer (JSON-LD, meta/OG, sitemap, robots, llms.txt).
+6. ⬜ Launch prep (preview build, visual + link checks). DNS is manual.
+
+## URLs
+
+Every route mirrors a URL the live WordPress site already serves, so the
+cutover needs **no redirects**. Verified against `wp-sitemap.xml` plus a crawl
+of the live site's own links — 22 of 22 live URLs exist here.
+
+| URL | What |
+| --- | --- |
+| `/` | Home |
+| `/our-practitioners/` | Practitioners index (WP page) |
+| `/our-practitioner/{slug}/` | Practitioner detail — singular base, as WP has it |
+| `/events/` | Events index (WP events archive) |
+| `/event/{slug}/` | Event detail — singular base, as WP has it |
+| `/make-a-booking/` | Booking |
+| `/contact/` | Contact |
+
+The singular `/our-practitioner/` and `/event/` bases are WordPress
+conventions. They are kept deliberately: matching them preserves every inbound
+link and search ranking without a redirect map. Renaming them to plural later
+would need 17 redirects, so treat these paths as fixed.
+
+Two links on the live site are already broken and are **not** reproduced here:
+`/our-practitioner/amanda_ross/` and `/our-practitioner/Pearl_Blinco-Doffiny/`
+(both 404 on WordPress — underscored duplicates of working pages).
 
 See [`DESIGN-TOKENS.md`](DESIGN-TOKENS.md) for the captured design language and
 the open design decisions.

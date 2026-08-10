@@ -31,7 +31,7 @@ const cards = await Promise.all(
     return {
       name: p.data.name,
       role: p.data.role,
-      href: `/practitioners/${p.id}`,
+      href: `/our-practitioner/${p.id}`,
       image: p.data.image,
       serviceTitle: svc?.data.shortTitle ?? svc?.data.title,
       excerpt: excerpt(p.body),
