@@ -34,17 +34,18 @@ My approach is low-impact and designed to enhance physical, mental, and emotiona
 
 **Pilates & Body Balance Classes**
 
-⚡ Workout Smarter – Not Harder ⚡
+Workout Smarter – Not Harder
 
-🧘 Classes include gentle but powerful Pilates exercises and mindful movement. Focusing on controlled movements that bring stability, strength, and mobility to the entire body – enhancing core strength and rejuvenating both body and mind.
+Classes include gentle but powerful Pilates exercises and mindful movement. Focusing on controlled movements that bring stability, strength, and mobility to the entire body – enhancing core strength and rejuvenating both body and mind.
 
-🌍 Pilates treats the body as an interconnected whole unlocking both physical and emotional strength – sculpting long, lean muscles, strengthening the core, improving posture and flexibility – leading to reduced joint strain, relief from chronic aches and pains, and a renewed sense of energy.
+Pilates treats the body as an interconnected whole unlocking both physical and emotional strength – sculpting long, lean muscles, strengthening the core, improving posture and flexibility – leading to reduced joint strain, relief from chronic aches and pains, and a renewed sense of energy.
 
-😴 Pilates also supports the mind and nervous system. Its mindful, breath-focused approach calms stress, eases anxiety, and promotes deep relaxation. This balance not only enhances emotional well-being but provide a natural pathway to more nourishing and restorative sleep – sometimes called the best meditation!
+Pilates also supports the mind and nervous system. Its mindful, breath-focused approach calms stress, eases anxiety, and promotes deep relaxation. This balance not only enhances emotional well-being but provide a natural pathway to more nourishing and restorative sleep – sometimes called the best meditation!
 
-🤍 A Practice of Harmony  
+**A Practice of Harmony**
+
 Ultimately, Pilates clears the mind, steadies the body, and helps us rediscover an inner rhythm that builds resilience and grace.
 
-🌿 Just 30 minutes a day practicing Pilates daily can help regulate mood, improve focus and foster a healthier mindset and a foundation for well-being that flows into every part of daily life. 🌟
+Just 30 minutes a day practicing Pilates daily can help regulate mood, improve focus and foster a healthier mindset and a foundation for well-being that flows into every part of daily life.
 
 ## Fee and Class Times

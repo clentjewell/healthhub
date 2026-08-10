@@ -24,4 +24,4 @@ You’re welcome to lie down, sit comfortably, or find any position that support
 
 Sunday 5:00-6:00pm
 
-Contact Pearl 0467 512 368 to book😊
+Contact Pearl 0467 512 368 to book.
