@@ -2,7 +2,7 @@
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import SectionHeading from '@components/SectionHeading.astro';
-import PractitionerCard from '@components/PractitionerCard.astro';
+import PractitionerCarousel from '@components/PractitionerCarousel.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
 import { getSettings, getPage, mapEmbedSrc } from '../lib/content';
@@ -29,8 +29,9 @@ function excerpt(body: string | undefined, max = 110): string {
   return clean.length <= max ? clean : clean.slice(0, clean.lastIndexOf(' ', max)).trimEnd() + '…';
 }
 
+// All of them — the carousel scrolls, so there is no reason to hold any back.
 const teaser = await Promise.all(
-  practitioners.slice(0, 4).map(async (p) => {
+  practitioners.map(async (p) => {
     const svc = p.data.service ? await getEntry('services', p.data.service) : undefined;
     return {
       name: p.data.name, role: p.data.role, href: `/our-practitioner/${p.id}`,
@@ -87,9 +88,7 @@ const mapSrc = mapEmbedSrc(cfg);
   <section class="section band-tint">
     <div class="container">
       <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
-      <div class="grid-practitioners">
-        {teaser.map((c) => <PractitionerCard {...c} />)}
-      </div>
+      <PractitionerCarousel cards={teaser} label={pracSec.heading} />
       <p class="section-more">
         <a href="/our-practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
       </p>
@@ -229,24 +228,25 @@ const mapSrc = mapEmbedSrc(cfg);
     justify-content: center;
   }
 
-  .grid-practitioners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
   .grid-events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 
-  /* Staggered reveal — 60ms apart, transform/opacity only. Cards are visible
-     by default so they still render without JS or with reduced motion. */
+  /* Staggered reveal — 60ms apart. Cards are visible by default so they still
+     render without JS or with reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
-    .grid-practitioners > :global(*),
     .grid-events > :global(*) {
       animation: riseIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
-    .grid-practitioners > :global(*:nth-child(1)), .grid-events > :global(*:nth-child(1)) { animation-delay: 0ms; }
-    .grid-practitioners > :global(*:nth-child(2)), .grid-events > :global(*:nth-child(2)) { animation-delay: 60ms; }
-    .grid-practitioners > :global(*:nth-child(3)), .grid-events > :global(*:nth-child(3)) { animation-delay: 120ms; }
-    .grid-practitioners > :global(*:nth-child(4)), .grid-events > :global(*:nth-child(4)) { animation-delay: 180ms; }
+    .grid-events > :global(*:nth-child(1)) { animation-delay: 0ms; }
+    .grid-events > :global(*:nth-child(2)) { animation-delay: 60ms; }
+    .grid-events > :global(*:nth-child(3)) { animation-delay: 120ms; }
+    .grid-events > :global(*:nth-child(4)) { animation-delay: 180ms; }
   }
+  /* Animates the independent `translate` property, not `transform`: a filled
+     animation beats a plain declaration, so animating `transform` here would
+     permanently cancel each card's `transform` hover lift. */
   @keyframes riseIn {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: none; }
+    from { opacity: 0; translate: 0 14px; }
+    to   { opacity: 1; translate: none; }
   }
 
   .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
@@ -258,10 +258,6 @@ const mapSrc = mapEmbedSrc(cfg);
     border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   }
 
-  @media (max-width: 1040px) { .grid-practitioners { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 900px) { .grid-events { grid-template-columns: 1fr; } }
   @media (max-width: 860px) { .location-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 560px) {
-    .grid-practitioners, .grid-events { grid-template-columns: 1fr; }
-  }
 </style>
