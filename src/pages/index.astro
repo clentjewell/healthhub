@@ -89,9 +89,8 @@ const mapSrc = mapEmbedSrc(cfg);
     <div class="container">
       <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
     </div>
-    {/* Outside .container: the track runs the full viewport width and scrolls
-        off the right edge. Its own inset keeps the first card in line with the
-        heading above. */}
+    {/* Outside .container: the track runs the full viewport width, with cards
+        bleeding off both edges rather than stopping on the content column. */}
     <PractitionerCarousel cards={teaser} label={pracSec.heading} />
     <div class="container">
       <p class="section-more">
