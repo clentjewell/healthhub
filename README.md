@@ -5,9 +5,10 @@ Static [Astro](https://astro.build) site for
 **Cloudflare Pages**. A fast, mobile-first rebuild of the current WordPress +
 Elementor site, styled as a sibling of Pottsville Acupuncture.
 
-This repo also temporarily hosts a **Pottsville-styled `/hub/` proposal page**
-(see `/proposals/hub`, added in a later phase) — isolated, `noindex`, and
-portable to the Pottsville repo after client sign-off.
+The Pottsville `/hub/` enhancement is **not** part of this repo. It ships from
+the Pottsville site itself (`clentjewell/pottsville-acupuncture-website`), which
+is where that page lives. A Pottsville-styled proposal page briefly lived here
+under `/proposals/hub`; it has been removed.
 
 ## Develop
 

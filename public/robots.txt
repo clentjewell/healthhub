@@ -7,10 +7,6 @@
 User-agent: *
 Allow: /
 
-# The Pottsville-styled proposal page is hosted here temporarily and must not
-# be indexed on this domain (it is also noindex,nofollow at the page level).
-Disallow: /proposals/
-
 # Content editor (staff only, also noindex at the page level).
 Disallow: /admin/
 

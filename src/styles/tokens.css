@@ -6,12 +6,14 @@
    1. PRIMITIVES  — the raw Pottsville design language, captured from the live
       site (pottsvilleacupuncture.com.au). These are the shared DNA.
 
-   2. :root SEMANTIC (default = POTTSVILLE)  — used by the /proposals/hub
-      Pottsville-styled proposal page (Prompt 2). Calm, clinical, teal.
+   2. :root SEMANTIC (default = POTTSVILLE)  — the calm, clinical, teal
+      baseline the Health Hub variant is derived from. No page renders on this
+      default today: it is kept as the reference the sibling theme is a
+      deliberate variation OF, so the two identities cannot silently diverge.
 
    3. [data-theme="healthhub"] SEMANTIC  — the Health Hub sibling variant
       (Prompt 1). Same family, distinct identity: warmer, grounded, "studio".
-      Applied on <html> by BaseLayout. The proposal layout leaves the default.
+      Applied on <html> by BaseLayout, i.e. on every page of this site.
 
    NOTE: the Pottsville family is Noah (body) + Reborn (uppercase headings) —
    both geometric sans. These are LICENSED fonts, supplied by the client and

@@ -19,11 +19,7 @@ export default defineConfig({
   //   /make-a-booking/               /make-a-booking/
   //   /contact/                      /contact/
   integrations: [
-    sitemap({
-      // The Pottsville-styled proposal page must never be indexed on this
-      // domain — it is excluded from the sitemap (see also robots.txt).
-      filter: (page) => !page.includes('/proposals/'),
-    }),
+    sitemap(),
   ],
   image: {
     // Built-in astro:assets pipeline (sharp) → WebP + responsive sizes.
