@@ -141,6 +141,12 @@ const events = defineCollection({
           ]),
           start: z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 18:00'),
           end: z.string().regex(/^\d{2}:\d{2}$/, 'Use 24-hour HH:MM, e.g. 19:15'),
+          /**
+           * Name this slot when one listing covers several distinct classes —
+           * Hatha & Yin Yoga is really Yin Yang Yoga, Hatha and Yin on three
+           * different days, and saying so is clearer than one lumped schedule.
+           */
+          label: optionalText,
         }),
       )
       .default([]),

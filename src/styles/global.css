@@ -191,3 +191,12 @@ a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Body copy resolves to Noah Bold (700) because the licensed Noah has no upright
+   400 face — the same situation as pottsvilleacupuncture.com.au. Emphasis
+   therefore steps up to Black (900), otherwise <strong> is indistinguishable
+   from ordinary text. */
+strong,
+b {
+  font-weight: 900;
+}

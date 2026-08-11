@@ -2,7 +2,7 @@
 title: "Hatha & Yin Yoga"
 order: 4
 category: "course"
-schedule: "Monday, Tuesday & Wednesday evenings — 75 minutes"
+schedule: "Three classes a week — 75 minutes each"
 summary: "Asana, pranayama, meditation and yoga philosophy. Hatha to invigorate and balance; Yin to rest, release and restore."
 image: "/images/events/hatha-yin-yoga.webp"
 instructor: "Shannon O’Hara"
@@ -14,12 +14,15 @@ sessions:
   - day: Monday
     start: "07:30"
     end: "08:45"
+    label: Yin Yang Yoga
   - day: Tuesday
     start: "18:00"
     end: "19:15"
+    label: Hatha Yoga
   - day: Wednesday
     start: "18:00"
     end: "19:15"
+    label: Yin Yoga
 ---
 ### Hatha & Yin Yoga
 

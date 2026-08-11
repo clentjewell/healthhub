@@ -4,15 +4,20 @@
    Reborn  → headings (uppercase display), 1 weight supplied (400).
    Noah    → body / UI. Supplied so far: 700 (bold), 900 (black), 400 italic.
 
-   ⚠️  MISSING for full parity — Noah UPRIGHT text weights:
-       • Noah Regular 400  (primary body copy)   ← most important
-       • Noah Medium  500  (nav, labels)
-       • Noah SemiBold 600 (eyebrows, CTAs)
-   Until those arrive, body/UI upright text falls back to Mulish (a close
-   free geometric sans, loaded in BaseLayout). Bold/italic already render in
-   real Noah. When the weights arrive: drop the woff2 files in public/fonts/,
-   add the @font-face blocks below, and remove Mulish from BaseLayout +
-   the --font-sans fallback in tokens.css.
+   Only three upright/italic Noah faces are licensed and supplied: 700, 900
+   and 400-italic. There is no Noah Regular 400.
+
+   That is also true of pottsvilleacupuncture.com.au, which self-hosts exactly
+   the same three faces and sets `body { font-family:'Noah'; font-weight:400 }`.
+   CSS weight matching keeps the family and picks the nearest available face,
+   so a request for 400 upright resolves to Noah Bold — measured in Chromium:
+   a 400 string and a 700 string render to identical widths (267.17px), and
+   neither matches the system fallback (284.45px).
+
+   So body copy here renders in Noah Bold, exactly as it does on Pottsville.
+   This is parity, not a bug. If lighter body copy is wanted, Noah Regular 400
+   has to be licensed and dropped into public/fonts/ — then add its @font-face
+   below and nothing else needs to change.
    ========================================================================= */
 
 /* ---- Reborn (headings) ---- */

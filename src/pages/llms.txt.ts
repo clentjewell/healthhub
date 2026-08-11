@@ -72,7 +72,7 @@ export const GET: APIRoute = async () => {
     ...events.map((e) => {
       const when = e.data.sessions.length
         ? e.data.sessions
-            .map((x) => sessionLabel({ day: DAYS.indexOf(x.day), start: x.start, end: x.end }))
+            .map((x) => sessionLabel({ day: DAYS.indexOf(x.day), start: x.start, end: x.end, label: x.label }))
             .join('; ')
         : (e.data.schedule ?? 'By arrangement');
       const cost = e.data.price ? ` — ${e.data.price}` : '';

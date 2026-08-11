@@ -239,7 +239,9 @@ const schema = [
   .prose :global(p) { color: var(--color-text); margin: 0 0 1em; max-width: none; }
   .prose :global(ul), .prose :global(ol) { margin: 0 0 1.2em; padding-left: 1.3em; }
   .prose :global(li) { margin-bottom: 0.4em; color: var(--color-text); }
-  .prose :global(strong) { color: var(--color-heading); font-weight: 700; }
+  /* Body copy resolves to Noah Bold (700) — the family has no upright 400, same
+     as Pottsville. So emphasis has to step up to Black or it is invisible. */
+  .prose :global(strong) { color: var(--color-heading); font-weight: 900; }
   .prose :global(blockquote) {
     margin: 1.4em 0; padding: 4px 0 4px 20px; border-left: 3px solid var(--color-accent);
     color: var(--color-text-muted); font-style: italic;

@@ -20,6 +20,8 @@ export interface Session {
   start: string;
   /** "HH:MM", 24-hour. */
   end: string;
+  /** Optional name, when one listing covers several distinct classes. */
+  label?: string;
 }
 
 export interface CalendarEvent {
@@ -37,9 +39,10 @@ const BYDAY = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 
 export const dayName = (day: number) => DAY_NAMES[day] ?? '';
 
-/** Human-readable "Sundays 8:00am – 9:15am". */
+/** Human-readable "Sundays 8:00am – 9:15am", prefixed with the class name if set. */
 export function sessionLabel(s: Session): string {
-  return `${DAY_NAMES[s.day]}s ${time12(s.start)} – ${time12(s.end)}`;
+  const when = `${DAY_NAMES[s.day]}s ${time12(s.start)} – ${time12(s.end)}`;
+  return s.label ? `${s.label} — ${when}` : when;
 }
 
 export function time12(hhmm: string): string {
@@ -124,7 +127,9 @@ export function buildIcs(ev: CalendarEvent, now: Date = new Date()): string {
       `DTSTART:${stampCompact(date, s.start)}`,
       `DTEND:${stampCompact(date, s.end)}`,
       `RRULE:FREQ=WEEKLY;BYDAY=${BYDAY[s.day]}`,
-      `SUMMARY:${icsText(ev.title)}`,
+      // Name the slot when it has its own label, so a listing covering three
+      // different classes imports as three recognisable entries.
+      `SUMMARY:${icsText(s.label ?? ev.title)}`,
       `DESCRIPTION:${icsText(`${ev.description}\n\n${ev.url}`)}`,
       `LOCATION:${icsText(ev.location)}`,
       `URL:${ev.url}`,
@@ -147,7 +152,7 @@ export function googleUrl(ev: CalendarEvent, now: Date = new Date()): string | u
   const date = nextOccurrence(s.day, now);
   const p = new URLSearchParams({
     action: 'TEMPLATE',
-    text: ev.title,
+    text: s.label ?? ev.title,
     dates: `${stampCompact(date, s.start)}/${stampCompact(date, s.end)}`,
     details: `${ev.description}\n\n${ev.url}`,
     location: ev.location,
@@ -168,7 +173,7 @@ export function outlookUrl(
   const p = new URLSearchParams({
     path: '/calendar/action/compose',
     rru: 'addevent',
-    subject: ev.title,
+    subject: s.label ?? ev.title,
     startdt: stampIso(date, s.start),
     enddt: stampIso(date, s.end),
     location: ev.location,

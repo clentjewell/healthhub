@@ -305,6 +305,7 @@ collections:
             options: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
           - { label: Starts, name: start, widget: string, hint: '24-hour, e.g. 18:00' }
           - { label: Ends, name: end, widget: string, hint: '24-hour, e.g. 19:15' }
+          - { label: Class name for this slot, name: label, widget: string, required: false, hint: 'Only if this listing covers several different classes, e.g. Yin Yang Yoga.' }
       - label: Show the weekly timetable table on this page
         name: showTimetable
         widget: boolean

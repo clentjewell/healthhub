@@ -152,7 +152,8 @@ const payload = JSON.stringify({
     // Re-point the single-event links at the next occurrence from *today*, so a
     // page served long after the last build still offers a future date.
     const data = JSON.parse(root.dataset.atc || '{}');
-    const sessions: { day: string; start: string; end: string }[] = data.sessions ?? [];
+    const sessions: { day: string; start: string; end: string; label?: string }[] =
+      data.sessions ?? [];
     if (sessions.length === 0) return;
     const next = sessions
       .map((s) => ({ s, at: nextOccurrence(DAYS.indexOf(s.day)) }))
@@ -165,7 +166,7 @@ const payload = JSON.stringify({
       if (kind === 'Google Calendar') {
         const p = new URLSearchParams({
           action: 'TEMPLATE',
-          text: data.title,
+          text: s.label || data.title,
           dates: `${compact(at, s.start)}/${compact(at, s.end)}`,
           details: data.details,
           location: data.location,
@@ -176,7 +177,7 @@ const payload = JSON.stringify({
         const p = new URLSearchParams({
           path: '/calendar/action/compose',
           rru: 'addevent',
-          subject: data.title,
+          subject: s.label || data.title,
           startdt: iso(at, s.start),
           enddt: iso(at, s.end),
           location: data.location,

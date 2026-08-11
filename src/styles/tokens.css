@@ -62,11 +62,11 @@
 
   /* ---- Typography — the real Pottsville family (self-hosted) ----------
      Reborn = uppercase display headings; Noah = body/UI (both geometric
-     sans). Mulish is the interim fallback for Noah's not-yet-supplied
-     upright weights (see fonts.css). */
-  --font-heading: 'Reborn', 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+     sans). This is Pottsville's own stack, character for character — see
+     fonts.css for what that means for upright body weights. */
+  --font-heading: 'Reborn', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: var(--font-heading);
-  --font-sans: 'Noah', 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Noah', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Type scale (matches Pottsville) */
   --fs-h1: clamp(2.4rem, 5.5vw, 4.5rem);

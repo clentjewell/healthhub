@@ -34,6 +34,7 @@ export const GET: APIRoute = ({ props }) => {
       day: DAYS.indexOf(s.day),
       start: s.start,
       end: s.end,
+      label: s.label,
     })),
   });
 
