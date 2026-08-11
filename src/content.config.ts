@@ -202,6 +202,13 @@ const settings = defineCollection({
     email: optionalText,
     mapUrl: z.string(),
     mapQuery: z.string(),
+    /**
+     * Exact coordinates of the studio, taken from its Google Maps listing.
+     * These feed the LocalBusiness `geo` and pin the embedded map on the
+     * building rather than letting Google guess from the street name.
+     */
+    lat: z.number().optional(),
+    lng: z.number().optional(),
 
     hoursLabel: z.string(),
     hoursOpen: z.string().regex(/^\d{2}:\d{2}$/),

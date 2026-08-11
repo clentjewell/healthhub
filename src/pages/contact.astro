@@ -1,11 +1,18 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PageHeader from '@components/PageHeader.astro';
+import Icon from '@components/Icon.astro';
 import { getSettings, getPage, mapEmbedSrc } from '../lib/content';
+import { site } from '@data/site';
 
 const cfg = await getSettings();
 const page = await getPage('contact');
 const mapSrc = mapEmbedSrc(cfg);
+
+const socials = [
+  cfg.facebook && { name: 'facebook' as const, label: 'Facebook', href: cfg.facebook },
+  cfg.instagram && { name: 'instagram' as const, label: 'Instagram', href: cfg.instagram },
+].filter(Boolean) as { name: 'facebook' | 'instagram'; label: string; href: string }[];
 ---
 
 <BaseLayout title={page.metaTitle} description={page.metaDescription}>
@@ -65,16 +72,31 @@ const mapSrc = mapEmbedSrc(cfg);
           <h3>Open</h3>
           <p>{cfg.hoursLabel}</p>
         </div>
-        <div class="detail">
-          <h3>Follow</h3>
-          <p>
-            {cfg.instagram
-              ? <a href={cfg.instagram} target="_blank" rel="noopener">Instagram {cfg.socialHandle}</a>
-              : cfg.socialHandle}
-          </p>
-          {cfg.phone && <p><a href={`tel:${cfg.phone.replace(/\s/g, '')}`}>{cfg.phone}</a></p>}
-          {cfg.email && <p><a href={`mailto:${cfg.email}`}>{cfg.email}</a></p>}
-        </div>
+        {
+          (cfg.phone || cfg.email) && (
+            <div class="detail">
+              <h3>Contact</h3>
+              {cfg.phone && <p><a href={`tel:${cfg.phone.replace(/\s/g, '')}`}>{cfg.phone}</a></p>}
+              {cfg.email && <p><a href={`mailto:${cfg.email}`}>{cfg.email}</a></p>}
+            </div>
+          )
+        }
+        {
+          socials.length > 0 && (
+            <div class="detail">
+              <h3>Follow</h3>
+              <ul class="contact-social" aria-label={`${site.name} on social media`}>
+                {socials.map((so) => (
+                  <li>
+                    <a href={so.href} target="_blank" rel="noopener" aria-label={so.label} title={so.label}>
+                      <Icon name={so.name} size={18} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
       </aside>
     </div>
 
@@ -116,6 +138,20 @@ const mapSrc = mapEmbedSrc(cfg);
   .detail h3 { font-size: 0.95rem; margin-bottom: 8px; }
   .detail address { font-style: normal; line-height: 1.6; }
   .detail p { margin: 0; }
+  /* Icon buttons, matching the footer and the practitioner profiles. */
+  .contact-social { display: flex; gap: 10px; list-style: none; padding: 0; margin: 4px 0 0; }
+  .contact-social a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-brand);
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+  .contact-social a:hover {
+    background: var(--color-brand); color: #fff; border-color: var(--color-brand);
+  }
+  .contact-social svg { width: 18px; height: 18px; fill: currentColor; }
   .todo-note { font-size: 12px; color: var(--color-text-muted); font-style: italic; }
   .todo-note code { font-style: normal; }
 

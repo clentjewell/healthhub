@@ -16,8 +16,14 @@ region: NSW
 postcode: '2489'
 phone: 0415 919 521
 email: ''
-mapUrl: https://www.google.com/maps/search/?api=1&query=87-89+Tweed+Coast+Road+Hastings+Point+NSW+2489
+# Points at the studio's own Google Maps listing (by its CID) rather than a
+# text search, so "Get directions" lands on the business, not a results list.
+mapUrl: https://maps.google.com/?cid=16890111486367809711
 mapQuery: 87-89 Tweed Coast Road, Hastings Point NSW 2489
+# Exact coordinates from the Google Maps listing — used for the LocalBusiness
+# geo and to pin the embedded map on the building.
+lat: -28.3688969
+lng: 153.5728374
 
 # ---- Opening hours ----------------------------------------------------------
 hoursLabel: Monday – Sunday, 8:00am – 6:30pm

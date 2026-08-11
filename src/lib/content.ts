@@ -29,7 +29,10 @@ export function formatAddress(s: Awaited<ReturnType<typeof getSettings>>) {
 
 /** Keyless Google Maps embed for the settings address. */
 export function mapEmbedSrc(s: Awaited<ReturnType<typeof getSettings>>) {
+  // Prefer the exact coordinates when we have them: a text query lets Google
+  // pick, and for this address it lands on the road rather than the building.
+  const q = s.lat != null && s.lng != null ? `${s.lat},${s.lng}` : s.mapQuery;
   return `https://maps.google.com/maps?q=${encodeURIComponent(
-    s.mapQuery,
-  )}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    q,
+  )}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
 }

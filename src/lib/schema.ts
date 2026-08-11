@@ -6,10 +6,9 @@
  * All facts come from the content collections — the address, hours and socials
  * are only ever edited in Settings, and this reads from there.
  *
- * Deliberately absent: `geo` coordinates. Geocoding the street address only
- * resolved to the road centreline, and a wrong pin is worse than none — Google
- * geocodes from `address` and `hasMap` anyway. Add `geo` here once the exact
- * coordinates are taken from the Google Business Profile.
+ * `geo` comes from the coordinates on the studio's own Google Maps listing, held
+ * in Settings — not from geocoding the street address, which resolved only to
+ * the road centreline.
  */
 import { site } from '../data/site';
 
@@ -23,6 +22,8 @@ type Settings = {
   phone?: string;
   email?: string;
   mapUrl: string;
+  lat?: number;
+  lng?: number;
   hoursOpen: string;
   hoursClose: string;
   instagram?: string;
@@ -69,6 +70,9 @@ export function businessNode(s: Settings) {
       postalCode: s.postcode,
       addressCountry: 'AU',
     },
+    ...(s.lat != null && s.lng != null
+      ? { geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lng } }
+      : {}),
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',

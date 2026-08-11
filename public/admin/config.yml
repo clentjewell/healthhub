@@ -382,6 +382,8 @@ collections:
           - { label: Email, name: email, widget: string, required: false }
           - { label: Google Maps link (Get directions button), name: mapUrl, widget: string }
           - { label: Address for the embedded map, name: mapQuery, widget: string, hint: 'Plain address, e.g. 87-89 Tweed Coast Road, Hastings Point NSW 2489' }
+          - { label: Latitude, name: lat, widget: number, value_type: float, required: false, hint: 'From the studio Google Maps listing. Pins the map and feeds Google.' }
+          - { label: Longitude, name: lng, widget: number, value_type: float, required: false }
 
           - { label: Opening hours (as shown), name: hoursLabel, widget: string, hint: 'e.g. Monday – Sunday, 8:00am – 6:30pm' }
           - { label: Opens at, name: hoursOpen, widget: string, hint: '24-hour HH:MM — used for Google', pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Use 24-hour HH:MM'] }
