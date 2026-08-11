@@ -15,7 +15,7 @@ const socials = [
 ].filter(Boolean) as { name: 'facebook' | 'instagram'; label: string; href: string }[];
 ---
 
-<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+<BaseLayout fullTitle={page.metaTitle} description={page.metaDescription}>
   <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
 
   <section class="section">

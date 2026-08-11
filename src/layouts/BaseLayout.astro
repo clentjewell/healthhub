@@ -14,6 +14,7 @@ import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import { getSettings } from '../lib/content';
 import { businessNode, websiteNode } from '../lib/schema';
+import { pageTitle as buildTitle } from '../lib/seo';
 import '@styles/global.css';
 
 interface Props {
@@ -26,6 +27,12 @@ interface Props {
   noindex?: boolean;
   /** og:type — "article" for a profile or event page, else "website". */
   ogType?: string;
+  /**
+   * The complete browser title, used verbatim. The five CMS-edited pages set
+   * this so an editor controls the whole string; detail pages pass `title`
+   * instead and get the brand appended.
+   */
+  fullTitle?: string;
   /**
    * Page-specific JSON-LD nodes. The business and website nodes are always
    * included, so pages only pass what is unique to them and reference the
@@ -41,6 +48,7 @@ const {
   ogImage = '/assets/og-default.jpg',
   noindex = false,
   ogType = 'website',
+  fullTitle,
   schema = [],
 } = Astro.props;
 
@@ -54,7 +62,7 @@ const graph = noindex
   ? null
   : { '@context': 'https://schema.org', '@graph': [businessNode(cfg), websiteNode(), ...schema] };
 
-const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · Wellness Studio, Hastings Point`;
+const pageTitle = fullTitle ?? buildTitle(title);
 /**
  * Canonicals always carry a trailing slash, matching both the sitemap and the
  * URLs the live WordPress site serves — so a page never advertises a canonical

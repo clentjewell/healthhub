@@ -5,6 +5,7 @@ import PlaceholderImage from '@components/PlaceholderImage.astro';
 import Icon from '@components/Icon.astro';
 import CtaBand from '@components/CtaBand.astro';
 import { personNode, breadcrumbNode } from '../../lib/schema';
+import { clamp } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const practitioners = await getCollection('practitioners');
@@ -28,7 +29,18 @@ const socials = [
   website && { label: 'Website', href: website, icon: 'globe' as const },
 ].filter(Boolean) as { label: string; href: string; icon: 'facebook' | 'instagram' | 'globe' }[];
 
-const description = `${name} — ${role} at Health Hub Tweed Coast, Hastings Point.`;
+/**
+ * Search intent for a studio like this is "acupuncturist Hastings Point" far
+ * more often than a practitioner's name, so the service goes in the title and
+ * the role plus the service's own words go in the description. The short service
+ * label keeps the title inside what Google renders.
+ */
+const svcShort = svc?.data.shortTitle ?? svc?.data.title;
+const metaTitle = svcShort ? `${name}, ${svcShort}` : name;
+const description = clamp(
+  `${name}, ${role} at Health Hub Tweed Coast in Hastings Point.` +
+    `${svc ? ` ${svc.data.summary}` : ''}`,
+);
 const schema = [
   personNode({
     id: entry.id,
@@ -45,7 +57,7 @@ const schema = [
 ---
 
 <BaseLayout
-  title={name}
+  title={metaTitle}
   description={description}
   path={`/our-practitioner/${entry.id}`}
   ogImage={image ?? '/assets/og-default.jpg'}

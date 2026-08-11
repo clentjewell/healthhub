@@ -10,6 +10,7 @@ import { getSettings, formatAddress } from '../../lib/content';
 import { sessionLabel } from '../../lib/calendar';
 import { site } from '../../data/site';
 import { eventNode, breadcrumbNode } from '../../lib/schema';
+import { clamp } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const events = await getCollection('events');
@@ -45,6 +46,21 @@ const others = (await getCollection('events'))
   .slice(0, 3);
 
 /**
+ * Lead the description with when the class runs. "Sundays 5:00pm" is the part
+ * someone scanning results is actually looking for, and the summary alone left
+ * the times invisible until they clicked through.
+ */
+const when = calSessions.length
+  ? calSessions.map(sessionLabel).join(' · ')
+  : schedule;
+const descBase = [when, summary].filter(Boolean).join(' — ');
+// Append the location only if it fits whole. Clamping the combined string left
+// most pages ending "— At Health Hub Tweed Coast…", which reads like a mistake.
+const descTail = ' At Health Hub Tweed Coast, Hastings Point.';
+const metaDescription =
+  descBase.length + descTail.length <= 158 ? descBase + descTail : clamp(descBase);
+
+/**
  * Only describe this as a schema.org Event when it has real times. The timetable
  * overview and the by-appointment listings have none, and an Event without a
  * schedule is incomplete structured data — better to publish nothing than a
@@ -67,7 +83,7 @@ const schema = [
 
 <BaseLayout
   title={title}
-  description={summary}
+  description={metaDescription}
   path={`/event/${entry.id}`}
   ogImage={image ?? '/assets/og-default.jpg'}
   ogType="article"
