@@ -28,6 +28,11 @@ welcome:
       Receive the care you deserve, delivered collaboratively from a group of
       dedicated and talented practitioners and therapists.
 
+# Services and Practitioners both link to the same eight profiles. Turn either
+# off here — the rest of the page, and the site's structured data, are unaffected.
+showServices: true
+showPractitioners: true
+
 services:
   eyebrow: What we offer
   heading: Our Services

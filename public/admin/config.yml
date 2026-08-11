@@ -66,6 +66,17 @@ collections:
                 name: paragraphs
                 widget: list
                 field: { label: Paragraph, name: paragraph, widget: text }
+          - label: Show the Services section
+            name: showServices
+            widget: boolean
+            default: true
+            hint: >-
+              Services and Practitioners both link to the same eight profiles.
+              Keep one, the other, or both — the rest of the page adjusts.
+          - label: Show the Practitioners section
+            name: showPractitioners
+            widget: boolean
+            default: true
           - label: Services section
             name: services
             widget: object

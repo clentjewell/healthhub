@@ -4,6 +4,7 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import PlaceholderImage from '@components/PlaceholderImage.astro';
 import Icon from '@components/Icon.astro';
 import CtaBand from '@components/CtaBand.astro';
+import { personNode, breadcrumbNode } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const practitioners = await getCollection('practitioners');
@@ -26,12 +27,30 @@ const socials = [
   instagram && { label: 'Instagram', href: instagram, icon: 'instagram' as const },
   website && { label: 'Website', href: website, icon: 'globe' as const },
 ].filter(Boolean) as { label: string; href: string; icon: 'facebook' | 'instagram' | 'globe' }[];
+
+const description = `${name} — ${role} at Health Hub Tweed Coast, Hastings Point.`;
+const schema = [
+  personNode({
+    id: entry.id,
+    name, role, image, phone, facebook, instagram, website,
+    serviceTitle: svc?.data.title,
+    summary: description,
+  }),
+  breadcrumbNode([
+    { name: 'Home', path: '/' },
+    { name: 'Practitioners', path: '/our-practitioners' },
+    { name, path: `/our-practitioner/${entry.id}` },
+  ]),
+];
 ---
 
 <BaseLayout
   title={name}
-  description={`${name} — ${role} at Health Hub Tweed Coast, Hastings Point.`}
+  description={description}
   path={`/our-practitioner/${entry.id}`}
+  ogImage={image ?? '/assets/og-default.jpg'}
+  ogType="profile"
+  schema={schema}
 >
   {/* Hero */}
   <header class="prac-hero">

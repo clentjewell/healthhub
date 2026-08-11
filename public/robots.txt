@@ -1,5 +1,8 @@
-# Health Hub Tweed Coast
-# NOTE: full robots.txt (with sitemap + llms.txt) is finalised in Phase 5.
+# Health Hub Tweed Coast — https://healthhubtweedcoast.com.au
+#
+# Search and AI crawlers are both welcome: being quotable in AI answers is worth
+# more to a local studio than withholding the content. If the client later wants
+# to opt out of AI training, add per-agent Disallow blocks here.
 
 User-agent: *
 Allow: /
@@ -11,4 +14,11 @@ Disallow: /proposals/
 # Content editor (staff only, also noindex at the page level).
 Disallow: /admin/
 
+# Calendar downloads — useful to visitors, nothing for a crawler to index.
+Disallow: /*.ics$
+
 Sitemap: https://healthhubtweedcoast.com.au/sitemap-index.xml
+
+# Plain-text summary of the site for AI assistants and answer engines.
+# Generated at build time from the same content the pages use, so it cannot
+# drift out of date: https://healthhubtweedcoast.com.au/llms.txt

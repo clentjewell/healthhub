@@ -5,6 +5,7 @@ import PageHeader from '@components/PageHeader.astro';
 import PractitionerCard from '@components/PractitionerCard.astro';
 import CtaBand from '@components/CtaBand.astro';
 import { getPage } from '../../lib/content';
+import { itemListNode, breadcrumbNode } from '../../lib/schema';
 
 const page = await getPage('practitioners');
 
@@ -39,9 +40,15 @@ const cards = await Promise.all(
     };
   }),
 );
+
+const schema = [
+  itemListNode('Practitioners at Health Hub Tweed Coast',
+    cards.map((c) => ({ name: c.name, path: c.href }))),
+  breadcrumbNode([{ name: 'Home', path: '/' }, { name: 'Practitioners', path: '/our-practitioners' }]),
+];
 ---
 
-<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+<BaseLayout title={page.metaTitle} description={page.metaDescription} schema={schema}>
   <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
 
   <section class="section">

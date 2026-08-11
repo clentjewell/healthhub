@@ -5,6 +5,7 @@ import PageHeader from '@components/PageHeader.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
 import { getPage } from '../../lib/content';
+import { itemListNode, breadcrumbNode } from '../../lib/schema';
 
 const page = await getPage('events');
 
@@ -12,9 +13,15 @@ const page = await getPage('events');
 const events = (await getCollection('events'))
   .filter((e) => e.data.active)
   .sort((a, b) => a.data.order - b.data.order);
+
+const schema = [
+  itemListNode('Classes & events at Health Hub Tweed Coast',
+    events.map((e) => ({ name: e.data.title, path: `/event/${e.id}` }))),
+  breadcrumbNode([{ name: 'Home', path: '/' }, { name: 'Events', path: '/events' }]),
+];
 ---
 
-<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+<BaseLayout title={page.metaTitle} description={page.metaDescription} schema={schema}>
   <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
 
   <section class="section">

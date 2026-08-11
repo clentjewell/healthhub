@@ -9,6 +9,7 @@ import { CATEGORY_LABEL } from '../../lib/format';
 import { getSettings, formatAddress } from '../../lib/content';
 import { sessionLabel } from '../../lib/calendar';
 import { site } from '../../data/site';
+import { eventNode, breadcrumbNode } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const events = await getCollection('events');
@@ -42,9 +43,36 @@ const others = (await getCollection('events'))
   .filter((e) => e.data.active && e.id !== entry.id)
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
+
+/**
+ * Only describe this as a schema.org Event when it has real times. The timetable
+ * overview and the by-appointment listings have none, and an Event without a
+ * schedule is incomplete structured data — better to publish nothing than a
+ * hollow node or an invented date.
+ */
+const schema = [
+  ...(sessions.length
+    ? [eventNode(
+        { id: entry.id, title, summary, image, price, instructor, location, bookingUrl, sessions },
+        cfg,
+      )]
+    : []),
+  breadcrumbNode([
+    { name: 'Home', path: '/' },
+    { name: 'Events', path: '/events' },
+    { name: title, path: `/event/${entry.id}` },
+  ]),
+];
 ---
 
-<BaseLayout title={title} description={summary} path={`/event/${entry.id}`}>
+<BaseLayout
+  title={title}
+  description={summary}
+  path={`/event/${entry.id}`}
+  ogImage={image ?? '/assets/og-default.jpg'}
+  ogType="article"
+  schema={schema}
+>
   <article>
     {/* Hero */}
     <header class="ev-hero">

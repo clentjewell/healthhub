@@ -275,6 +275,15 @@ const pages = defineCollection({
         paragraphs: z.array(z.string()).default([]),
       })
       .optional(),
+    /**
+     * Which of the two overlapping homepage sections to show. Services and
+     * Practitioners both link to the same eight profiles, so the client may keep
+     * one, the other, or both — this is a toggle rather than a code change. The
+     * SEO layer reads from the collections, not from these, so structured data
+     * is unaffected either way.
+     */
+    showServices: z.boolean().default(true),
+    showPractitioners: z.boolean().default(true),
     services: section.optional(),
     practitioners: section.optional(),
     events: section.optional(),

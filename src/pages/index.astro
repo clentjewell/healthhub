@@ -7,6 +7,7 @@ import ServiceCard from '@components/ServiceCard.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
 import { getSettings, getPage, mapEmbedSrc } from '../lib/content';
+import { serviceCatalogueNode } from '../lib/schema';
 
 const cfg = await getSettings();
 const page = await getPage('home');
@@ -77,9 +78,18 @@ const events = (await getCollection('events'))
   .slice(0, 4);
 
 const mapSrc = mapEmbedSrc(cfg);
+
+/**
+ * The service catalogue is built from the collections, not from what the page
+ * renders — so it stays complete whichever of the Services / Practitioners
+ * sections the client chooses to show.
+ */
+const schema = [serviceCatalogueNode(services.map((s) => ({
+  title: s.title, summary: s.summary, providerName: s.provider, href: s.href,
+})))];
 ---
 
-<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+<BaseLayout title={page.metaTitle} description={page.metaDescription} schema={schema}>
   {/* Hero with background image slider */}
   <section class="hero">
     <div class="hero-slides" aria-hidden="true">
@@ -114,29 +124,40 @@ const mapSrc = mapEmbedSrc(cfg);
   </section>
 
   {/* Our Services — no service pages; every tile goes to its practitioner */}
-  <section class="section">
-    <div class="container">
-      <SectionHeading eyebrow={svcSec.eyebrow} title={svcSec.heading} lede={svcSec.lede} />
-      <div class="grid-services">
-        {services.map((s) => <ServiceCard {...s} />)}
-      </div>
-    </div>
-  </section>
+  {
+    page.showServices && (
+      <section class:list={['section', { 'band-tint': !page.showPractitioners }]}>
+        <div class="container">
+          <SectionHeading eyebrow={svcSec.eyebrow} title={svcSec.heading} lede={svcSec.lede} />
+          <div class="grid-services">
+            {services.map((s) => <ServiceCard {...s} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
-  {/* Practitioners teaser */}
-  <section class="section band-tint">
-    <div class="container">
-      <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
-    </div>
-    {/* Outside .container: the track runs the full viewport width, with cards
-        bleeding off both edges rather than stopping on the content column. */}
-    <PractitionerCarousel cards={teaser} label={pracSec.heading} />
-    <div class="container">
-      <p class="section-more">
-        <a href="/our-practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
-      </p>
-    </div>
-  </section>
+  {/* Practitioners teaser. These two sections share one slot between Welcome and
+      Events, and the tint alternates so the page never shows three plain bands in
+      a row: Practitioners is always tinted, and Services takes the tint only when
+      it is the only one of the pair showing. */}
+  {
+    page.showPractitioners && (
+      <section class="section band-tint">
+        <div class="container">
+          <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
+        </div>
+        {/* Outside .container: the track runs the full viewport width, with cards
+            bleeding off both edges rather than stopping on the content column. */}
+        <PractitionerCarousel cards={teaser} label={pracSec.heading} />
+        <div class="container">
+          <p class="section-more">
+            <a href="/our-practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   {/* Events teaser — 4 of the studio's offerings */}
   <section class="section">
