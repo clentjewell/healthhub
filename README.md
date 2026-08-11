@@ -60,7 +60,10 @@ public/               Static assets, robots.txt, favicon
    header/footer/contact settings.
    See [`docs/EDITING-THE-WEBSITE.md`](docs/EDITING-THE-WEBSITE.md).
    *Needs one-time auth setup before first login.*
-5. ⬜ SEO layer (JSON-LD, meta/OG, sitemap, robots, llms.txt).
+5. ✅ **SEO / AEO layer** — JSON-LD (LocalBusiness, Person, Event, OfferCatalog,
+   BreadcrumbList, ItemList), written titles and descriptions, OG/Twitter cards
+   and share image, sitemap, robots, `/llms.txt`.
+   No redirect map is needed — see [URLs](#urls).
 6. ⬜ Launch prep (preview build, visual + link checks). DNS is manual.
 
 ## URLs
