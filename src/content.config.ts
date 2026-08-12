@@ -289,25 +289,16 @@ const pages = defineCollection({
       })
       .optional(),
     /**
-     * Which of the two overlapping homepage sections to show. Services and
-     * Practitioners both link to the same eight profiles, so the client may keep
-     * one, the other, or both — this is a toggle rather than a code change. The
-     * SEO layer reads from the collections, not from these, so structured data
-     * is unaffected either way.
+     * Whether the homepage Services grid shows. A toggle rather than a code
+     * change. The SEO layer reads from the collections, not from this, so
+     * structured data is unaffected either way.
+     *
+     * The homepage once also carried a Practitioners carousel, and briefly a
+     * carousel variant of Services alongside the grid. Both were removed; the
+     * team is reached through /our-practitioners, which is in the nav.
      */
     showServices: z.boolean().default(true),
-    /**
-     * Services again, in the full-bleed carousel the Practitioners section uses.
-     * Two presentations of the same eight services, so the client can see both
-     * side by side and pick one. Turn the loser off before launch — running both
-     * permanently would list every service twice.
-     */
-    showServicesCarousel: z.boolean().default(false),
-    showPractitioners: z.boolean().default(true),
     services: section.optional(),
-    /** Heading block for the carousel variant. Falls back to `services`. */
-    servicesCarousel: section.optional(),
-    practitioners: section.optional(),
     events: section.optional(),
     location: z
       .object({

@@ -15,7 +15,11 @@ locality: Hastings Point
 region: NSW
 postcode: '2489'
 phone: 0415 919 521
-email: ''
+# Shared with the Pottsville clinic — confirmed by the client as the address to
+# use for the Hub too, rather than a separate healthhubtweedcoast.com.au inbox.
+# Setting it here lights it up in all four places at once: the footer, the
+# contact page, llms.txt and the LocalBusiness schema.
+email: health@pottsvilleacupuncture.com.au
 # Points at the studio's own Google Maps listing (by its CID) rather than a
 # text search, so "Get directions" lands on the business, not a results list.
 mapUrl: https://maps.google.com/?cid=16890111486367809711

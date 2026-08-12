@@ -27,19 +27,9 @@ welcome:
       Receive the care you deserve, delivered collaboratively from a group of
       dedicated and talented practitioners and therapists.
 
-# Services and Practitioners both link to the same eight profiles. Turn any of
-# these off here — the rest of the page, and the site's structured data, are
-# unaffected.
-#
-# Services has two designs built: the grid (A) and the full-bleed carousel (B),
-# the same layout the Practitioners section uses. Only one should ever be on at
-# a time — both on lists all eight services twice on the one page.
-showServices: true          # design A — grid
-showServicesCarousel: false # design B — carousel. Hidden, not deleted.
-
-# Hidden, not deleted. The section, its content below and its eight cards are
-# all still here — flip this back to true to bring it straight back.
-showPractitioners: false
+# Turn the Services grid off here — the rest of the page, and the site's
+# structured data, are unaffected.
+showServices: true
 
 services:
   eyebrow: What we offer
@@ -47,23 +37,6 @@ services:
   lede: >-
     Each service is led by the practitioner who provides it — choose a service to
     meet them, see their fees and book directly.
-
-# Heading block for design B. Deliberately the same words as above: the two
-# sections are a layout comparison, so holding the copy constant is the point.
-servicesCarousel:
-  eyebrow: What we offer
-  heading: Our Services
-  lede: >-
-    Each service is led by the practitioner who provides it — choose a service to
-    meet them, see their fees and book directly.
-
-practitioners:
-  eyebrow: Meet the team
-  heading: Our Practitioners
-  lede: >-
-    A multidisciplinary team — each leading their own service, from acupuncture
-    and naturopathy to yoga, pilates, movement and sound.
-  linkLabel: Meet all our practitioners
 
 events:
   eyebrow: On the calendar
