@@ -27,12 +27,31 @@ welcome:
       Receive the care you deserve, delivered collaboratively from a group of
       dedicated and talented practitioners and therapists.
 
-# Services and Practitioners both link to the same eight profiles. Turn either
-# off here — the rest of the page, and the site's structured data, are unaffected.
-showServices: true
-showPractitioners: true
+# Services and Practitioners both link to the same eight profiles. Turn any of
+# these off here — the rest of the page, and the site's structured data, are
+# unaffected.
+#
+# Services is currently showing TWICE on purpose, as two designs of the same
+# section for the client to choose between: the grid (A) and the full-bleed
+# carousel (B). Once they pick, set the other to false. Leaving both on
+# permanently would list all eight services twice on one page.
+showServices: true          # design A — grid
+showServicesCarousel: true  # design B — carousel, same layout as Practitioners
+
+# Hidden, not deleted. The section, its content below and its eight cards are
+# all still here — flip this back to true to bring it straight back.
+showPractitioners: false
 
 services:
+  eyebrow: What we offer
+  heading: Our Services
+  lede: >-
+    Each service is led by the practitioner who provides it — choose a service to
+    meet them, see their fees and book directly.
+
+# Heading block for design B. Deliberately the same words as above: the two
+# sections are a layout comparison, so holding the copy constant is the point.
+servicesCarousel:
   eyebrow: What we offer
   heading: Our Services
   lede: >-

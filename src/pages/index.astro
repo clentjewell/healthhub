@@ -2,7 +2,7 @@
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import SectionHeading from '@components/SectionHeading.astro';
-import PractitionerCarousel from '@components/PractitionerCarousel.astro';
+import CardCarousel from '@components/CardCarousel.astro';
 import ServiceCard from '@components/ServiceCard.astro';
 import EventCard from '@components/EventCard.astro';
 import CtaBand from '@components/CtaBand.astro';
@@ -14,6 +14,7 @@ const page = await getPage('home');
 const hero = page.hero!;
 const welcome = page.welcome!;
 const svcSec = page.services!;
+const svcCarSec = page.servicesCarousel ?? svcSec;
 const pracSec = page.practitioners!;
 const eventsSec = page.events!;
 const loc = page.location!;
@@ -59,17 +60,50 @@ const services = await Promise.all(
     }),
 );
 
+/**
+ * The same services, shaped for the shared carousel. Practitioner cards read
+ * name → role → their service; service cards mirror that exactly one step
+ * across: title → provider → nothing to tag, since the provider is already the
+ * subtitle and repeating it in the footer pill would say the same thing twice.
+ */
+const serviceCards = services.map((s) => ({
+  title: s.title,
+  subtitle: s.provider,
+  excerpt: s.summary,
+  href: s.href,
+  image: s.image,
+  imageAlt: s.title,
+}));
+
 // All of them — the carousel scrolls, so there is no reason to hold any back.
 const teaser = await Promise.all(
   practitioners.map(async (p) => {
     const svc = p.data.service ? await getEntry('services', p.data.service) : undefined;
     return {
-      name: p.data.name, role: p.data.role, href: `/our-practitioner/${p.id}`,
-      image: p.data.image, serviceTitle: svc?.data.shortTitle ?? svc?.data.title,
+      title: p.data.name, subtitle: p.data.role, href: `/our-practitioner/${p.id}`,
+      image: p.data.image, imageAlt: `Portrait of ${p.data.name}`,
+      tag: svc?.data.shortTitle ?? svc?.data.title,
       excerpt: excerpt(p.body), placeholder: p.data.placeholder,
     };
   }),
 );
+
+/**
+ * Band rhythm for the middle slot. Welcome above and Events below are both
+ * plain, so whichever of these three sections are switched on alternate ending
+ * tinted — the page never shows two tinted bands, or three plain ones, in a
+ * row. Counting back from the end reproduces what the pair did before the
+ * carousel variant existed: Services alone is tinted; Services then
+ * Practitioners is plain, tinted.
+ */
+const midSlots = (
+  [
+    page.showServices && 'servicesGrid',
+    page.showServicesCarousel && 'servicesCarousel',
+    page.showPractitioners && 'practitioners',
+  ] as const
+).filter(Boolean) as string[];
+const tinted = new Set(midSlots.filter((_, i) => (midSlots.length - 1 - i) % 2 === 0));
 
 // Four of the studio's offerings, in manual order.
 const events = (await getCollection('events'))
@@ -123,10 +157,11 @@ const schema = [serviceCatalogueNode(services.map((s) => ({
     </div>
   </section>
 
-  {/* Our Services — no service pages; every tile goes to its practitioner */}
+  {/* Our Services, design A — grid. No service pages; every tile goes to its
+      practitioner. */}
   {
     page.showServices && (
-      <section class:list={['section', { 'band-tint': !page.showPractitioners }]}>
+      <section class:list={['section', { 'band-tint': tinted.has('servicesGrid') }]}>
         <div class="container">
           <SectionHeading eyebrow={svcSec.eyebrow} title={svcSec.heading} lede={svcSec.lede} />
           <div class="grid-services">
@@ -137,19 +172,41 @@ const schema = [serviceCatalogueNode(services.map((s) => ({
     )
   }
 
-  {/* Practitioners teaser. These two sections share one slot between Welcome and
-      Events, and the tint alternates so the page never shows three plain bands in
-      a row: Practitioners is always tinted, and Services takes the tint only when
-      it is the only one of the pair showing. */}
+  {/* Our Services, design B — the same eight services in the full-bleed carousel
+      the Practitioners section uses, so the two can be compared with the content
+      held constant and only the layout changing. Same component, so it is not a
+      lookalike: it is the same carousel. One of A/B comes off before launch. */}
+  {
+    page.showServicesCarousel && (
+      <section class:list={['section', { 'band-tint': tinted.has('servicesCarousel') }]}>
+        <div class="container">
+          <SectionHeading
+            eyebrow={svcCarSec.eyebrow}
+            title={svcCarSec.heading}
+            lede={svcCarSec.lede}
+          />
+        </div>
+        {/* Outside .container: the track runs the full viewport width, with cards
+            bleeding off both edges rather than stopping on the content column. */}
+        <CardCarousel
+          cards={serviceCards}
+          label={svcCarSec.heading}
+          placeholderLabel="Service"
+        />
+      </section>
+    )
+  }
+
+  {/* Practitioners teaser. */}
   {
     page.showPractitioners && (
-      <section class="section band-tint">
+      <section class:list={['section', { 'band-tint': tinted.has('practitioners') }]}>
         <div class="container">
           <SectionHeading eyebrow={pracSec.eyebrow} title={pracSec.heading} lede={pracSec.lede} />
         </div>
         {/* Outside .container: the track runs the full viewport width, with cards
             bleeding off both edges rather than stopping on the content column. */}
-        <PractitionerCarousel cards={teaser} label={pracSec.heading} />
+        <CardCarousel cards={teaser} label={pracSec.heading} />
         <div class="container">
           <p class="section-more">
             <a href="/our-practitioners" class="btn btn-ghost">{pracSec.linkLabel}</a>

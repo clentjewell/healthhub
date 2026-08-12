@@ -296,8 +296,17 @@ const pages = defineCollection({
      * is unaffected either way.
      */
     showServices: z.boolean().default(true),
+    /**
+     * Services again, in the full-bleed carousel the Practitioners section uses.
+     * Two presentations of the same eight services, so the client can see both
+     * side by side and pick one. Turn the loser off before launch — running both
+     * permanently would list every service twice.
+     */
+    showServicesCarousel: z.boolean().default(false),
     showPractitioners: z.boolean().default(true),
     services: section.optional(),
+    /** Heading block for the carousel variant. Falls back to `services`. */
+    servicesCarousel: section.optional(),
     practitioners: section.optional(),
     events: section.optional(),
     location: z

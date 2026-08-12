@@ -1,11 +1,18 @@
 ---
 /**
- * Homepage practitioners carousel.
+ * Full-bleed card carousel — used by the homepage Practitioners section and by
+ * the carousel variant of the Services section.
  *
- * Cards show the portrait only; hovering (or focusing) shrinks the image and
- * slides the details up from underneath. The reveal is a height transition on
- * the image with the body sitting below it in normal flow, so nothing is
- * absolutely positioned and the card can never reveal a clipped half-line.
+ * It is deliberately one component rather than one per section. The two are
+ * meant to be visually identical, and the only way to guarantee that stays true
+ * is for them to be the same code: a copy would drift the first time either is
+ * touched. Cards are described in neutral terms (title / subtitle / tag) so
+ * neither caller's vocabulary leaks into the markup.
+ *
+ * Cards show the image only; hovering (or focusing) shrinks it and slides the
+ * details up from underneath. The reveal is a height transition on the image
+ * with the body sitting below it in normal flow, so nothing is absolutely
+ * positioned and the card can never reveal a clipped half-line.
  *
  * The track is a native scroll-snap container: it scrolls by touch, trackpad
  * and keyboard with no JavaScript at all. The arrows are an enhancement — they
@@ -14,24 +21,38 @@
 import PlaceholderImage from './PlaceholderImage.astro';
 
 export interface CarouselCard {
-  name: string;
-  role: string;
+  /** Card headline — a practitioner's name, or a service's title. */
+  title: string;
+  /** Accent line under the title — a practitioner's role, or a service's provider. */
+  subtitle?: string;
   href: string;
   image?: string;
-  serviceTitle?: string;
+  /** Falls back to the title, which suits both a portrait and a service photo. */
+  imageAlt?: string;
+  /** Pill in the card footer. */
+  tag?: string;
   excerpt?: string;
   placeholder?: boolean;
 }
 interface Props {
   cards: CarouselCard[];
-  /** Accessible name for the scroll region. */
+  /** Accessible name for the scroll region, and the noun in the arrow labels. */
   label?: string;
+  ctaLabel?: string;
+  placeholderLabel?: string;
+  placeholderIcon?: 'user' | 'calendar' | 'map-pin' | 'image' | 'clock';
 }
-const { cards, label = 'Our practitioners' } = Astro.props;
+const {
+  cards,
+  label = 'Our practitioners',
+  ctaLabel = 'View profile',
+  placeholderLabel = 'Portrait',
+  placeholderIcon = 'user',
+} = Astro.props;
 ---
 
 <div class="pcar" data-pcar>
-  <button type="button" class="pcar-nav pcar-prev" aria-label="Show previous practitioners" hidden>
+  <button type="button" class="pcar-nav pcar-prev" aria-label={`Show previous — ${label}`} hidden>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" /></svg>
   </button>
 
@@ -43,20 +64,20 @@ const { cards, label = 'Our practitioners' } = Astro.props;
             <div class="pcard-r-media">
               {
                 c.image ? (
-                  <img src={c.image} alt={`Portrait of ${c.name}`} loading="lazy" width="320" height="440" />
+                  <img src={c.image} alt={c.imageAlt ?? c.title} loading="lazy" width="320" height="440" />
                 ) : (
-                  <PlaceholderImage label="Portrait" ratio="4/5" icon="user" />
+                  <PlaceholderImage label={placeholderLabel} ratio="4/5" icon={placeholderIcon} />
                 )
               }
               {c.placeholder && import.meta.env.DEV && <span class="ph-badge">Placeholder</span>}
             </div>
             <div class="pcard-r-body">
-              <h3>{c.name}</h3>
-              <p class="pcard-r-role">{c.role}</p>
+              <h3>{c.title}</h3>
+              {c.subtitle && <p class="pcard-r-role">{c.subtitle}</p>}
               {c.excerpt && <p class="pcard-r-excerpt">{c.excerpt}</p>}
               <div class="pcard-r-foot">
-                {c.serviceTitle && <span class="pcard-r-tag">{c.serviceTitle}</span>}
-                <span class="pcard-r-cta">View profile</span>
+                {c.tag && <span class="pcard-r-tag">{c.tag}</span>}
+                <span class="pcard-r-cta">{ctaLabel}</span>
               </div>
             </div>
           </a>
@@ -65,7 +86,7 @@ const { cards, label = 'Our practitioners' } = Astro.props;
     }
   </ul>
 
-  <button type="button" class="pcar-nav pcar-next" aria-label="Show more practitioners" hidden>
+  <button type="button" class="pcar-nav pcar-next" aria-label={`Show more — ${label}`} hidden>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" /></svg>
   </button>
 </div>
