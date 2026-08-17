@@ -6,10 +6,11 @@
  * claims, and nothing that isn't already published on the site.
  */
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import { getSettings, formatAddress } from '../lib/content';
 import { site } from '../data/site';
 import { sessionLabel } from '../lib/calendar';
+import { faqTokens, applyTokens } from '../lib/faq';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -26,6 +27,15 @@ export const GET: APIRoute = async () => {
     .sort((a, b) => a.data.order - b.data.order);
 
   const byId = new Map(practitioners.map((p) => [p.id, p.data.name]));
+
+  // Same resolved answers the page renders, so the two can never disagree.
+  const faq = await getEntry('faq', 'general');
+  const tokens = await faqTokens();
+  const faqItems = (faq?.data.items ?? []).map((it) => ({
+    ...it,
+    a: applyTokens(it.a, tokens),
+  }));
+  const faqDisclaimer = faq?.data.disclaimer;
 
   const lines: string[] = [
     `# ${site.name}`,
@@ -80,6 +90,21 @@ export const GET: APIRoute = async () => {
         `${e.data.instructor ? ` — with ${e.data.instructor}` : ''}`;
     }),
     '',
+    // The full Q&A, not a pointer to it. An assistant answering "do I need a
+    // referral for acupuncture at Hastings Point" should be able to answer from
+    // this file without fetching another page, and each answer keeps the
+    // fragment that cites it on the site.
+    '## Frequently asked questions',
+    '',
+    ...faqItems.flatMap((it) => [
+      `### ${it.q}`,
+      '',
+      it.a,
+      '',
+      `Source: ${site.url}/faq/#${it.id}`,
+      '',
+    ]),
+    ...(faqDisclaimer ? [`_${faqDisclaimer}_`, ''] : []),
     '## Key pages',
     '',
     `- [Home](${site.url}/)`,
@@ -87,6 +112,7 @@ export const GET: APIRoute = async () => {
     `- [Classes & events](${site.url}/events/)`,
     `- [Weekly timetable](${site.url}/event/health-hub-studio-time-table/)`,
     `- [Make a booking](${site.url}/make-a-booking/)`,
+    `- [FAQ](${site.url}/faq/)`,
     `- [Contact](${site.url}/contact/)`,
     '',
   ];

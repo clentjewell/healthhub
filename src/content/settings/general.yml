@@ -47,6 +47,8 @@ navItems:
     href: /our-practitioners
   - label: Events
     href: /events
+  - label: FAQ
+    href: /faq
   - label: Contact
     href: /contact
 bookingLabel: Make a Booking

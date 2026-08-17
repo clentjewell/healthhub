@@ -1,0 +1,136 @@
+---
+/**
+ * /faq/ — one flat list of questions and answers.
+ *
+ * A dedicated page rather than a homepage block, for three reasons. Thirteen
+ * long answers would push the homepage's booking and timetable calls below a
+ * wall of text. The questions are written for long-tail comparison searches
+ * ("yoga or pilates for beginners", "naturopath or GP") which want a URL of
+ * their own to rank, while the homepage should stay pointed at the brand and
+ * local intent. And FAQPage structured data belongs on a page whose main
+ * content is the question list, not bolted onto a homepage that already carries
+ * the business and website nodes.
+ *
+ * Built for extraction as much as for reading: every answer is visible text
+ * rather than a collapsed accordion, each has a stable #id to cite, and the
+ * whole list is mirrored into /llms.txt.
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+import { getEntry } from 'astro:content';
+import { getPage } from '../lib/content';
+import { faqTokens, applyTokens } from '../lib/faq';
+import { faqPageNode, breadcrumbNode } from '../lib/schema';
+
+const PATH = '/faq';
+
+const page = await getPage('faq');
+const faq = await getEntry('faq', 'general');
+if (!faq) throw new Error('FAQ content (src/content/faq/general.yml) is missing.');
+
+const tokens = await faqTokens();
+const items = faq.data.items.map((it) => ({ ...it, a: applyTokens(it.a, tokens) }));
+
+/**
+ * The schema carries the resolved answers, not the raw ones — an engine quoting
+ * a literal "{{address}}" would be worse than no markup at all.
+ */
+const schema = [
+  faqPageNode(items, PATH),
+  breadcrumbNode([
+    { name: 'Home', path: '/' },
+    { name: 'FAQ', path: PATH },
+  ]),
+];
+---
+
+<BaseLayout fullTitle={page.metaTitle} description={page.metaDescription} path={PATH} schema={schema}>
+  <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
+
+  <section class="section">
+    <div class="container">
+      <div class="faq-list">
+        {
+          items.map((it) => (
+            <div class="faq-item" id={it.id}>
+              {/* h2 because each question is a top-level topic on this page, and
+                  a heading is what makes the answer addressable — to a reader
+                  scanning, to a #link, and to an engine chunking the page. */}
+              <h2 class="faq-q">
+                <a href={`#${it.id}`} class="faq-anchor">{it.q}</a>
+              </h2>
+              <p class="faq-a">{it.a}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      {
+        faq.data.disclaimer && (
+          <p class="faq-disclaimer">{faq.data.disclaimer}</p>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* One column at a readable measure, centred under the centred page header —
+     left-aligning a 72ch column inside a 1200px container just looks unplaced. */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(32px, 4vw, 44px);
+    max-width: 72ch;
+    margin-inline: auto;
+  }
+
+  /* scroll-margin so a deep link doesn't drop the question under the sticky
+     header — the anchors are meant to be shared, so they have to land right. */
+  .faq-item { scroll-margin-top: 96px; }
+
+  /* Body face at semibold, not the Reborn display face h2 inherits. Reborn is
+     built for short uppercase headings; thirteen questions of it — several
+     running to two lines — reads as decoration and is genuinely hard to scan.
+     "Bold question, plain answer" is also the format the copy was written for. */
+  .faq-q {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: clamp(1rem, 1.4vw, 1.14rem);
+    letter-spacing: 0;
+    line-height: 1.4;
+    text-transform: none;
+    text-wrap: balance;
+    color: var(--color-text);
+    margin: 0 0 10px;
+  }
+  /* The question is a link to itself. Styled as plain text so it reads as a
+     heading, with the affordance appearing on hover and always for keyboards. */
+  .faq-anchor {
+    color: inherit;
+    text-decoration: none;
+  }
+  .faq-anchor:hover { color: var(--color-brand); }
+  .faq-anchor:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .faq-a {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+  }
+
+  .faq-disclaimer {
+    max-width: 72ch;
+    margin-inline: auto;
+    margin-top: clamp(48px, 6vw, 72px);
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+</style>

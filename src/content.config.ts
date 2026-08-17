@@ -191,6 +191,41 @@ const timetable = defineCollection({
 });
 
 /**
+ * FAQ entries for /faq/. One entry: `general`.
+ *
+ * A flat list, deliberately not grouped into categories — the questions are
+ * written for the way people actually search ("yoga or pilates for beginners"),
+ * and sub-headers would only add a layer between the query and the answer.
+ *
+ * Answers support a small set of `{{token}}` placeholders so facts that live in
+ * Settings are never re-typed here. See the comment at the top of
+ * src/content/faq/general.yml for the list; an unknown token fails the build
+ * rather than shipping a literal "{{typo}}" to a visitor.
+ */
+const faq = defineCollection({
+  loader: glob({ pattern: '**/*.yml', base: './src/content/faq' }),
+  schema: z.object({
+    items: z
+      .array(
+        z.object({
+          q: z.string(),
+          a: z.string(),
+          /**
+           * URL fragment for deep-linking a single answer, e.g. #booking.
+           * Answer engines and support replies cite these, so they are authored
+           * rather than generated from the question text, which would change
+           * the anchor every time the wording is edited.
+           */
+          id: z.string(),
+        }),
+      )
+      .default([]),
+    /** Shown once under the list. Health-practice compliance, not an answer. */
+    disclaimer: optionalText,
+  }),
+});
+
+/**
  * Site-wide settings (header menu, footer text, NAP, hours, socials).
  * One entry: `general`. Edited in the CMS under Settings.
  */
@@ -324,4 +359,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { settings, pages, services, practitioners, events, timetable };
+export const collections = { settings, pages, services, practitioners, events, timetable, faq };

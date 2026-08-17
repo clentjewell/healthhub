@@ -71,12 +71,8 @@ collections:
             widget: boolean
             default: true
             hint: >-
-              Services and Practitioners both link to the same eight profiles.
-              Keep one, the other, or both — the rest of the page adjusts.
-          - label: Show the Practitioners section
-            name: showPractitioners
-            widget: boolean
-            default: true
+              Turn the Services grid off to hide it. The team is reached through
+              the Practitioners page in the menu.
           - label: Services section
             name: services
             widget: object
@@ -87,14 +83,6 @@ collections:
               - { label: Small label, name: eyebrow, widget: string, required: false }
               - { label: Heading, name: heading, widget: string }
               - { label: Intro, name: lede, widget: text, required: false }
-          - label: Practitioners section
-            name: practitioners
-            widget: object
-            fields:
-              - { label: Small label, name: eyebrow, widget: string, required: false }
-              - { label: Heading, name: heading, widget: string }
-              - { label: Intro, name: lede, widget: text, required: false }
-              - { label: Button text, name: linkLabel, widget: string, required: false }
           - label: Events section
             name: events
             widget: object
@@ -160,6 +148,19 @@ collections:
             widget: text
             required: false
             hint: Leave blank to hide. Good for practitioners who aren't listed above.
+
+      - name: faq
+        label: FAQ
+        file: src/content/pages/faq.yml
+        description: >-
+          Heading and search-engine wording for the FAQ page. The questions
+          themselves are edited under "FAQ" in the sidebar.
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text, hint: 'Around 150 characters — shows in Google results.' }
+          - { label: Small label above heading, name: eyebrow, widget: string, required: false }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Intro paragraph, name: lede, widget: text, required: false }
 
       - name: contact
         label: Contact
@@ -360,6 +361,46 @@ collections:
                     widget: string
                     required: false
                     hint: 'e.g. /event/seniors-yoga/ — leave blank for no link.'
+
+  - name: faq
+    label: FAQ
+    editor: { preview: false }
+    files:
+      - name: general
+        label: Questions & answers
+        file: src/content/faq/general.yml
+        description: >-
+          The questions on /faq/, in the order they appear. Answers may use
+          placeholders so shared facts are never typed twice — see the hint on
+          the Answer field. A misspelt placeholder stops the site publishing,
+          rather than showing a visitor the raw text.
+        fields:
+          - label: Questions
+            name: items
+            widget: list
+            label_singular: question
+            summary: '{{fields.q}}'
+            fields:
+              - { label: Question, name: q, widget: string }
+              - label: Answer
+                name: a
+                widget: text
+                hint: >-
+                  Placeholders: {{address}}, {{hours}}, {{phone}},
+                  {{bookOnline}} (services bookable online), {{bookByPhone}}
+                  (booked by phone or text). These fill in from Settings and the
+                  practitioner profiles when the site builds.
+              - label: Link anchor
+                name: id
+                widget: string
+                hint: >-
+                  Used for linking straight to this answer, e.g. "booking"
+                  makes /faq/#booking. Lower-case, no spaces. Changing it
+                  breaks any existing link to this answer.
+          - label: Disclaimer under the list
+            name: disclaimer
+            widget: text
+            required: false
 
   - name: settings
     label: Settings

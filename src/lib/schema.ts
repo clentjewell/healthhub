@@ -242,6 +242,43 @@ export function breadcrumbNode(trail: { name: string; path: string }[]) {
   };
 }
 
+/**
+ * FAQPage for /faq/.
+ *
+ * Only ever emitted on the FAQ page itself. Google's guidance is that FAQPage
+ * belongs on a page whose main content *is* the question list, and stacking a
+ * second one onto the homepage — which already carries the business and website
+ * nodes — would make the same answers compete with themselves for attribution.
+ *
+ * Note this is not chasing a rich result: Google restricted FAQ rich snippets to
+ * well-known health and government sites, so a local studio will not get the
+ * expandable SERP treatment. The value is machine-readable Q&A for answer
+ * engines, which is why the page also carries visible text and per-answer
+ * anchors rather than relying on the markup alone.
+ *
+ * `isPartOf` ties the page to the site, and `about` to the business, so an
+ * engine reading only this node still knows whose answers these are.
+ */
+export function faqPageNode(
+  items: { q: string; a: string; id: string }[],
+  path: string,
+) {
+  return {
+    '@type': 'FAQPage',
+    '@id': `${abs(path)}#faq`,
+    url: abs(path),
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': BUSINESS_ID },
+    inLanguage: 'en-AU',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      '@id': `${abs(path)}#${it.id}`,
+      name: it.q,
+      acceptedAnswer: { '@type': 'Answer', text: it.a },
+    })),
+  };
+}
+
 /** A simple collection page listing pointer (practitioners / events index). */
 export function itemListNode(
   name: string,

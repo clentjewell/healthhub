@@ -1,0 +1,143 @@
+# =============================================================================
+# FAQ entries for /faq/ — editable in the CMS under "FAQ".
+#
+# Answers may use these placeholders. They resolve from Settings → General at
+# build time, so the address, hours, phone and booking routes can never drift
+# out of step with the rest of the site (or with the LocalBusiness schema).
+# A token that isn't on this list fails the build.
+#
+#   {{address}}         87–89 Tweed Coast Road, Hastings Point NSW 2489
+#   {{hours}}           the hoursLabel from Settings
+#   {{phone}}           the Hub's phone number
+#   {{bookOnline}}      services whose practitioner has an online booking link
+#   {{bookByPhone}}     services booked by phone or text
+#
+# `id` is the URL fragment for deep-linking one answer (/faq/#booking). Answer
+# engines and support replies cite these, so change one only if you mean to
+# break existing links to it.
+# =============================================================================
+
+items:
+  - id: booking
+    q: How do I book an appointment or class?
+    a: >-
+      Booking is direct with the practitioner running that service. {{bookOnline}}
+      can be booked online. {{bookByPhone}} are booked by phone or text with the
+      relevant practitioner. Kirtan & Harmonium Chant is available by arrangement.
+      Every practitioner's own number and booking link is on their profile, and if
+      you're unsure who to contact, call the Hub on {{phone}}.
+
+  - id: hub-vs-pottsville
+    q: Is Health Hub Tweed Coast the same as Pottsville Acupuncture?
+    a: >-
+      They're closely related but not the same thing. Dr Mal McKay practises
+      acupuncture and Traditional Chinese Medicine at both. Health Hub Tweed Coast
+      is the wider multi-disciplinary centre at {{address}}, home to a full group
+      of independent practitioners across yoga, Pilates, naturopathy, movement and
+      sound healing — not acupuncture alone. Each practitioner here manages their
+      own bookings and fees.
+
+  - id: holistic-health
+    q: What is holistic health care, and why choose a multi-disciplinary centre over a single specialist?
+    a: >-
+      Holistic health care treats the whole person — body, mind and energy —
+      rather than one symptom in isolation. At Health Hub that looks like
+      acupuncture, naturopathy, yoga, Pilates, movement and sound healing all
+      working from the same address, so it's easier to build a plan that joins the
+      dots between pain, energy, stress and mobility, rather than tackling each in
+      isolation with a different provider each time.
+
+  - id: naturopath-or-gp
+    q: Naturopath or GP — which should I see for family health concerns?
+    a: >-
+      They're not a substitute for each other. Our naturopath, Amanda Ross, uses
+      natural health strategies and traditional naturopathic knowledge to support
+      your family's everyday health and wellbeing, working alongside — not instead
+      of — your GP's medical care. Many families use both: a GP for diagnosis and
+      medical treatment, and naturopathy for broader lifestyle and wellbeing
+      support.
+
+  - id: yoga-or-pilates
+    q: Yoga or Pilates — which is better for beginners?
+    a: >-
+      Yoga (with Alicia Grace, or Hatha & Yin Yoga with Shannon O'Hara) centres on
+      breath, alignment and meditation. Pilates & Body Balance with Monique Carole
+      centres on controlled strength and body awareness. Neither requires
+      experience — both are taught in a guided, invitational way — so it comes
+      down to whether you're after calm and flexibility or strength and control.
+
+  - id: trauma-informed-yoga
+    q: Do you offer trauma-informed or gentle yoga classes, and how are they different?
+    a: >-
+      Yes. Alicia Grace's Yoga & Meditation classes are taught with a
+      trauma-informed lens — every session is invitational and choice-based, so
+      you're guided through options rather than a fixed sequence. It's a
+      supportive option if you'd simply prefer a gentler, more adaptable class
+      where you set the pace.
+
+  - id: seniors-yoga
+    q: Is there yoga suitable for seniors or people wanting a gentler class?
+    a: >-
+      Yes — gentler, lower-impact options are available as part of our yoga and
+      movement timetable, distinct from our faster-paced or more physically
+      demanding classes. Contact Alicia Grace or Shannon O'Hara to find the right
+      level for your goals.
+
+  - id: embodied-movement
+    q: What is embodied movement, and how is it different from a regular dance or fitness class?
+    a: >-
+      Embodied movement with Rebecca Lindsay is less about following steps and
+      more about learning to feel the body rather than just think about it — using
+      guided movement, breath and presence to explore instinctive awareness
+      beneath everyday thought. It suits people wanting a more intuitive,
+      body-led way to move, rather than a set workout routine.
+
+  - id: acupuncture
+    q: What is acupuncture, and how might it help with pain?
+    a: >-
+      Dr Mal McKay is a registered acupuncturist (Chinese Medicine Board of
+      Australia) with over 30 years of clinical experience in acupuncture and
+      Traditional Chinese Medicine. Acupuncture is a long-established, drug-free
+      approach within Traditional Chinese Medicine that many people use to support
+      pain management and general wellbeing. Results vary from person to person,
+      so Dr Mal can talk through what's suitable for your specific situation at
+      your first consultation.
+
+  - id: sound-healing
+    q: What is sound healing with crystal bowls, and what can I expect?
+    a: >-
+      Crystal Sound Bowls with Pearl Blinco-Doffiny use crystal bowl vibrations to
+      support relaxation and a sense of grounding, in a safe, nurturing space. No
+      experience is needed — you're simply invited to relax and receive.
+
+  - id: referral
+    q: Do I need a referral from my GP to book?
+    a: >-
+      No — you can book directly with any of our practitioners without a referral.
+      If you're managing a specific medical condition, it's still worth keeping
+      your GP in the loop, but it isn't required to get started here.
+
+  - id: first-visit
+    q: What should I expect at my first visit?
+    a: >-
+      For a private consultation (acupuncture, naturopathy), your practitioner
+      will talk through your health history and goals before recommending next
+      steps. For a class, arrive a little early in comfortable clothing and
+      mention it's your first time — the instructor will guide you from there.
+
+  - id: location-hours
+    q: Where are you located, and what are your hours?
+    a: >-
+      {{address}} — open {{hours}}. Individual class and appointment times sit
+      within those hours, so check with the relevant practitioner for exact
+      availability.
+
+# Sits under the list, outside the Q&A. Kept out of the FAQPage structured data
+# on purpose: it is a standing notice about the page, not the answer to a
+# question, and answer engines should never quote it as one.
+disclaimer: >-
+  Information on this page is general in nature and does not replace
+  personalised advice from a qualified health practitioner. Our practitioners do
+  not diagnose, treat, cure or prevent any specific medical condition beyond
+  what is permitted under AHPRA and TGA guidelines. Please consult your GP or
+  specialist for any medical concerns.
