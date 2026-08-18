@@ -30,8 +30,12 @@ lat: -28.3688969
 lng: 153.5728374
 
 # ---- Opening hours ----------------------------------------------------------
-hoursLabel: Monday – Sunday, 8:00am – 6:30pm
-hoursOpen: '08:00'
+# Studio reception hours, confirmed by the client. Note these feed the
+# openingHoursSpecification in the LocalBusiness schema — i.e. the hours Google
+# shows — and the timetable currently runs outside them at both ends: a 6:00am
+# Wednesday class, and consultations to 7:30pm. Raised with the client.
+hoursLabel: Monday – Sunday, 7:00am – 6:30pm
+hoursOpen: '07:00'
 hoursClose: '18:30'
 
 # ---- Social ----------------------------------------------------------------
@@ -56,8 +60,9 @@ bookingHref: /make-a-booking
 
 # ---- Footer ----------------------------------------------------------------
 footerBlurb: >-
-  The community wellness studio arm of Pottsville Acupuncture — movement, allied
-  health and events on the Tweed Coast.
+  A community wellness studio at Hastings Point, where independent practitioners
+  work alongside each other — movement, allied health and events on the Tweed
+  Coast.
 footerNote: Made on the Tweed Coast.
 
 # ---- Integrations ----------------------------------------------------------

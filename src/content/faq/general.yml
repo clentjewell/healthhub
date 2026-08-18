@@ -30,12 +30,15 @@ items:
   - id: hub-vs-pottsville
     q: Is Health Hub Tweed Coast the same as Pottsville Acupuncture?
     a: >-
-      They're closely related but not the same thing. Dr Mal McKay practises
-      acupuncture and Traditional Chinese Medicine at both. Health Hub Tweed Coast
-      is the wider multi-disciplinary centre at {{address}}, home to a full group
-      of independent practitioners across yoga, Pilates, naturopathy, movement and
-      sound healing — not acupuncture alone. Each practitioner here manages their
-      own bookings and fees.
+      No — they're two separate businesses, with Dr Mal McKay involved in both.
+      Health Hub Tweed Coast is a studio at {{address}} from which independent
+      practitioners and businesses work alongside one another, across yoga,
+      Pilates, naturopathy, movement and sound healing as well as acupuncture.
+      Each runs their own practice and handles their own bookings and fees.
+      Pottsville Acupuncture is Dr Mal's own acupuncture and Chinese medicine
+      practice, from the clinic next to the Hub. So you'll find him in both
+      places — but an acupuncture appointment is booked with Pottsville
+      Acupuncture, and a class is booked with the practitioner running it.
 
   - id: holistic-health
     q: What is holistic health care, and why choose a multi-disciplinary centre over a single specialist?
@@ -128,9 +131,10 @@ items:
   - id: location-hours
     q: Where are you located, and what are your hours?
     a: >-
-      {{address}} — open {{hours}}. Individual class and appointment times sit
-      within those hours, so check with the relevant practitioner for exact
-      availability.
+      {{address}} — the studio is open {{hours}}. Some classes and consultations
+      run outside those hours, including an early-morning class and evening
+      appointments, so check the weekly timetable or with the relevant
+      practitioner for exact times.
 
 # Sits under the list, outside the Q&A. Kept out of the FAQPage structured data
 # on purpose: it is a standing notice about the page, not the answer to a
