@@ -56,8 +56,12 @@ const schema = [
           or answer engines — and the list still works with JavaScript off. */}
       <div class="faq-list">
         {
-          items.map((it) => (
-            <details class="faq-item" id={it.id}>
+          items.map((it, i) => (
+            /* The first answer starts open. With everything closed the page is
+               thirteen identical rows and nothing shows what a row does; one
+               open answer demonstrates the control and gives the page some
+               body. Only the first — beyond that it stops being a summary. */
+            <details class="faq-item" id={it.id} open={i === 0}>
               {/* <summary> may contain one heading element, so the h2 outline
                   survives the accordion. Each question stays a top-level topic
                   a reader, a #link and an engine chunking the page can address. */}
