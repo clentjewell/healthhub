@@ -27,8 +27,10 @@ days:
   - day: Wednesday
     sessions:
       - name: Functional Group Exercise
+        # Katie's profile, not her naturopathic seminars event — this session is
+        # Function & Flow, which has no event page of its own.
         time: 6:00–6:45am
-        href: /event/naturopathic-health-seminars-with-katie-verkerk/
+        href: /our-practitioner/katie-verkerk/
       - name: Pilates & Body Balance
         time: 8:15–8:45am
         href: /event/pilates-and-body-balance/

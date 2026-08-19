@@ -253,8 +253,9 @@ export function breadcrumbNode(trail: { name: string; path: string }[]) {
  * Note this is not chasing a rich result: Google restricted FAQ rich snippets to
  * well-known health and government sites, so a local studio will not get the
  * expandable SERP treatment. The value is machine-readable Q&A for answer
- * engines, which is why the page also carries visible text and per-answer
- * anchors rather than relying on the markup alone.
+ * engines. The page presents the same answers in native <details> accordions —
+ * closed or open, they are in the served HTML, so this node and the page never
+ * disagree about what the answer is.
  *
  * `isPartOf` ties the page to the site, and `about` to the business, so an
  * engine reading only this node still knows whose answers these are.
