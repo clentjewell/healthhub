@@ -4,7 +4,12 @@ order: 1
 category: "community"
 schedule: "All classes, all week"
 summary: "The full weekly studio timetable — every class running at the Hub, at a glance."
-image: "/images/events/health-hub-studio-time-table.webp"
+# No image on purpose. The old graphic showed the pre-September schedule — a
+# 6:00am Wednesday class that no longer runs, Tuesday Hatha, weekly Sound Bowls
+# — and it sat directly above the live table on this page, contradicting it.
+# A picture of a timetable next to the real timetable is only ever a liability;
+# the rendered table below is the source of truth and always current. Add a
+# replacement graphic here if the client supplies one built from the new times.
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 showTimetable: true

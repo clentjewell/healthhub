@@ -63,7 +63,7 @@ items:
   - id: yoga-or-pilates
     q: Yoga or Pilates — which is better for beginners?
     a: >-
-      Yoga (with Alicia Grace, or Hatha & Yin Yoga with Shannon O'Hara) centres on
+      Yoga (with Alicia Grace, or Hatha & Yin Yoga with Kate Doedee) centres on
       breath, alignment and meditation. Pilates & Body Balance with Monique Carole
       centres on controlled strength and body awareness. Neither requires
       experience — both are taught in a guided, invitational way — so it comes
@@ -83,7 +83,7 @@ items:
     a: >-
       Yes — gentler, lower-impact options are available as part of our yoga and
       movement timetable, distinct from our faster-paced or more physically
-      demanding classes. Contact Alicia Grace or Shannon O'Hara to find the right
+      demanding classes. Contact Alicia Grace or Kate Doedee to find the right
       level for your goals.
 
   - id: embodied-movement
@@ -132,8 +132,7 @@ items:
     q: Where are you located, and what are your hours?
     a: >-
       {{address}} — the studio is open {{hours}}. Some classes and consultations
-      run outside those hours, including an early-morning class and evening
-      appointments, so check the weekly timetable or with the relevant
+      run later than that, so check the weekly timetable or with the relevant
       practitioner for exact times.
 
 # Sits under the list, outside the Q&A. Kept out of the FAQPage structured data

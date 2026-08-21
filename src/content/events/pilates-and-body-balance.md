@@ -15,9 +15,11 @@ sessions:
   - day: Wednesday
     start: "08:15"
     end: "08:45"
+    label: Chair Pilates & Body Balance
   - day: Wednesday
     start: "08:45"
     end: "09:30"
+    label: Balance & Mat Pilates
 ---
 ### Pilates and Body Balance
 

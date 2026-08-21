@@ -2,7 +2,7 @@
 title: "Crystal Sound Bowls"
 order: 8
 category: "sound-bath"
-schedule: "Sundays 5:00pm – 6:00pm"
+schedule: "Every 3rd Sunday, 5:00pm – 6:00pm"
 summary: "Crystal bowl sound to quiet the mind, ease tension and create a sense of grounding and lightness."
 image: "/images/events/crystal-sound-bowls.webp"
 instructor: "Pearl Blinco-Doffiny"

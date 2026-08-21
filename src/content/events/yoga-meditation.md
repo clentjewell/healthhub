@@ -12,6 +12,9 @@ price: "$24"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 sessions:
+  - day: Tuesday
+    start: "18:00"
+    end: "19:15"
   - day: Friday
     start: "09:30"
     end: "10:45"

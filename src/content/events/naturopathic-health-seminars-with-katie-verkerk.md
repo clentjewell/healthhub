@@ -12,8 +12,11 @@ location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 sessions:
   - day: Wednesday
-    start: "06:00"
-    end: "06:45"
+    start: "10:15"
+    end: "11:00"
+  - day: Wednesday
+    start: "16:30"
+    end: "17:15"
 ---
 ### Function & Flow Exercise Class
 

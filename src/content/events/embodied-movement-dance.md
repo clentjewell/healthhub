@@ -2,7 +2,7 @@
 title: "Embodied Movement & Dance"
 order: 6
 category: "workshop"
-schedule: "Thursdays 11:00am – 12:00pm, plus evening workshops"
+schedule: "Thursdays 11:00am – 12:00pm, plus 1st Friday of the month 7:00pm – 8:15pm"
 summary: "Guided exploration that shifts you from thinking about the body to feeling it — movement, breath and presence."
 image: "/images/events/embodied-movement-dance.webp"
 instructor: "Rebecca Lindsay"
@@ -15,6 +15,10 @@ sessions:
   - day: Thursday
     start: "11:00"
     end: "12:00"
+  - day: Friday
+    start: "19:00"
+    end: "20:15"
+    label: Embodied Movement & Dance (1st Friday of the month)
 ---
 ### Embodied Movement & Dance
 

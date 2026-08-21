@@ -1,6 +1,7 @@
 # The weekly studio timetable — editable in the CMS under "Timetable".
-# Mirrors the grid published on the live site. Sessions are listed in start-time
-# order within each day; each one links to the class or practitioner page.
+# Source: "What's On Health Hub September 2026" (client, Aug 2026). Sessions are
+# listed in start-time order within each day; each one links to the class or
+# practitioner page.
 note: >-
   Class times can change with school holidays and public holidays — check with
   the practitioner running the session before your first visit.
@@ -21,22 +22,23 @@ days:
       - name: Seniors Yoga
         time: 9:30–10:30am
         href: /event/seniors-yoga/
-      - name: Hatha Yoga
+      - name: Yoga & Meditation
         time: 6:00–7:15pm
-        href: /event/hatha-yin-yoga/
+        href: /event/yoga-meditation/
   - day: Wednesday
     sessions:
-      - name: Functional Group Exercise
-        # Katie's profile, not her naturopathic seminars event — this session is
-        # Function & Flow, which has no event page of its own.
-        time: 6:00–6:45am
-        href: /our-practitioner/katie-verkerk/
-      - name: Pilates & Body Balance
+      - name: Chair Pilates & Body Balance
         time: 8:15–8:45am
         href: /event/pilates-and-body-balance/
-      - name: Mat Pilates & Stretches
+      - name: Balance & Mat Pilates
         time: 8:45–9:30am
         href: /event/pilates-and-body-balance/
+      - name: Functional Workout
+        time: 10:15–11:00am
+        href: /our-practitioner/katie-verkerk/
+      - name: Functional Workout
+        time: 4:30–5:15pm
+        href: /our-practitioner/katie-verkerk/
       - name: Yin Yoga
         time: 6:00–7:15pm
         href: /event/hatha-yin-yoga/
@@ -51,6 +53,10 @@ days:
       - name: Embodied Movement & Dance
         time: 11:00am–12:00pm
         href: /event/embodied-movement-dance/
+      # One-off, and the only dated entry on the table. No page of its own yet,
+      # so it is deliberately unlinked rather than pointed somewhere near-enough.
+      - name: ADHD Workshop
+        time: 17 September
   - day: Friday
     sessions:
       - name: Acupuncture Consultations
@@ -59,6 +65,9 @@ days:
       - name: Yoga & Meditation
         time: 9:30–10:45am
         href: /event/yoga-meditation/
+      - name: Embodied Movement & Dance
+        time: 7:00–8:15pm, 1st Friday of the month
+        href: /event/embodied-movement-dance/
   - day: Saturday
     sessions: []
   - day: Sunday
@@ -67,5 +76,5 @@ days:
         time: 8:00–9:15am
         href: /event/yoga-meditation/
       - name: Sound Bowls
-        time: 5:00–6:00pm
+        time: 5:00–6:00pm, every 3rd Sunday
         href: /event/crystal-sound-bowls/
