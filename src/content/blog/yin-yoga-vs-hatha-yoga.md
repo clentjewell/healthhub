@@ -8,6 +8,8 @@ author: "Kate Doedee"
 authorId: "kate-doedee"
 publishDate: 2026-08-21
 readingMinutes: 3
+ctaLabel: "View class times"
+ctaHref: "/event/health-hub-studio-time-table/"
 image: "/images/blog/yin-yoga-vs-hatha-yoga-hero.webp"
 imageAlt: "A guided yoga class in the studio at Health Hub Tweed Coast, moving through supported poses on mats and bolsters."
 draft: false

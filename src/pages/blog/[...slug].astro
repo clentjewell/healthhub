@@ -87,10 +87,10 @@ const schema = [
       </div>
 
       {/* Both ways out of a finished article: back to the reading list, or on
-          to the thing the article is ultimately about — when a class runs. */}
+          to whatever this particular piece is ultimately pointing at. */}
       <nav class="post-nav" aria-label="More from the Hub">
         <a href="/blog/">← Back to the Journal</a>
-        <a href="/event/health-hub-studio-time-table/">View class times →</a>
+        {d.ctaLabel && d.ctaHref && <a href={d.ctaHref}>{d.ctaLabel} →</a>}
       </nav>
     </div>
   </article>

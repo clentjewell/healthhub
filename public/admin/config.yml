@@ -406,6 +406,16 @@ collections:
         hint: 'Links the byline to their practitioner page. Leave blank for guest writers.'
       - { label: Publish date, name: publishDate, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true }
       - { label: Last updated, name: updatedDate, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true, required: false }
+      - label: Footer button text
+        name: ctaLabel
+        widget: string
+        required: false
+        hint: 'Shown at the end of the post, opposite "Back to the Journal" — e.g. "View class times". Leave both this and the link blank to show only the back link.'
+      - label: Footer button link
+        name: ctaHref
+        widget: string
+        required: false
+        hint: 'e.g. /make-a-booking/ or /our-practitioners/'
       - { label: Header image, name: image, widget: image, required: false }
       - { label: Header image description, name: imageAlt, widget: string, required: false, hint: 'Describes the image for screen readers and search engines.' }
       - { label: Reading time (minutes), name: readingMinutes, widget: number, value_type: int, required: false }

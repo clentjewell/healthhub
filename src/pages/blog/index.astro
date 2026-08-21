@@ -17,7 +17,13 @@ const page = await getPage('blog');
 
 const posts = (await getCollection('blog'))
   .filter((p) => import.meta.env.DEV || !p.data.draft)
-  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+  // Newest first. Titles break the tie so the order is stable between builds
+  // while several posts still share a placeholder publish date.
+  .sort(
+    (a, b) =>
+      b.data.publishDate.getTime() - a.data.publishDate.getTime() ||
+      a.data.title.localeCompare(b.data.title),
+  );
 
 const dateLabel = (d: Date) =>
   d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });

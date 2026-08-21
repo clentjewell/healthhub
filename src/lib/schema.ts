@@ -272,11 +272,16 @@ export function blogPostingNode(p: {
     datePublished: p.published.toISOString().slice(0, 10),
     ...(p.updated ? { dateModified: p.updated.toISOString().slice(0, 10) } : {}),
     ...(p.image ? { image: abs(p.image) } : {}),
-    author: {
-      '@type': 'Person',
-      name: p.author,
-      ...(p.authorPath ? { url: abs(p.authorPath) } : {}),
-    },
+    /**
+     * A hub-wide piece is written by the studio, not a person — attributing it
+     * to a Person named "Health Hub Tweed Coast" would invent one. Those point
+     * at the business node instead, which already carries the NAP and socials.
+     */
+    author: p.authorPath
+      ? { '@type': 'Person', name: p.author, url: abs(p.authorPath) }
+      : p.author === site.name
+        ? { '@id': BUSINESS_ID }
+        : { '@type': 'Person', name: p.author },
     publisher: { '@id': BUSINESS_ID },
     isPartOf: { '@id': WEBSITE_ID },
   };

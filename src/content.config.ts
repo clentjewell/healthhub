@@ -223,6 +223,14 @@ const blog = defineCollection({
     imageAlt: optionalText,
     /** Reading time in minutes. Author's own estimate; not computed. */
     readingMinutes: z.number().optional(),
+    /**
+     * The forward half of the footer pair, opposite "Back to the Journal".
+     * Per-post because the drafts each end somewhere different — a class piece
+     * sends you to the timetable, an acupuncture piece to booking, a hub-wide
+     * piece to the team. Omit both and only the back link renders.
+     */
+    ctaLabel: optionalText,
+    ctaHref: optionalText,
     /** Drafts build in dev but never appear in production. */
     draft: z.boolean().default(false),
   }),
