@@ -86,12 +86,20 @@ const schema = [
         <Content />
       </div>
 
-      <p class="post-back"><a href="/blog/">← All posts</a></p>
+      {/* Both ways out of a finished article: back to the reading list, or on
+          to the thing the article is ultimately about — when a class runs. */}
+      <nav class="post-nav" aria-label="More from the Hub">
+        <a href="/blog/">← Back to the Journal</a>
+        <a href="/event/health-hub-studio-time-table/">View class times →</a>
+      </nav>
     </div>
   </article>
 </BaseLayout>
 
 <style>
+  /* The article is not inside a .section, so it carries its own end padding —
+     without it the footer nav sits flush against the site footer band. */
+  .post { padding-bottom: clamp(56px, 8vw, 96px); }
   .post-head { background: var(--color-surface-tint); padding: clamp(48px, 7vw, 88px) 0; }
   .post-head-inner { max-width: 72ch; margin-inline: auto; }
 
@@ -105,20 +113,15 @@ const schema = [
     color: var(--color-accent);
   }
 
-  /* Body face, not the Reborn display face headings inherit. Reborn is built
-     for short uppercase labels — "CLASSES & EVENTS" — and a post title is a
-     sentence, often a question with punctuation, that runs to three lines. Set
-     in Reborn it stops being readable at exactly the size it matters most.
-     Same call as the FAQ questions, for the same reason. */
+  /* Reborn, per the client — the post title is a page title, and every other
+     page title on the site is set in it. Sized a little smaller than a section
+     heading and given a touch more leading, since post titles are sentences
+     rather than two-word labels and wrap to two or three lines. */
   .post-head h1 {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-    letter-spacing: -0.01em;
-    line-height: 1.18;
+    font-size: clamp(1.75rem, 3.6vw, 2.6rem);
+    line-height: 1.22;
     text-transform: none;
     text-wrap: balance;
-    color: var(--color-text);
     margin: 0;
   }
   .post-byline { margin: 16px 0 0; font-size: 15px; color: var(--color-text-muted); }
@@ -162,10 +165,23 @@ const schema = [
   .post-body :global(hr + p) { font-size: 14px; color: var(--color-text-muted); }
   .post-body :global(img) { max-width: 100%; height: auto; border-radius: var(--radius-md); }
 
-  .post-back {
-    max-width: 72ch; margin: clamp(40px, 5vw, 64px) auto 0;
-    font-size: 14px; font-weight: 600;
+  .post-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px 24px;
+    max-width: 72ch;
+    margin: clamp(40px, 5vw, 64px) auto 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+    font-size: 14px;
+    font-weight: 600;
   }
-  .post-back a { color: var(--color-brand); text-decoration: none; }
-  .post-back a:hover { text-decoration: underline; }
+  .post-nav a { color: var(--color-brand); text-decoration: none; }
+  .post-nav a:hover { text-decoration: underline; }
+  /* Stacked on narrow screens, the two links would sit flush left with no
+     relationship; centring keeps them reading as a pair. */
+  @media (max-width: 520px) {
+    .post-nav { justify-content: center; text-align: center; }
+  }
 </style>

@@ -8,6 +8,8 @@ author: "Kate Doedee"
 authorId: "kate-doedee"
 publishDate: 2026-08-21
 readingMinutes: 3
+image: "/images/blog/yin-yoga-vs-hatha-yoga-hero.webp"
+imageAlt: "A guided yoga class in the studio at Health Hub Tweed Coast, moving through supported poses on mats and bolsters."
 draft: false
 ---
 
@@ -22,6 +24,8 @@ Yin is slow and still. Poses are held for several minutes at a time, working int
 ## Hatha yoga
 
 Hatha moves at a gentler pace than more dynamic styles, but with shorter holds and more active engagement of breath and posture throughout. It's one of the more accessible, foundational styles for people newer to yoga.
+
+![Students working with straps in a guided stretch during a class at Health Hub Tweed Coast.](/images/blog/yin-yoga-vs-hatha-yoga-inline.webp)
 
 ## Which one should you try first?
 
