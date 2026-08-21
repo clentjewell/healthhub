@@ -4,7 +4,7 @@ order: 7
 category: "course"
 schedule: "Small-group classes — see times"
 summary: "A full-body functional workout blending strength, mobility, stability and coordination in a small, supportive group."
-image: "/images/events/naturopathic-health-seminars-with-katie-verkerk.webp"
+image: "/images/events/function-flow.webp"
 instructor: "Katie Verkerk"
 instructorPhone: "0434 570 512"
 instructorWebsite: "https://visibook.com/functionandflow?pp=calintro"

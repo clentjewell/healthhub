@@ -243,6 +243,46 @@ export function breadcrumbNode(trail: { name: string; path: string }[]) {
 }
 
 /**
+ * BlogPosting for a single post.
+ *
+ * `author` is a Person by name rather than a reference to the business: a post
+ * is written by someone, and attributing it to the studio would lose the very
+ * thing that makes a practitioner's article worth reading. When the author has
+ * a profile here, their page is linked as the Person's url so the two records
+ * are joinable.
+ */
+export function blogPostingNode(p: {
+  title: string;
+  description: string;
+  path: string;
+  author: string;
+  authorPath?: string;
+  published: Date;
+  updated?: Date;
+  image?: string;
+}) {
+  return {
+    '@type': 'BlogPosting',
+    '@id': `${abs(p.path)}#post`,
+    headline: p.title,
+    description: p.description,
+    url: abs(p.path),
+    mainEntityOfPage: abs(p.path),
+    inLanguage: 'en-AU',
+    datePublished: p.published.toISOString().slice(0, 10),
+    ...(p.updated ? { dateModified: p.updated.toISOString().slice(0, 10) } : {}),
+    ...(p.image ? { image: abs(p.image) } : {}),
+    author: {
+      '@type': 'Person',
+      name: p.author,
+      ...(p.authorPath ? { url: abs(p.authorPath) } : {}),
+    },
+    publisher: { '@id': BUSINESS_ID },
+    isPartOf: { '@id': WEBSITE_ID },
+  };
+}
+
+/**
  * FAQPage for /faq/.
  *
  * Only ever emitted on the FAQ page itself. Google's guidance is that FAQPage

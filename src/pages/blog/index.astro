@@ -1,0 +1,123 @@
+---
+/**
+ * /blog/ — the post index.
+ *
+ * Newest first by publish date. Drafts are visible while developing and never
+ * in a production build, so a half-written post can sit in the repo without
+ * anyone having to remember to pull it before deploying.
+ */
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+import { getPage } from '../../lib/content';
+import { breadcrumbNode, itemListNode } from '../../lib/schema';
+
+const PATH = '/blog';
+const page = await getPage('blog');
+
+const posts = (await getCollection('blog'))
+  .filter((p) => import.meta.env.DEV || !p.data.draft)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+
+const dateLabel = (d: Date) =>
+  d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const schema = [
+  itemListNode('Blog posts', posts.map((p) => ({ name: p.data.title, path: `/blog/${p.id}` }))),
+  breadcrumbNode([
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: PATH },
+  ]),
+];
+---
+
+<BaseLayout fullTitle={page.metaTitle} description={page.metaDescription} path={PATH} schema={schema}>
+  <PageHeader eyebrow={page.eyebrow} title={page.heading!} lede={page.lede} />
+
+  <section class="section">
+    <div class="container">
+      {
+        posts.length === 0 ? (
+          <p class="blog-empty">No posts yet — the first one is on its way.</p>
+        ) : (
+          <ul class="blog-list" role="list">
+            {posts.map((p) => (
+              <li class="blog-item">
+                <article>
+                  <p class="blog-meta">
+                    {p.data.category && <span class="blog-cat">{p.data.category}</span>}
+                    <span>{dateLabel(p.data.publishDate)}</span>
+                    {p.data.readingMinutes && <span>{p.data.readingMinutes} min read</span>}
+                    <span>{p.data.author}</span>
+                  </p>
+                  <h2 class="blog-title">
+                    <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+                  </h2>
+                  <p class="blog-excerpt">{p.data.excerpt}</p>
+                  <p class="blog-more"><a href={`/blog/${p.id}/`}>Read the post →</a></p>
+                </article>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* A reading list, not a card grid. One post reads as a deliberate start to a
+     blog; one lonely card in a three-column grid reads as a broken page. */
+  .blog-list {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 72ch;
+    display: flex;
+    flex-direction: column;
+  }
+  .blog-item + .blog-item {
+    margin-top: clamp(28px, 4vw, 40px);
+    padding-top: clamp(28px, 4vw, 40px);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .blog-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin: 0 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+  }
+  .blog-cat {
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  /* Body face, matching the post pages — see the note in blog/[...slug].astro. */
+  .blog-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: clamp(1.18rem, 2vw, 1.45rem);
+    letter-spacing: -0.01em;
+    line-height: 1.28;
+    text-transform: none;
+    text-wrap: balance;
+    color: var(--color-text);
+    margin: 0 0 12px;
+  }
+  .blog-title a { color: inherit; text-decoration: none; }
+  .blog-title a:hover { color: var(--color-brand); }
+
+  .blog-excerpt { margin: 0; color: var(--color-text-muted); line-height: 1.65; }
+  .blog-more { margin: 14px 0 0; font-size: 14px; font-weight: 600; }
+  .blog-more a { color: var(--color-brand); text-decoration: none; }
+  .blog-more a:hover { text-decoration: underline; }
+
+  .blog-empty { max-width: 72ch; margin-inline: auto; color: var(--color-text-muted); }
+</style>

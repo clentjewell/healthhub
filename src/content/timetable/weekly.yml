@@ -35,10 +35,10 @@ days:
         href: /event/pilates-and-body-balance/
       - name: Functional Workout
         time: 10:15–11:00am
-        href: /our-practitioner/katie-verkerk/
+        href: /event/function-flow/
       - name: Functional Workout
         time: 4:30–5:15pm
-        href: /our-practitioner/katie-verkerk/
+        href: /event/function-flow/
       - name: Yin Yoga
         time: 6:00–7:15pm
         href: /event/hatha-yin-yoga/
@@ -53,10 +53,10 @@ days:
       - name: Embodied Movement & Dance
         time: 11:00am–12:00pm
         href: /event/embodied-movement-dance/
-      # One-off, and the only dated entry on the table. No page of its own yet,
-      # so it is deliberately unlinked rather than pointed somewhere near-enough.
+      # One-off, and the only dated entry on the table.
       - name: ADHD Workshop
         time: 17 September
+        href: /event/adhd-workshop/
   - day: Friday
     sessions:
       - name: Acupuncture Consultations

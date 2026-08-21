@@ -1,0 +1,171 @@
+---
+/**
+ * /blog/[slug]/ — a single post.
+ *
+ * The body is Markdown rendered through Astro's own pipeline, so a post can be
+ * written and edited without touching this template.
+ */
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { blogPostingNode, breadcrumbNode } from '../../lib/schema';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = (await getCollection('blog')).filter(
+    (p) => import.meta.env.DEV || !p.data.draft,
+  );
+  return posts.map((p) => ({ params: { slug: p.id } }));
+};
+
+const { slug } = Astro.params;
+const entry = await getEntry('blog', slug!);
+if (!entry) throw new Error(`No blog post for slug "${slug}"`);
+const { Content } = await render(entry);
+const d = entry.data;
+
+const PATH = `/blog/${entry.id}`;
+const authorPath = d.authorId ? `/our-practitioner/${d.authorId}` : undefined;
+
+const dateLabel = (x: Date) =>
+  x.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const schema = [
+  blogPostingNode({
+    title: d.title,
+    description: d.metaDescription,
+    path: PATH,
+    author: d.author,
+    authorPath,
+    published: d.publishDate,
+    updated: d.updatedDate,
+    image: d.image,
+  }),
+  breadcrumbNode([
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blog' },
+    { name: d.title, path: PATH },
+  ]),
+];
+---
+
+<BaseLayout
+  fullTitle={d.metaTitle ?? `${d.title} · Health Hub Tweed Coast`}
+  description={d.metaDescription}
+  path={PATH}
+  ogType="article"
+  ogImage={d.image}
+  schema={schema}
+>
+  <article class="post">
+    <header class="post-head">
+      <div class="container post-head-inner">
+        <p class="post-meta">
+          {d.category && <span class="post-cat">{d.category}</span>}
+          <span>{dateLabel(d.publishDate)}</span>
+          {d.readingMinutes && <span>{d.readingMinutes} min read</span>}
+        </p>
+        <h1>{d.title}</h1>
+        <p class="post-byline">
+          By {
+            authorPath ? <a href={`${authorPath}/`}>{d.author}</a> : d.author
+          }
+        </p>
+      </div>
+    </header>
+
+    {
+      d.image && (
+        <div class="container">
+          <img class="post-hero" src={d.image} alt={d.imageAlt ?? d.title} width="1600" height="900" />
+        </div>
+      )
+    }
+
+    <div class="container">
+      <div class="post-body">
+        <Content />
+      </div>
+
+      <p class="post-back"><a href="/blog/">← All posts</a></p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post-head { background: var(--color-surface-tint); padding: clamp(48px, 7vw, 88px) 0; }
+  .post-head-inner { max-width: 72ch; margin-inline: auto; }
+
+  .post-meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+    margin: 0 0 14px; font-size: 12px; letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+  }
+  .post-cat {
+    font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  /* Body face, not the Reborn display face headings inherit. Reborn is built
+     for short uppercase labels — "CLASSES & EVENTS" — and a post title is a
+     sentence, often a question with punctuation, that runs to three lines. Set
+     in Reborn it stops being readable at exactly the size it matters most.
+     Same call as the FAQ questions, for the same reason. */
+  .post-head h1 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    line-height: 1.18;
+    text-transform: none;
+    text-wrap: balance;
+    color: var(--color-text);
+    margin: 0;
+  }
+  .post-byline { margin: 16px 0 0; font-size: 15px; color: var(--color-text-muted); }
+  .post-byline a { color: var(--color-brand); }
+
+  .post-hero {
+    display: block;
+    width: 100%; height: auto;
+    max-width: 72ch; margin: clamp(32px, 5vw, 56px) auto 0;
+    border-radius: var(--radius-md);
+  }
+
+  /* Long-form measure, and headings that sit closer to the paragraph they
+     introduce than to the one they follow. */
+  .post-body {
+    max-width: 72ch;
+    margin: clamp(40px, 6vw, 72px) auto 0;
+    font-size: 17px;
+    line-height: 1.72;
+  }
+  .post-body :global(p) { margin: 0 0 1.15em; }
+  .post-body :global(h2) {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 1.7vw, 1.28rem);
+    letter-spacing: 0;
+    line-height: 1.35;
+    text-transform: none;
+    color: var(--color-text);
+    margin: 2em 0 0.5em;
+  }
+  .post-body :global(ul),
+  .post-body :global(ol) { margin: 0 0 1.15em; padding-left: 1.3em; }
+  .post-body :global(li) { margin-bottom: 0.4em; }
+  .post-body :global(a) { color: var(--color-brand); }
+  .post-body :global(hr) {
+    border: 0; border-top: 1px solid var(--color-border); margin: 2.2em 0 1.4em;
+  }
+  /* The trailing italic paragraph is the health disclaimer — quieter than the
+     article, but not hidden. */
+  .post-body :global(hr + p) { font-size: 14px; color: var(--color-text-muted); }
+  .post-body :global(img) { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+
+  .post-back {
+    max-width: 72ch; margin: clamp(40px, 5vw, 64px) auto 0;
+    font-size: 14px; font-weight: 600;
+  }
+  .post-back a { color: var(--color-brand); text-decoration: none; }
+  .post-back a:hover { text-decoration: underline; }
+</style>

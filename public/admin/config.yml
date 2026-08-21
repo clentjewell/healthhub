@@ -162,6 +162,19 @@ collections:
           - { label: Heading, name: heading, widget: string }
           - { label: Intro paragraph, name: lede, widget: text, required: false }
 
+      - name: blog
+        label: Blog (index page wording)
+        file: src/content/pages/blog.yml
+        description: >-
+          Heading and search-engine wording for the blog index. The posts
+          themselves are written under "Blog" in the sidebar.
+        fields:
+          - { label: Browser tab title, name: metaTitle, widget: string }
+          - { label: Search-engine description, name: metaDescription, widget: text }
+          - { label: Small label above heading, name: eyebrow, widget: string, required: false }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Intro paragraph, name: lede, widget: text, required: false }
+
       - name: contact
         label: Contact
         file: src/content/pages/contact.yml
@@ -361,6 +374,47 @@ collections:
                     widget: string
                     required: false
                     hint: 'e.g. /event/seniors-yoga/ — leave blank for no link.'
+
+  - name: blog
+    label: Blog
+    label_singular: post
+    folder: src/content/blog
+    create: true
+    slug: '{{fields.title | slugify}}'
+    preview_path: 'blog/{{slug}}'
+    sortable_fields: ['publishDate', 'title']
+    editor: { preview: false }
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Browser tab title
+        name: metaTitle
+        widget: string
+        required: false
+        hint: 'Leave blank to use the title plus the brand name.'
+      - { label: Search-engine description, name: metaDescription, widget: text, hint: 'Around 150 characters — shows in Google results.' }
+      - { label: Excerpt, name: excerpt, widget: text, hint: 'One or two sentences, shown on the blog index. Write it to earn the click, not as the first line of the article.' }
+      - { label: Category, name: category, widget: string, required: false, hint: 'e.g. Yoga & Meditation' }
+      - { label: Author name, name: author, widget: string }
+      - label: Author's profile
+        name: authorId
+        widget: relation
+        collection: practitioners
+        search_fields: ['name']
+        value_field: '{{slug}}'
+        display_fields: ['name']
+        required: false
+        hint: 'Links the byline to their practitioner page. Leave blank for guest writers.'
+      - { label: Publish date, name: publishDate, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true }
+      - { label: Last updated, name: updatedDate, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true, required: false }
+      - { label: Header image, name: image, widget: image, required: false }
+      - { label: Header image description, name: imageAlt, widget: string, required: false, hint: 'Describes the image for screen readers and search engines.' }
+      - { label: Reading time (minutes), name: readingMinutes, widget: number, value_type: int, required: false }
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+        hint: 'On = hidden from the live site. Turn off to publish.'
+      - { label: Article, name: body, widget: markdown }
 
   - name: faq
     label: FAQ

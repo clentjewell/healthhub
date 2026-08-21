@@ -37,6 +37,10 @@ export const GET: APIRoute = async () => {
   }));
   const faqDisclaimer = faq?.data.disclaimer;
 
+  const posts = (await getCollection('blog'))
+    .filter((p) => !p.data.draft)
+    .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+
   const lines: string[] = [
     `# ${site.name}`,
     '',
@@ -105,6 +109,20 @@ export const GET: APIRoute = async () => {
       '',
     ]),
     ...(faqDisclaimer ? [`_${faqDisclaimer}_`, ''] : []),
+    ...(posts.length
+      ? [
+          '## Writing',
+          '',
+          'Articles by the practitioners who teach here.',
+          '',
+          ...posts.map(
+            (p) =>
+              `- [${p.data.title}](${site.url}/blog/${p.id}/) — ${p.data.author}, ` +
+              `${p.data.publishDate.toISOString().slice(0, 10)}: ${p.data.excerpt}`,
+          ),
+          '',
+        ]
+      : []),
     '## Key pages',
     '',
     `- [Home](${site.url}/)`,
@@ -112,6 +130,7 @@ export const GET: APIRoute = async () => {
     `- [Classes & events](${site.url}/events/)`,
     `- [Weekly timetable](${site.url}/event/health-hub-studio-time-table/)`,
     `- [Make a booking](${site.url}/make-a-booking/)`,
+    `- [Blog](${site.url}/blog/)`,
     `- [FAQ](${site.url}/faq/)`,
     `- [Contact](${site.url}/contact/)`,
     '',

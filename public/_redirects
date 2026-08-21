@@ -1,0 +1,15 @@
+# Redirects for Cloudflare Workers static assets. Real 301s, unlike Astro's
+# static `redirects`, which can only emit a meta-refresh page.
+# Docs: https://developers.cloudflare.com/workers/static-assets/redirects/
+
+# Shannon O'Hara left the Hub in September 2026; Kate Doedee took over her
+# classes. Her profile is gone, so send anyone holding the old link to the team
+# rather than a 404 — /our-practitioner/ (singular) is not a real route, so the
+# index is the closest useful page.
+/our-practitioner/shannon-ohara/  /our-practitioners/  301
+/our-practitioner/shannon-ohara   /our-practitioners/  301
+
+# This event was always Katie Verkerk's Function & Flow class; only its slug
+# said naturopathy, which is Amanda Ross's field, not Katie's.
+/event/naturopathic-health-seminars-with-katie-verkerk/  /event/function-flow/  301
+/event/naturopathic-health-seminars-with-katie-verkerk   /event/function-flow/  301

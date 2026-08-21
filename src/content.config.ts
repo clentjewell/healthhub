@@ -191,6 +191,44 @@ const timetable = defineCollection({
 });
 
 /**
+ * Blog posts for /blog/.
+ *
+ * Posts carry their own meta and excerpt rather than deriving them from the
+ * body: the excerpt is written to sell the click on the index, which is not the
+ * same job as the first paragraph, and a truncated opening line makes a poor
+ * meta description.
+ */
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    /** Full browser/tab title. Falls back to `title` plus the brand. */
+    metaTitle: optionalText,
+    metaDescription: z.string(),
+    /** Shown on the index card and used for og:description. */
+    excerpt: z.string(),
+    /** Free text, e.g. "Yoga & Meditation". Grouping only — not a taxonomy. */
+    category: optionalText,
+    /**
+     * Display name of the author. A plain string rather than a practitioner id:
+     * posts may be written by people who do not have a profile on the site, and
+     * a guest post should not fail the build for want of one.
+     */
+    author: z.string(),
+    /** Practitioner id, when the author does have a profile to link to. */
+    authorId: optionalText,
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    image: optionalText,
+    imageAlt: optionalText,
+    /** Reading time in minutes. Author's own estimate; not computed. */
+    readingMinutes: z.number().optional(),
+    /** Drafts build in dev but never appear in production. */
+    draft: z.boolean().default(false),
+  }),
+});
+
+/**
  * FAQ entries for /faq/. One entry: `general`.
  *
  * A flat list, deliberately not grouped into categories — the questions are
@@ -359,4 +397,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { settings, pages, services, practitioners, events, timetable, faq };
+export const collections = { settings, pages, services, practitioners, events, timetable, faq, blog };
