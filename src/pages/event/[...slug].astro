@@ -124,7 +124,7 @@ const schema = [
         </div>
         {image && (
           <div class="ev-hero-media">
-            <img src={image} alt={title} width="940" height="788" />
+            <img src={image} alt={title} width="1000" height="1000" />
           </div>
         )}
       </div>
@@ -190,7 +190,7 @@ const schema = [
             {others.map((o) => (
               <li>
                 <a href={`/event/${o.id}`}>
-                  {o.data.image && <img src={o.data.image} alt={o.data.title} loading="lazy" width="940" height="788" />}
+                  {o.data.image && <img src={o.data.image} alt={o.data.title} loading="lazy" width="1000" height="1000" />}
                   <span class="ev-more-cat">{CATEGORY_LABEL[o.data.category] ?? o.data.category}</span>
                   <span class="ev-more-title">{o.data.title}</span>
                 </a>

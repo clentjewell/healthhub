@@ -28,7 +28,7 @@ const {
   <div class="event-media">
     {
       image ? (
-        <img src={image} alt={title} loading="lazy" width="940" height="788" />
+        <img src={image} alt={title} loading="lazy" width="1000" height="1000" />
       ) : (
         <div class="event-media-fallback" aria-hidden="true"><Icon name="calendar" size={32} /></div>
       )
@@ -76,7 +76,7 @@ const {
   .event-card:hover .event-media img { transform: scale(1.03); }
   .event-media-fallback {
     display: flex; align-items: center; justify-content: center;
-    aspect-ratio: 940/788; color: var(--color-text-muted);
+    aspect-ratio: 1/1; color: var(--color-text-muted);
   }
 
   .event-body { display: flex; flex-direction: column; flex: 1; padding: 22px 24px 24px; }
