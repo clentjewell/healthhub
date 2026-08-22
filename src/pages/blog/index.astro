@@ -1,6 +1,6 @@
 ---
 /**
- * /blog/ — the post index.
+ * /blog/ — the post index, as a card grid.
  *
  * Newest first by publish date. Drafts are visible while developing and never
  * in a production build, so a half-written post can sit in the repo without
@@ -46,25 +46,47 @@ const schema = [
         posts.length === 0 ? (
           <p class="blog-empty">No posts yet — the first one is on its way.</p>
         ) : (
-          <ul class="blog-list" role="list">
+          <div class="blog-grid">
             {posts.map((p) => (
-              <li class="blog-item">
-                <article>
-                  <p class="blog-meta">
-                    {p.data.category && <span class="blog-cat">{p.data.category}</span>}
-                    <span>{dateLabel(p.data.publishDate)}</span>
-                    {p.data.readingMinutes && <span>{p.data.readingMinutes} min read</span>}
-                    <span>{p.data.author}</span>
-                  </p>
-                  <h2 class="blog-title">
-                    <a href={`/blog/${p.id}/`}>{p.data.title}</a>
-                  </h2>
+              /* The whole card is the link, matching the event cards. That also
+                 keeps one link per card rather than a title and a "read more"
+                 pointing at the same place, which doubles the tab stops and
+                 reads twice to a screen reader. */
+              <a class="blog-card" href={`/blog/${p.id}/`}>
+                <div class="blog-media">
+                  {
+                    p.data.image ? (
+                      <img
+                        src={p.data.image}
+                        alt={p.data.imageAlt ?? p.data.title}
+                        loading="lazy"
+                        width="1600"
+                        height="900"
+                      />
+                    ) : (
+                      /* A post can ship before its photography does. Naming the
+                         category beats a generic icon: it still tells you what
+                         the card is, and it looks deliberate rather than broken. */
+                      <div class="blog-media-fallback" aria-hidden="true">
+                        <span>{p.data.category ?? 'Health Hub'}</span>
+                      </div>
+                    )
+                  }
+                </div>
+
+                <div class="blog-body">
+                  {p.data.category && <p class="blog-cat">{p.data.category}</p>}
+                  <h2 class="blog-title">{p.data.title}</h2>
                   <p class="blog-excerpt">{p.data.excerpt}</p>
-                  <p class="blog-more"><a href={`/blog/${p.id}/`}>Read the post →</a></p>
-                </article>
-              </li>
+                  <p class="blog-byline">
+                    {p.data.author} · {dateLabel(p.data.publishDate)}
+                    {p.data.readingMinutes && ` · ${p.data.readingMinutes} min read`}
+                  </p>
+                  <span class="blog-more">Read the post →</span>
+                </div>
+              </a>
             ))}
-          </ul>
+          </div>
         )
       }
     </div>
@@ -72,58 +94,126 @@ const schema = [
 </BaseLayout>
 
 <style>
-  /* A reading list, not a card grid. One post reads as a deliberate start to a
-     blog; one lonely card in a three-column grid reads as a broken page. */
-  .blog-list {
-    list-style: none;
-    margin: 0 auto;
-    padding: 0;
-    max-width: 72ch;
+  /* Same grid rhythm and breakpoints as the events listing, so the two index
+     pages feel like the same site rather than two different templates. */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 980px) { .blog-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .blog-grid { grid-template-columns: 1fr; } }
+
+  .blog-card {
     display: flex;
     flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   }
-  .blog-item + .blog-item {
-    margin-top: clamp(28px, 4vw, 40px);
-    padding-top: clamp(28px, 4vw, 40px);
-    border-top: 1px solid var(--color-border);
+  .blog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+  }
+  .blog-card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
 
-  .blog-meta {
+  /* Every featured image is generated 16:9, so `cover` crops nothing — the
+     ratio is fixed here so a future post with a different-shaped image can
+     never break the row. */
+  .blog-media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--color-surface-tint);
+  }
+  .blog-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .blog-card:hover .blog-media img { transform: scale(1.03); }
+  @media (prefers-reduced-motion: reduce) {
+    .blog-media img { transition: none; }
+  }
+
+  .blog-media-fallback {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 8px 14px;
-    margin: 0 0 10px;
+    justify-content: center;
+    height: 100%;
+    padding: 16px;
+    text-align: center;
     font-size: 12px;
-    letter-spacing: 0.04em;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     color: var(--color-text-muted);
   }
-  .blog-cat {
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-accent);
+
+  .blog-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px 22px 24px;
   }
 
-  /* Body face, matching the post pages — see the note in blog/[...slug].astro. */
+  .blog-cat {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 8px;
+  }
+
+  /* Body face at semibold, as on the post pages. */
   .blog-title {
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: clamp(1.18rem, 2vw, 1.45rem);
+    font-size: 1.08rem;
     letter-spacing: -0.01em;
-    line-height: 1.28;
+    line-height: 1.3;
     text-transform: none;
     text-wrap: balance;
     color: var(--color-text);
-    margin: 0 0 12px;
+    margin: 0 0 10px;
+    transition: color var(--transition);
   }
-  .blog-title a { color: inherit; text-decoration: none; }
-  .blog-title a:hover { color: var(--color-brand); }
+  .blog-card:hover .blog-title { color: var(--color-brand); }
 
-  .blog-excerpt { margin: 0; color: var(--color-text-muted); line-height: 1.65; }
-  .blog-more { margin: 14px 0 0; font-size: 14px; font-weight: 600; }
-  .blog-more a { color: var(--color-brand); text-decoration: none; }
-  .blog-more a:hover { text-decoration: underline; }
+  /* Clamped so a long excerpt can't push one card taller than its row. */
+  .blog-excerpt {
+    margin: 0 0 16px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* margin-top:auto pins the byline and link to the bottom, so they line up
+     across a row whatever the title and excerpt lengths do above them. */
+  .blog-byline {
+    margin: auto 0 12px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+  .blog-more {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-brand);
+  }
 
   .blog-empty { max-width: 72ch; margin-inline: auto; color: var(--color-text-muted); }
 </style>
