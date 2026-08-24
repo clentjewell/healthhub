@@ -207,6 +207,13 @@ const blog = defineCollection({
     metaDescription: z.string(),
     /** Shown on the index card and used for og:description. */
     excerpt: z.string(),
+    /**
+     * Editorial running order on /blog/, lowest first — a fixed sequence the
+     * client sets, not date order. Same convention as the other collections.
+     * A post without one sorts to the back (99) and then by date, so a new
+     * post never fails the build for want of a number.
+     */
+    order: z.number().default(99),
     /** Free text, e.g. "Yoga & Meditation". Grouping only — not a taxonomy. */
     category: optionalText,
     /**

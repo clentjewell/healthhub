@@ -3,6 +3,7 @@ title: "What Happens at Your First Acupuncture Appointment"
 metaTitle: "What Happens at Your First Acupuncture Appointment — Health Hub Tweed Coast"
 metaDescription: "What actually happens at a first acupuncture consultation — from a Doctor of Acupuncture with over 30 years in clinical practice at Health Hub Tweed Coast."
 excerpt: "Not knowing what to expect is often the biggest reason people put off their first acupuncture visit. Here's a plain, honest walkthrough — from the consultation itself through to what the evidence actually says."
+order: 2
 category: "Acupuncture & TCM"
 author: "Dr Malcolm McKay"
 authorId: "dr-malcolm-mckay"

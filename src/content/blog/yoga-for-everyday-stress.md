@@ -3,6 +3,7 @@ title: "How Yoga Can Support Everyday Stress and a Calmer Nervous System"
 metaTitle: "How Yoga Can Support Everyday Stress — Health Hub Tweed Coast"
 metaDescription: "How Hatha yoga and breathwork can support a calmer response to everyday stress — from Alicia Grace at Health Hub Tweed Coast."
 excerpt: "A nervous system that never switches off is one of the most common things that bring students to yoga. Here's how yoga and breathing practices can help — and what the research actually shows."
+order: 4
 category: "Yoga & Meditation"
 author: "Alicia Grace"
 authorId: "alicia-grace"

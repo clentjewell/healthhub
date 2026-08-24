@@ -3,6 +3,7 @@ title: "What Is Sound Healing with Crystal Bowls, and What Can You Expect?"
 metaTitle: "What Is Sound Healing with Crystal Bowls? — Health Hub Tweed Coast"
 metaDescription: "Curious about crystal sound bowls? Here's what a session actually involves and what the (still-developing) evidence says, from Pearl Blinco-Doffiny at Health Hub Tweed Coast."
 excerpt: "If you've never experienced a sound bath, here's what actually happens — and an honest look at what the (still small) body of research says."
+order: 8
 category: "Sound Healing"
 author: "Pearl Blinco-Doffiny"
 authorId: "pearl-blinco-doffiny"

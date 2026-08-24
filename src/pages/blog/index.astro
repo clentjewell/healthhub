@@ -17,10 +17,12 @@ const page = await getPage('blog');
 
 const posts = (await getCollection('blog'))
   .filter((p) => import.meta.env.DEV || !p.data.draft)
-  // Newest first. Titles break the tie so the order is stable between builds
-  // while several posts still share a placeholder publish date.
+  // The client sets a fixed running order (the `order` field), lowest first.
+  // A post without one falls to the back on 99, then newest-first, with the
+  // title breaking any remaining tie so the build order stays stable.
   .sort(
     (a, b) =>
+      a.data.order - b.data.order ||
       b.data.publishDate.getTime() - a.data.publishDate.getTime() ||
       a.data.title.localeCompare(b.data.title),
   );

@@ -39,7 +39,12 @@ export const GET: APIRoute = async () => {
 
   const posts = (await getCollection('blog'))
     .filter((p) => !p.data.draft)
-    .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+    // Same running order as /blog/: the client's `order` first, then newest.
+    .sort(
+      (a, b) =>
+        a.data.order - b.data.order ||
+        b.data.publishDate.getTime() - a.data.publishDate.getTime(),
+    );
 
   const lines: string[] = [
     `# ${site.name}`,

@@ -3,6 +3,7 @@ title: "What Does a Naturopath Do, and How Can They Support Family Health?"
 metaTitle: "What Does a Naturopath Do? — Health Hub Tweed Coast"
 metaDescription: "What a naturopath actually does, how it's different from seeing your GP, and how it can support your family's everyday health — from Amanda Ross at Health Hub Tweed Coast."
 excerpt: "If you've never seen a naturopath, this is a fair question: what actually happens in a consultation, and how is it different from a GP visit?"
+order: 9
 category: "Naturopathy"
 author: "Amanda Ross"
 authorId: "amanda-ross"

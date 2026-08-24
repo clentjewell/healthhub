@@ -3,6 +3,7 @@ title: "Yin Yoga vs Hatha Yoga: What's the Difference?"
 metaTitle: "Yin Yoga vs Hatha Yoga: What's the Difference? — Health Hub Tweed Coast"
 metaDescription: "Not sure whether to try Yin or Hatha yoga? Here's a clear, honest comparison from Kate Doedee at Health Hub Tweed Coast."
 excerpt: "Yin and Hatha are both \"yoga\", but they're not the same experience at all. Here's a straightforward comparison to help you choose."
+order: 5
 category: "Yoga & Meditation"
 author: "Kate Doedee"
 authorId: "kate-doedee"

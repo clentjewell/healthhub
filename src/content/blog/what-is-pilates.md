@@ -3,6 +3,7 @@ title: "What Is Pilates, and What Are the Benefits of Regular Practice?"
 metaTitle: "What Is Pilates? Benefits of Regular Practice — Health Hub Tweed Coast"
 metaDescription: "What Pilates actually involves, what the evidence says about its benefits, and what to expect in your first class — from Monique Carole at Health Hub Tweed Coast."
 excerpt: "Pilates has a reputation for being both gentle and genuinely challenging. Here's what it actually involves, what the evidence says, and what to expect if you're new."
+order: 6
 category: "Pilates & Body Balance"
 author: "Monique Carole"
 authorId: "monique-carole"

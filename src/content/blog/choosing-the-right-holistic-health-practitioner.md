@@ -3,6 +3,7 @@ title: "Choosing the Right Holistic Health Practitioner for You"
 metaTitle: "Choosing the Right Holistic Health Practitioner | Health Hub Tweed Coast"
 metaDescription: "Not sure where to start at a multi-disciplinary health centre? Here's a simple guide to choosing the right practitioner at Health Hub Tweed Coast."
 excerpt: "Eight practitioners, seven disciplines, one address. Here's a simple way to work out where to start — based on what you're actually looking for."
+order: 10
 category: "About Health Hub"
 author: "Health Hub Tweed Coast"
 publishDate: 2026-08-21

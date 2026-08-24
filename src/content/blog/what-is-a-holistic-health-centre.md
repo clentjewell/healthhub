@@ -3,6 +3,7 @@ title: "What Is a Holistic Health Centre, and How Does It Work?"
 metaTitle: "What Is a Holistic Health Centre? — Health Hub Tweed Coast"
 metaDescription: "Curious what \"holistic health centre\" actually means? Here's how Health Hub Tweed Coast brings acupuncture, naturopathy, yoga and movement together under one roof."
 excerpt: "Search \"holistic health centre\" and you'll get a dozen slightly different answers. Here's a straightforward one — and how it actually works at Health Hub Tweed Coast."
+order: 1
 category: "About Health Hub"
 author: "Health Hub Tweed Coast"
 publishDate: 2026-08-21

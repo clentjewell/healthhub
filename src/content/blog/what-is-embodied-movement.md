@@ -3,6 +3,7 @@ title: "What Is Embodied Movement, and How Is It Different from a Regular Fitnes
 metaTitle: "What Is Embodied Movement? — Health Hub Tweed Coast"
 metaDescription: "Embodied movement isn't a typical dance or fitness class. Here's what it actually involves, from Rebecca Lindsay at Health Hub Tweed Coast."
 excerpt: "Embodied movement is one of those terms that sounds abstract until you try it. Here's what it actually involves, and what it isn't."
+order: 7
 category: "Embodied Movement & Dance"
 author: "Rebecca Lindsay"
 authorId: "rebecca-lindsay"
