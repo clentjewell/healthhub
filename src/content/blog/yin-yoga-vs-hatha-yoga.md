@@ -44,7 +44,7 @@ Both classes are guided, and neither requires prior experience. Turn up, let me 
 
 If you're not sure which to try, come to either — I'll help you work out what suits you as we go.
 
-You'll find me on the [weekly timetable](/event/health-hub-studio-time-table/) on Monday mornings for Yin-Yang Yoga and Wednesday evenings for Yin, and my class times and fees are on [my profile](/our-practitioner/kate-doedee/).
+You'll find me on the [weekly timetable](/event/health-hub-studio-time-table/) on Monday mornings for Yin-Yang Yoga, and my class times and fees are on [my profile](/our-practitioner/kate-doedee/).
 
 ---
 

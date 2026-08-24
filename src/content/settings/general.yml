@@ -30,13 +30,14 @@ lat: -28.3688969
 lng: 153.5728374
 
 # ---- Opening hours ----------------------------------------------------------
-# Studio reception hours, confirmed by the client. Note these feed the
+# Studio hours, set by the client (24 Aug 2026: "tie it down, 7am to 7:30pm,
+# Monday to Sunday") to cover the timetable end to end. These feed the
 # openingHoursSpecification in the LocalBusiness schema — i.e. the hours Google
-# shows — and the timetable currently runs outside them at both ends: a 6:00am
-# Wednesday class, and consultations to 7:30pm. Raised with the client.
-hoursLabel: Monday – Sunday, 7:00am – 6:30pm
+# shows. One session still runs past close: Embodied Movement & Dance,
+# 7:00–8:15pm on the first Friday of each month.
+hoursLabel: Monday – Sunday, 7:00am – 7:30pm
 hoursOpen: '07:00'
-hoursClose: '18:30'
+hoursClose: '19:30'
 
 # ---- Social ----------------------------------------------------------------
 socialHandle: '@healthhubtweedcoast'

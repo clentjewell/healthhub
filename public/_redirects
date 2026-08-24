@@ -9,6 +9,11 @@
 /our-practitioner/shannon-ohara/  /our-practitioners/  301
 /our-practitioner/shannon-ohara   /our-practitioners/  301
 
+# The ADHD Workshop page was removed before its details were ever confirmed;
+# the workshop still shows on the timetable, so send old links there.
+/event/adhd-workshop/  /event/health-hub-studio-time-table/  301
+/event/adhd-workshop   /event/health-hub-studio-time-table/  301
+
 # This event was always Katie Verkerk's Function & Flow class; only its slug
 # said naturopathy, which is Amanda Ross's field, not Katie's.
 /event/naturopathic-health-seminars-with-katie-verkerk/  /event/function-flow/  301

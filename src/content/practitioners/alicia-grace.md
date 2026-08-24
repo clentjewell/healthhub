@@ -60,6 +60,10 @@ YOGA & MEDITATION
 
 A general style of class structured similar to a traditional yoga class. It will generally include an opening mindfulness practice, movement to warm up the body, movement to cool down the body and a concluding breathing practice or meditation. The practices taught are drawn from various yoga lineages, including Hatha, Ashtanga and Yin to create a blended practice that balances both strength and ease.
 
+YIN YOGA
+
+A slow-paced, floor-based evening practice. Poses are held for longer with the support of props, making space to rest, release and wind down at the end of the day.
+
 ## Dates & times for Yoga Classes
 
 **YOGA CLASSES**
@@ -67,6 +71,8 @@ A general style of class structured similar to a traditional yoga class. It will
 Please arrive 10mins before class to sign in & get settled
 
 * TUESDAY Seniors Yoga 9:30am – 10:30am
+* TUESDAY Yoga & Meditation 6:00pm – 7:15pm
+* WEDNESDAY Yin Yoga 6:00pm – 7:15pm
 * THURSDAY Seniors Yoga 9:30am – 10:30am
 * FRIDAY  Hatha Yoga 9:30am – 10:45am
 * SUNDAY HATHA Yoga 8:00am – 9:15am

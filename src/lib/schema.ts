@@ -271,7 +271,9 @@ export function blogPostingNode(p: {
     inLanguage: 'en-AU',
     datePublished: p.published.toISOString().slice(0, 10),
     ...(p.updated ? { dateModified: p.updated.toISOString().slice(0, 10) } : {}),
-    ...(p.image ? { image: abs(p.image) } : {}),
+    // abs() adds the canonical trailing slash, which belongs on pages, not
+    // files — same trim as the business image above.
+    ...(p.image ? { image: abs(p.image).replace(/\/$/, '') } : {}),
     /**
      * A hub-wide piece is written by the studio, not a person — attributing it
      * to a Person named "Health Hub Tweed Coast" would invent one. Those point

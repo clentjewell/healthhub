@@ -53,5 +53,3 @@ A Yin–Yang yoga class blends two complementary energies into one beautifully b
 ## Class Times & Fees
 
 **Monday Yin-Yang:** 7:30 – 8:45 am (75mins)
-
-**Wednesday Yin:** 6:00 – 7:15 pm (75mins)
