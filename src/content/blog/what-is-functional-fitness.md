@@ -11,7 +11,7 @@ readingMinutes: 3
 ctaLabel: "View class times"
 ctaHref: "/event/health-hub-studio-time-table/"
 image: "/images/blog/what-is-functional-fitness-hero.webp"
-imageAlt: "A Function & Flow class in progress at Health Hub Tweed Coast."
+imageAlt: "A seated medicine-ball twist — a core exercise of the kind used in a Function & Flow session."
 draft: false
 ---
 
@@ -27,7 +27,7 @@ It trains the body to move the way it needs to in daily life — bending, reachi
 
 This is one area where the broader research is genuinely solid. A well-established body of evidence has found that exercise programs incorporating balance and functional or strength training meaningfully reduce fall rates in older, community-dwelling adults. I want to be precise here: that's evidence for this type of exercise generally, not a claim that my specific classes have themselves been the subject of a trial — but it's genuinely strong support for why this kind of training matters as people move through different life stages.
 
-![Function & Flow class detail at Health Hub Tweed Coast.](/images/blog/what-is-functional-fitness-inline.webp)
+![A dumbbell chest press on the studio floor during a Function & Flow session at Health Hub Tweed Coast.](/images/blog/what-is-functional-fitness-inline.webp)
 
 ## What a class actually involves
 
