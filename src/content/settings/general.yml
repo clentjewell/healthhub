@@ -69,5 +69,10 @@ footerBlurb: >-
 footerNote: Made on the Tweed Coast.
 
 # ---- Integrations ----------------------------------------------------------
-# Where the contact form posts. Leave blank until the endpoint is confirmed.
-contactFormEndpoint: ''
+# Where the contact form posts. FormSubmit delivers submissions to the inbox
+# named in the URL — no account needed, but the FIRST submission emails that
+# inbox an activation link which must be clicked before anything is delivered.
+# rao@ is the test inbox (client, 24 Aug 2026); once testing is done, swap to
+# https://formsubmit.co/health@pottsvilleacupuncture.com.au and have the client
+# click the new activation email.
+contactFormEndpoint: 'https://formsubmit.co/rao@jewellprojects.com'

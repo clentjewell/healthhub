@@ -29,6 +29,19 @@ const socials = [
           action={cfg.contactFormEndpoint || '#'}
           data-endpoint-set={cfg.contactFormEndpoint ? 'true' : 'false'}
         >
+          {/* FormSubmit control fields. Harmless extras if the endpoint is ever
+              something else — they just post as unused fields. `_next` is
+              filled in by the script below so it follows whatever domain the
+              site is on; without JS, FormSubmit's own thank-you page shows. */}
+          <input type="hidden" name="_subject" value="New enquiry — Health Hub Tweed Coast website" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_captcha" value="false" />
+          <input type="hidden" name="_next" value="" />
+          {/* Honeypot: humans never see it; bots that fill it are discarded. */}
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp-field" />
+          <p class="form-sent" hidden>
+            Thanks — your message has been sent. We'll get back to you soon.
+          </p>
           <div class="field">
             <label for="name">Name</label>
             <input id="name" name="name" type="text" required autocomplete="name" />
@@ -111,6 +124,19 @@ const socials = [
   </section>
 </BaseLayout>
 
+<script>
+  // Send FormSubmit back to this page with ?sent=1, whichever domain we're on,
+  // and show the confirmation when we arrive back with it.
+  const next = document.querySelector<HTMLInputElement>('input[name="_next"]');
+  if (next) next.value = `${location.origin}/contact/?sent=1`;
+
+  if (new URLSearchParams(location.search).has('sent')) {
+    const note = document.querySelector<HTMLElement>('.form-sent');
+    if (note) note.hidden = false;
+    note?.scrollIntoView({ block: 'center' });
+  }
+</script>
+
 <style>
   .contact-grid {
     display: grid;
@@ -154,6 +180,18 @@ const socials = [
   .contact-social svg { width: 18px; height: 18px; fill: currentColor; }
   .todo-note { font-size: 12px; color: var(--color-text-muted); font-style: italic; }
   .todo-note code { font-style: normal; }
+
+  /* Honeypot: off-screen rather than display:none, so naive bots still fill it. */
+  .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  .form-sent {
+    margin: 0 0 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-tint);
+    font-size: 15px;
+  }
 
   .map-wrap { margin-top: 56px; }
   .map-wrap iframe {

@@ -521,4 +521,4 @@ collections:
             name: contactFormEndpoint
             widget: string
             required: false
-            hint: Where the contact form submits. Leave blank until it's set up.
+            hint: 'Where the contact form submits. Format: https://formsubmit.co/you@example.com — after changing the address, the new inbox gets an activation email on the first submission; nothing is delivered until its link is clicked.'
