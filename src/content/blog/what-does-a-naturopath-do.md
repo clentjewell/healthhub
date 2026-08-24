@@ -10,6 +10,8 @@ publishDate: 2026-08-21
 readingMinutes: 4
 ctaLabel: "Book a consultation"
 ctaHref: "/make-a-booking/"
+image: "/images/blog/what-does-a-naturopath-do-hero.webp"
+imageAlt: "Amanda Ross, naturopath, working on a laptop in the garden at Health Hub Tweed Coast."
 draft: false
 ---
 
