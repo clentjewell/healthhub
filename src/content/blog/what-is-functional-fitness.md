@@ -26,7 +26,7 @@ It trains the body to move the way it needs to in daily life — bending, reachi
 
 ## What the evidence says
 
-This is one area where the broader research is genuinely solid. A well-established body of evidence has found that exercise programs incorporating balance and functional or strength training meaningfully reduce fall rates in older, community-dwelling adults. I want to be precise here: that's evidence for this type of exercise generally, not a claim that my specific classes have themselves been the subject of a trial — but it's genuinely strong support for why this kind of training matters as people move through different life stages.
+This is one area where the broader research is genuinely solid. A large Cochrane review found that exercise programs incorporating balance and functional or strength training meaningfully reduce fall rates in older, community-dwelling adults.<sup><a href="#reference">1</a></sup> I want to be precise here: that's evidence for this type of exercise generally, not a claim that my specific classes have themselves been the subject of a trial — but it's genuinely strong support for why this kind of training matters as people move through different life stages.
 
 ![A dumbbell chest press on the studio floor during a Function & Flow session at Health Hub Tweed Coast.](/images/blog/what-is-functional-fitness-inline.webp)
 
@@ -45,6 +45,10 @@ If you have an existing injury, a recent surgery, or a specific health condition
 ## A place to start
 
 If you're curious about functional fitness, come along to a class — everyone starts somewhere, and mine is a genuinely supportive place to do it.
+
+## Reference
+
+1. Sherrington C, Fairhall NJ, Wallbank GK, et al. Exercise for preventing falls in older people living in the community. *Cochrane Database of Systematic Reviews*, 2019; Issue 1: CD012424.
 
 ---
 
