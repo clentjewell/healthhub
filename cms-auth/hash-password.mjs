@@ -10,7 +10,8 @@
  * The password itself is never stored — only this one-way hash.
  *
  * Must stay in sync with verifyPbkdf2() in src/index.js: PBKDF2-SHA256,
- * 210000 iterations, 16-byte salt, 32-byte derived key, standard base64.
+ * 100000 iterations (Cloudflare Workers' ceiling), 16-byte salt, 32-byte
+ * derived key, standard base64.
  */
 import { pbkdf2, randomBytes } from 'node:crypto';
 
