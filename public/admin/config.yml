@@ -14,10 +14,12 @@ backend:
   name: github
   repo: clentjewell/healthhub
   branch: main
-  # Deployed sveltia-cms-auth worker. Its GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET
-  # variables must be set in the Cloudflare dashboard before sign-in works —
-  # see docs/EDITING-THE-WEBSITE.md steps 2b–2c.
-  base_url: https://sveltia-cms-auth.clent.workers.dev
+  # Email + password login, handled by the worker in /cms-auth (see its
+  # README.md to deploy it and set the secrets). It hands the CMS a scoped
+  # GitHub token after a correct password, so editors sign in without a GitHub
+  # account. Until that worker is deployed, /admin sign-in will not work.
+  base_url: https://healthhub-cms-auth.clent.workers.dev
+  auth_endpoint: auth
   commit_messages:
     create: 'content: create {{collection}} "{{slug}}"'
     update: 'content: update {{collection}} "{{slug}}"'

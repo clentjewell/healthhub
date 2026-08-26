@@ -1,0 +1,20 @@
+# Cloudflare Worker: Health Hub CMS email + password login.
+# Deploy from this directory:  npx wrangler deploy
+#
+# This is a SEPARATE worker from the site itself. It only handles /admin sign-in.
+name = "healthhub-cms-auth"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Rate-limit store for failed logins. Create it once with:
+#   npx wrangler kv namespace create RL
+# then paste the returned id below and uncomment. Optional but recommended.
+# [[kv_namespaces]]
+# binding = "RL"
+# id = "PASTE_KV_NAMESPACE_ID_HERE"
+
+# Secrets are NOT set here (never commit them). Set them with:
+#   npx wrangler secret put GITHUB_TOKEN
+#   npx wrangler secret put AUTH_USERS
+#   npx wrangler secret put ALLOWED_ORIGINS
+# See README.md for what each one contains.
