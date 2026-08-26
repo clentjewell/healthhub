@@ -1,0 +1,30 @@
+# HTTP response headers for the Cloudflare Workers static-assets deployment.
+# Same mechanism as public/_redirects. First matching rule set applies per path;
+# /admin/* is listed after /* and loosens the CSP for the CMS bundle only.
+#
+# NOT set here on purpose: Strict-Transport-Security (HSTS). Enable that on the
+# real domain at cutover (Cloudflare dashboard → SSL/TLS → Edge Certificates →
+# HSTS), not on the shared *.workers.dev host.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  # Fonts, CSS and images are all self-hosted; the only embedded third party is
+  # the Google Maps iframe on /contact/. Inline <script>/<style> are Astro's own
+  # scoped output, hence 'unsafe-inline'. The contact form POSTs to FormSubmit,
+  # so form-action allows it. frame-ancestors 'none' blocks clickjacking.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src https://maps.google.com https://www.google.com; connect-src 'self'; form-action 'self' https://formsubmit.co; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+
+# The CMS editor loads the Sveltia bundle from unpkg and, once GitHub OAuth is
+# configured, talks to github.com / api.github.com and shows repo images from
+# raw.githubusercontent.com. This page is noindex and behind auth; the extra
+# allowances apply to it alone. If a future CMS feature calls another host,
+# add it to connect-src here.
+/admin/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data: https://unpkg.com; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com https://sveltia-cms-auth.clent.workers.dev; frame-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'

@@ -1,0 +1,35 @@
+---
+/**
+ * 404 — served by the Worker for any unmatched path (wrangler.toml sets
+ * not_found_handling = "404-page", which looks for this file's output).
+ * noindex so a crawler that stumbles onto it never lists it as a real page.
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PageHeader from '@components/PageHeader.astro';
+---
+
+<BaseLayout title="Page not found" noindex={true}>
+  <PageHeader
+    eyebrow="404"
+    title="We couldn't find that page"
+    lede="The page may have moved, or the link might be slightly off. Here are a few good places to pick things back up."
+  />
+
+  <section class="section">
+    <div class="container nf-actions">
+      <a class="btn btn-primary" href="/">Back to home</a>
+      <a class="btn btn-ghost" href="/our-practitioners/">Our practitioners</a>
+      <a class="btn btn-ghost" href="/events/">Classes &amp; events</a>
+      <a class="btn btn-ghost" href="/contact/">Contact us</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
+</style>

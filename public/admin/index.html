@@ -37,7 +37,18 @@
       Config lives in ./config.yml (Decap-compatible, so swapping to Decap is a
       one-line change of this script tag).
     -->
-    <script src="https://unpkg.com/@sveltia/cms@0.175.1/dist/sveltia-cms.js" type="module"></script>
+    <!--
+      Subresource Integrity: the browser refuses to run this file unless it
+      hashes to the value below, so a compromised CDN can't swap in other code.
+      The hash is tied to the pinned @0.175.1 — regenerate it if that version
+      changes: curl -s <url> | openssl dgst -sha384 -binary | openssl base64 -A
+    -->
+    <script
+      src="https://unpkg.com/@sveltia/cms@0.175.1/dist/sveltia-cms.js"
+      integrity="sha384-b6o5APwsjm1LTXxPrq5Mas+fKyiR0Ywwpojq8pP4iDdw0dqrcCH55dUIcqBgYloL"
+      crossorigin="anonymous"
+      type="module"
+    ></script>
     <script>
       // The CMS replaces the document body once it mounts; if it never does,
       // the boot message above stays visible as a diagnostic.
