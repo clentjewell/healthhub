@@ -119,55 +119,24 @@ is recorded in the repository history and can be restored.
 
 The editor needs a small sign-in helper and two secrets before first use.
 
-### 1. Editor sign-in (do these four steps *in order*)
+### 1. Editor sign-in — ✅ DONE (email + password)
 
-GitHub doesn't yet allow browser-only sign-in, so the editor needs a tiny OAuth
-relay worker. Sveltia publishes a ready-made one. **Deploy the worker first** —
-the OAuth app needs its URL.
+Editors sign in with an **email and password** — no GitHub account needed. A
+small worker (in [`/cms-auth`](../cms-auth/)) shows the password screen and, on
+a correct password, hands the editor a scoped GitHub token so the CMS can save.
 
-**1a. Deploy the auth worker — ✅ DONE**
+This is already deployed and configured:
 
-Already deployed to: **`https://sveltia-cms-auth.clent.workers.dev`**
+- **Worker:** `https://healthhub-cms-auth.clent.workers.dev` (source in `/cms-auth`)
+- **Secrets set on it:** `GITHUB_TOKEN` (fine-grained, Contents R/W on this repo),
+  `AUTH_USERS` (editor logins), `ALLOWED_ORIGINS` (this site's origins)
+- **Rate limiting:** on (KV namespace `RL`, 10 tries per IP per 15 min)
+- **CMS pointed at it:** `base_url` in
+  [`public/admin/config.yml`](../public/admin/config.yml)
 
-(For reference, to redeploy or move it:
-`git clone https://github.com/sveltia/sveltia-cms-auth.git && cd sveltia-cms-auth && npx wrangler deploy`)
-
-**1b. Register it as a GitHub OAuth app**
-
-[Register a new OAuth application](https://github.com/settings/applications/new):
-
-| Field | Value |
-|---|---|
-| Application name | `Health Hub CMS` (anything) |
-| Homepage URL | `https://healthhubtweedcoast.com.au` |
-| **Authorization callback URL** | **`https://sveltia-cms-auth.clent.workers.dev/callback`** |
-
-Then click **Generate a new client secret**, and keep the **Client ID** and
-**Client Secret**.
-
-**1c. Give the worker its variables**
-
-Cloudflare dashboard → **Workers & Pages → `sveltia-cms-auth` → Settings →
-Variables and Secrets**:
-
-| Name | Value |
-|---|---|
-| `GITHUB_CLIENT_ID` | Client ID from 1b |
-| `GITHUB_CLIENT_SECRET` | Client Secret from 1b — click **Encrypt** |
-| `ALLOWED_DOMAINS` | `healthhubtweedcoast.com.au, *.workers.dev` |
-
-Save and deploy.
-
-> `ALLOWED_DOMAINS` is what stops anyone else pointing their own CMS at your
-> worker. Including `*.workers.dev` lets sign-in work on the preview URL too;
-> drop it once you're live on the real domain.
-
-**1d. Point the CMS at the worker — ✅ DONE**
-
-`base_url` in [`public/admin/config.yml`](../public/admin/config.yml) is already
-set to `https://sveltia-cms-auth.clent.workers.dev`.
-
-Once 1b and 1c are done, sign-in works — nothing further to deploy.
+Everything you'd change day-to-day — adding an editor, changing a password,
+rotating the GitHub token — is in [`cms-auth/README.md`](../cms-auth/README.md).
+Nothing here needs redoing unless you're moving the worker.
 
 ### 2. Repository secrets for auto-deploy
 
