@@ -88,11 +88,19 @@ async function handleLogin(request, env) {
   return handshakePage(env.GITHUB_TOKEN, allowed);
 }
 
+// A structurally valid hash used only to spend the same PBKDF2 time when the
+// email is unknown, so an attacker can't tell "no such editor" from "wrong
+// password" by timing the response (email enumeration). It matches no password.
+const DUMMY_HASH =
+  'pbkdf2$sha256$100000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
+
 async function verifyCredentials(env, email, password) {
   const users = parseUsers(env.AUTH_USERS);
   const stored = users.get(email);
-  if (!stored) return false;
-  return verifyPbkdf2(password, stored);
+  // Always run the KDF — against the real hash if the email exists, otherwise
+  // against a dummy — so the response time doesn't reveal which emails are valid.
+  const ok = await verifyPbkdf2(password, stored || DUMMY_HASH);
+  return stored ? ok : false;
 }
 
 /** Parse "email:hash" lines (comments and blanks ignored). */
@@ -175,7 +183,13 @@ function loginPage(env, error, status = 200) {
     <button type="submit">Sign in</button>
   </form>
 </body></html>`;
-  return new Response(html, { status, headers: { ...baseHeaders(), 'Content-Type': 'text/html; charset=utf-8' } });
+  // The login page has no scripts at all — lock it down to styles + its own form.
+  const csp =
+    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+  return new Response(html, {
+    status,
+    headers: { ...baseHeaders(), 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': csp },
+  });
 }
 
 /**
@@ -188,22 +202,30 @@ function handshakePage(token, allowedOrigins) {
   // The token is posted only to an origin on the allow-list, so a page on some
   // other origin that opened this popup can never receive it. An empty list
   // (misconfiguration) accepts none — fail closed rather than leak the token.
+  // jsForScript() escapes '<' etc. so neither the token nor an origin string can
+  // break out of the <script> block.
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Signing in…</title></head>
 <body><script>
   (function () {
-    var allowed = ${JSON.stringify(allowedOrigins)};
+    var allowed = ${jsForScript(allowedOrigins)};
     function receive(e) {
       if (e.data !== 'authorizing:github') return;
       if (allowed.indexOf(e.origin) === -1) return;
       window.opener.postMessage(
-        'authorization:github:success:' + ${JSON.stringify(payload)}, e.origin);
+        'authorization:github:success:' + ${jsForScript(payload)}, e.origin);
       window.removeEventListener('message', receive);
     }
     window.addEventListener('message', receive, false);
     window.opener.postMessage('authorizing:github', '*');
   })();
 </script><p style="font-family:sans-serif">Signing you in…</p></body></html>`;
-  return new Response(html, { status: 200, headers: { ...baseHeaders(), 'Content-Type': 'text/html; charset=utf-8' } });
+  // The page runs exactly one inline script and talks only to window.opener.
+  const csp =
+    "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'";
+  return new Response(html, {
+    status: 200,
+    headers: { ...baseHeaders(), 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': csp },
+  });
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -233,6 +255,13 @@ function b64ToBytes(b64) {
 }
 function escapeHtml(s) {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+/** JSON for safe embedding inside an inline <script>: no '<' to start a tag,
+ *  and the JS line separators U+2028/U+2029 escaped. */
+function jsForScript(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 }
 
 export const _PBKDF2_ITERATIONS = PBKDF2_ITERATIONS; // referenced by hash-password.mjs

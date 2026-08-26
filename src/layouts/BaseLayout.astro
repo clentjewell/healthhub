@@ -59,6 +59,22 @@ const graph = noindex
   ? null
   : { '@context': 'https://schema.org', '@graph': [businessNode(cfg), websiteNode(), ...schema] };
 
+/**
+ * JSON-LD for embedding in a <script>. JSON.stringify does not escape "<", so a
+ * content field containing "</script>" would break out of the tag. Escaping the
+ * three HTML-significant characters (still valid JSON — they only ever appear
+ * inside string values) closes that off. U+2028/U+2029 are escaped too, since
+ * they are literal newlines in a JS/JSON string context.
+ */
+const jsonLd = graph
+  ? JSON.stringify(graph)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029')
+  : null;
+
 const pageTitle = fullTitle ?? buildTitle(title);
 /**
  * Canonicals always carry a trailing slash, matching both the sitemap and the
@@ -100,7 +116,7 @@ const ogImageUrl = new URL(ogImage, site.url).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
 
-    {graph && <script type="application/ld+json" set:html={JSON.stringify(graph)} />}
+    {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
 
     {/* Brand fonts — self-hosted licensed Pottsville family, no external
         request. See fonts.css for the upright-weight situation. */}
