@@ -43,7 +43,7 @@ node cms-auth/hash-password.mjs editor@healthhub.example
 It asks for a password (min 10 chars, hidden) and prints one line:
 
 ```
-editor@healthhub.example:pbkdf2$sha256$210000$…$…
+editor@healthhub.example:pbkdf2$sha256$100000$…$…
 ```
 
 Run it once per editor. Collect the lines together — that's your `AUTH_USERS`

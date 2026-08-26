@@ -6,12 +6,10 @@ name = "healthhub-cms-auth"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
 
-# Rate-limit store for failed logins. Create it once with:
-#   npx wrangler kv namespace create RL
-# then paste the returned id below and uncomment. Optional but recommended.
-# [[kv_namespaces]]
-# binding = "RL"
-# id = "PASTE_KV_NAMESPACE_ID_HERE"
+# Rate-limit store for failed logins (10 tries per IP per 15 min).
+[[kv_namespaces]]
+binding = "RL"
+id = "921cd297caed46ad869b1a5592e718a3"
 
 # Secrets are NOT set here (never commit them). Set them with:
 #   npx wrangler secret put GITHUB_TOKEN

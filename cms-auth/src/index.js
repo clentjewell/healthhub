@@ -38,7 +38,7 @@
  *   RL  (optional)   KV namespace binding for rate limiting
  */
 
-const PBKDF2_ITERATIONS = 210000;
+const PBKDF2_ITERATIONS = 100000;
 const RL_MAX_ATTEMPTS = 10; // per IP per window
 const RL_WINDOW_SECONDS = 900; // 15 minutes
 

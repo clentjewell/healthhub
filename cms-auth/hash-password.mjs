@@ -14,7 +14,7 @@
  */
 import { pbkdf2, randomBytes } from 'node:crypto';
 
-const ITERATIONS = 210000;
+const ITERATIONS = 100000;
 const SALT_BYTES = 16;
 const KEY_BYTES = 32;
 
