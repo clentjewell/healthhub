@@ -11,6 +11,7 @@ import {
   COLLECTIONS, verifyLogin, createSession, readSession, sessionCookie,
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
   loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
+  ghCommits, ghGetAtRef,
 } from './lib.js';
 import { APP_JS } from './app-js.js';
 import { groupedKeys, labelFor, hintFor, previewPath } from './fields.js';
@@ -67,6 +68,8 @@ async function route(request, env) {
   if (p === '/media') return mediaPage(env, url.searchParams.get('path'));
   if (p === '/media/upload' && request.method === 'POST') return doUpload(request, env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
+  if (p === '/history') return historyPage(env, url.searchParams.get('k'), url.searchParams.get('path'));
+  if (p === '/restore' && request.method === 'POST') return doRestore(request, env);
   return redirect('/');
 }
 
@@ -221,6 +224,40 @@ function errorPage(msg) {
     <p class="err">${msg}</p>`);
 }
 
+/* ── Version history ─────────────────────────────────────────────────────── */
+
+async function historyPage(env, k, path, notice) {
+  const c = COLLECTIONS[k];
+  if (!c || !path) return redirect('/');
+  const commits = await ghCommits(env, path);
+  const back = `/edit?k=${k}&path=${encodeURIComponent(path)}`;
+  const rows = commits.map((cm, i) => {
+    const when = new Date(cm.date).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
+    const who = cm.message.includes('via CMS') ? 'edited here' : 'change';
+    return `<div class="vrow">
+      <span><strong>${esc(when)}</strong><span class="vmeta">${i === 0 ? 'current version' : esc(who)}</span></span>
+      ${i === 0 ? '<span class="vmeta">—</span>' : `<form method="POST" action="/restore" onsubmit="return confirm('Restore this version? Your current version is saved first, so you can undo.')">
+        <input type="hidden" name="k" value="${esc(k)}"><input type="hidden" name="path" value="${esc(path)}">
+        <input type="hidden" name="sha" value="${esc(cm.sha)}">
+        <button class="btn small" type="submit">Restore this</button></form>`}</div>`;
+  }).join('');
+  return shell('Version history', `
+    <div class="head"><h1>Version history</h1><a class="ghost" href="${back}">← Back to editing</a></div>
+    ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+    <p class="sub">Every save is kept. Restore any earlier version — your current one is saved first, so you can always undo.</p>
+    <div class="vlist">${rows || '<p class="sub">No history yet.</p>'}</div>`);
+}
+
+async function doRestore(request, env) {
+  const form = await request.formData();
+  const k = String(form.get('k')); const path = String(form.get('path')); const oldSha = String(form.get('sha'));
+  if (!COLLECTIONS[k] || !path || !oldSha) return redirect('/');
+  const old = await ghGetAtRef(env, path, oldSha);
+  const current = await ghGet(env, path); // for its sha
+  await ghPut(env, path, old.text, current.sha, `content: restore ${path} to an earlier version (via CMS)`);
+  return editForm(env, k, path, 'Restored an earlier version. The site will update in about a minute.');
+}
+
 async function listCollection(env, k) {
   const c = COLLECTIONS[k];
   if (!c) return redirect('/');
@@ -253,7 +290,11 @@ async function editForm(env, k, path, notice) {
     const data = parseYaml(text);
     const json = JSON.stringify(data).replace(/</g, '\\u003c');
     return shell(c.label, `
-      <div class="head"><h1>${esc(c.label)}</h1><a class="ghost" href="/">← All sections</a></div>
+      <div class="head"><h1>${esc(c.label)}</h1>
+        <span class="headlinks">
+          <a class="ghost" href="${esc(SITE + previewPath(k, path.split('/').pop()))}" target="_blank" rel="noopener">View live ↗</a>
+          <a class="ghost" href="/history?k=${k}&path=${encodeURIComponent(path)}">Version history</a>
+          <a class="ghost" href="/">← All sections</a></span></div>
       ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
       <form method="POST" action="/save">
         <input type="hidden" name="k" value="${esc(k)}">
@@ -287,9 +328,13 @@ async function editForm(env, k, path, notice) {
   const name = path.split('/').pop();
   const datalist = `<datalist id="imglist">${imgs.map((p) => `<option value="${esc(p)}">`).join('')}</datalist>`;
   const altJson = `<script type="application/json" id="alt-map">${JSON.stringify(altMap).replace(/</g, '\\u003c')}</script>`;
+  const live = SITE + previewPath(k, name);
   return shell(`Edit — ${name}`, `
     <div class="head"><h1>${esc(displayTitle(c, parsed.data, name))}</h1>
-      <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a></div>
+      <span class="headlinks">
+        <a class="ghost" href="${esc(live)}" target="_blank" rel="noopener">View live ↗</a>
+        <a class="ghost" href="/history?k=${k}&path=${encodeURIComponent(path)}">Version history</a>
+        <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a></span></div>
     ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
     <span id="img-base" data-base="${SITE}" hidden></span>
     ${datalist}${altJson}
@@ -496,6 +541,14 @@ h1{font-size:1.4rem;margin:0}
 .group{background:#fff;border:1px solid #dce6eb;border-radius:12px;padding:20px 22px 8px;margin:0 0 16px}
 .gh{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#1f7a80;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #eef3f5}
 .hint{display:block;font-size:11.5px;color:#8494a0;margin-top:5px}
+.headlinks{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.btn.small{padding:7px 13px;font-size:.85rem}
+.vlist{display:flex;flex-direction:column;border:1px solid #dce6eb;border-radius:12px;overflow:hidden;background:#fff}
+.vrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-top:1px solid #eef3f5}
+.vrow:first-child{border-top:0}
+.vrow strong{font-size:14px}
+.vmeta{color:#8494a0;font-size:12px;margin-left:10px}
+.vrow form{margin:0}
 .ta.body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
 .actions{display:flex;align-items:center;gap:16px;margin-top:26px}
 .btn{background:#34719f;color:#fff;border:0;border-radius:9px;padding:11px 20px;font-size:1rem;font-weight:600;cursor:pointer}

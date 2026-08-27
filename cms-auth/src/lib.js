@@ -145,6 +145,23 @@ export async function ghPut(env, path, text, sha, message) {
   return res.json();
 }
 
+/** Past commits that touched a file — for version history. */
+export async function ghCommits(env, path, limit = 25) {
+  const res = await gh(env, 'GET',
+    `/repos/${REPO}/commits?path=${encodeURIComponent(path)}&sha=${BRANCH}&per_page=${limit}`);
+  if (!res.ok) throw new Error(`commits ${path}: ${res.status}`);
+  const arr = await res.json();
+  return arr.map((c) => ({ sha: c.sha, date: c.commit.author.date, message: c.commit.message }));
+}
+
+/** A file's content as it was at a specific commit. */
+export async function ghGetAtRef(env, path, ref) {
+  const res = await gh(env, 'GET', `/repos/${REPO}/contents/${path}?ref=${ref}`);
+  if (!res.ok) throw new Error(`get ${path}@${ref}: ${res.status}`);
+  const data = await res.json();
+  return { text: b64ToUtf8(data.content.replace(/\n/g, '')) };
+}
+
 /** Like ghGet but returns null (instead of throwing) on 404 — for the manifest. */
 export async function ghGetOrNull(env, path) {
   const res = await gh(env, 'GET', `/repos/${REPO}/contents/${path}?ref=${BRANCH}`);
