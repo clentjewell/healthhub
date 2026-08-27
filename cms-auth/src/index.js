@@ -12,6 +12,11 @@ import {
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
   loadYamlSnippet,
 } from './lib.js';
+import { APP_JS } from './app-js.js';
+
+// Collections edited with a structured (repeatable-row) editor instead of the
+// generic field form. Their whole value is submitted as JSON by app.js.
+const STRUCTURED = { timetable: true, faq: true };
 
 const RL_MAX = 10, RL_WINDOW = 900;
 
@@ -32,6 +37,11 @@ async function route(request, env) {
   const p = url.pathname;
   const session = await readSession(env, request);
 
+  if (p === '/app.js') {
+    return new Response(APP_JS, {
+      headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-cache' },
+    });
+  }
   if (p === '/login' && request.method === 'POST') return doLogin(request, env);
   if (p === '/logout') {
     return redirect('/login', { 'Set-Cookie': sessionCookie('', 0) });
@@ -116,6 +126,28 @@ async function editForm(env, k, path, notice) {
   const c = COLLECTIONS[k];
   if (!c || !path) return redirect('/');
   const { text, sha } = await ghGet(env, path);
+
+  // Structured editors (timetable, faq): app.js renders repeatable rows from the
+  // embedded JSON and writes the edited value back into #__json on submit.
+  if (STRUCTURED[k]) {
+    const data = parseYaml(text);
+    const json = JSON.stringify(data).replace(/</g, '\\u003c');
+    return shell(c.label, `
+      <div class="head"><h1>${esc(c.label)}</h1><a class="ghost" href="/">← All sections</a></div>
+      ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+      <form method="POST" action="/save">
+        <input type="hidden" name="k" value="${esc(k)}">
+        <input type="hidden" name="path" value="${esc(path)}">
+        <input type="hidden" name="sha" value="${esc(sha)}">
+        <input type="hidden" id="__json" name="__json">
+        <div id="structured" data-editor="${esc(k)}"></div>
+        <script type="application/json" id="structured-data">${json}</script>
+        <div class="actions"><button class="btn" type="submit">Save &amp; publish</button>
+          <a class="ghost" href="/">Cancel</a></div>
+      </form>
+      <script src="/app.js"></script>`);
+  }
+
   const parsed = c.kind === 'markdown' ? parseMarkdown(text) : { data: parseYaml(text), body: null };
   const fields = renderFields(parsed.data);
   const bodyField = c.kind === 'markdown'
@@ -144,15 +176,18 @@ async function doSave(request, env) {
   const c = COLLECTIONS[k];
   if (!c || !path) return redirect('/');
 
-  let data;
-  try { data = parseFields(form); }
-  catch (e) { return editForm(env, k, path, null).then((r) => r); } // shouldn't happen
-
-  // Validate any scoped-YAML fields before writing.
   let text;
   try {
-    if (c.kind === 'markdown') text = buildMarkdown(data, String(form.get('__body') ?? ''));
-    else text = buildYaml(data);
+    if (STRUCTURED[k]) {
+      // Whole value arrives as JSON from app.js.
+      const data = JSON.parse(String(form.get('__json') || '{}'));
+      text = buildYaml(data);
+    } else {
+      const data = parseFields(form);
+      text = c.kind === 'markdown'
+        ? buildMarkdown(data, String(form.get('__body') ?? ''))
+        : buildYaml(data);
+    }
   } catch (e) {
     return editForm(env, k, path, `Could not save: ${e.message}`);
   }
@@ -250,7 +285,9 @@ function page(title, inner, status = 200) {
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Cache-Control': 'no-store',
       'Content-Security-Policy':
-        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; img-src 'self' data:",
+        "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; " +
+        "img-src 'self' data: https://healthhub-tweed-coast.clent.workers.dev https://www.healthhubtweedcoast.com.au https://healthhubtweedcoast.com.au; " +
+        "form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
     },
   });
 }
@@ -304,4 +341,15 @@ h1{font-size:1.4rem;margin:0}
 .ghost{color:#2b8a9a;text-decoration:none;font-size:.9rem}
 .err{background:#fdecec;border:1px solid #f5b5b5;color:#a12;padding:10px 12px;border-radius:9px;font-size:.9rem}
 .ok{background:#eaf7ee;border:1px solid #b6e0c2;color:#1c6b34;padding:10px 12px;border-radius:9px;font-size:.9rem}
+fieldset.day,fieldset.faq-item{border:1px solid #dbe5e8;border-radius:12px;padding:8px 18px 18px;margin:16px 0;background:#fff}
+fieldset.day>legend,fieldset.faq-item>legend{font-weight:600;padding:0 8px}
+fieldset.day>legend{font-size:1.05rem;color:#2b8a9a}
+.srow{display:grid;grid-template-columns:1.4fr 1fr 1.4fr auto;gap:10px;align-items:end;padding:10px 0;border-top:1px solid #eef2f4}
+.srow:first-of-type{border-top:0}
+.srow .fl{margin:0}
+.add-btn{margin-top:10px;background:#eaf5f6;color:#1f6b78;border:1px dashed #9cc7ce;border-radius:9px;padding:9px 14px;font-size:.9rem;font-weight:600;cursor:pointer}
+.add-btn:hover{background:#dcecef}
+.rm{background:#fff;color:#a12;border:1px solid #f0c0c0;border-radius:8px;padding:9px 12px;font-size:.85rem;cursor:pointer;height:fit-content}
+.rm:hover{background:#fdecec}
+@media(max-width:640px){.srow{grid-template-columns:1fr}}
 `;
