@@ -8,7 +8,7 @@ category: Functional Fitness
 author: Katie Verkerk
 authorId: katie-verkerk
 publishDate: 2026-08-21
-readingMinutes: 3
+readingMinutes: 4
 ctaLabel: View class times
 ctaHref: /event/health-hub-studio-time-table/
 image: /images/blog/what-is-functional-fitness-hero.webp
