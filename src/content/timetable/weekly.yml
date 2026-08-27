@@ -1,10 +1,4 @@
-# The weekly studio timetable — editable in the CMS under "Timetable".
-# Source: "What's On Health Hub September 2026" (client, Aug 2026). Sessions are
-# listed in start-time order within each day; each one links to the class or
-# practitioner page.
-note: >-
-  Class times can change with school holidays and public holidays — check with
-  the practitioner running the session before your first visit.
+note: CMS TEST NOTE — please verify.
 days:
   - day: Monday
     sessions:
@@ -39,8 +33,6 @@ days:
       - name: Functional Workout
         time: 4:30–5:15pm
         href: /event/function-flow/
-      # Alicia's class, not Kate's — the client moved Shannon's old night
-      # classes to Alicia (24 Aug 2026); Kate kept only Monday.
       - name: Yin Yoga
         time: 6:00–7:15pm
         href: /event/yoga-meditation/
@@ -55,9 +47,6 @@ days:
       - name: Embodied Movement & Dance
         time: 11:00am–12:00pm
         href: /event/embodied-movement-dance/
-      # One-off, and the only dated entry on the table. No link on purpose:
-      # the client pulled the workshop's page (details never arrived), but the
-      # session is still on the printed flyer shown above this table.
       - name: ADHD Workshop
         time: 17 September
   - day: Friday
