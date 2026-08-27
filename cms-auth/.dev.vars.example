@@ -1,0 +1,19 @@
+# Template for local testing of the login worker with `wrangler dev`.
+#
+# Copy this file to `.dev.vars` (which is git-ignored) and keep the DUMMY values.
+# NEVER put the real GITHUB_TOKEN here — a scanner or anyone with the local copy
+# would see it. A dummy token means the worker runs and the password flow works,
+# but the handed-over "token" is worthless, so nothing can reach the real repo.
+#
+#   cp .dev.vars.example .dev.vars
+#   npx wrangler dev            # serves the worker at http://localhost:8788
+
+# Dummy — not a real token. Leave as-is for local scanning.
+GITHUB_TOKEN=ghp_DUMMY_local_testing_only_000000000000000000
+
+# One test editor. Password for this hash is:  test-password-1234
+# Regenerate with:  node hash-password.mjs test@example.com
+AUTH_USERS=test@example.com:pbkdf2$sha256$100000$N6x3qSAR++hnP5nZwUkycQ==$D1rUE3vbjJUfB7f5v18qEIk+mGPmpHOXZeDyUxGMiz0=
+
+# Point at localhost so the handshake works locally.
+ALLOWED_ORIGINS=http://localhost:8788

@@ -5,13 +5,18 @@ and password** instead of a GitHub account. On a correct password it hands the
 Sveltia CMS a pre-provisioned GitHub token so it can save content — the same
 approach as the Pottsville password gate, rebuilt for a static Cloudflare site.
 
-The site (`public/admin/config.yml`) already points `base_url` at this worker.
-Until the worker is deployed and its secrets are set, `/admin` sign-in will not
-work — which is the safe state (nobody can edit).
+The site (`public/admin/config.yml`) points `base_url` at this worker.
+
+## Status: LIVE ✅
+
+Deployed to `https://healthhub-cms-auth.clent.workers.dev` with all three
+secrets set (`GITHUB_TOKEN`, `AUTH_USERS`, `ALLOWED_ORIGINS`) and the `RL` KV
+throttle bound. Editors sign in at `/admin/`. The steps below are the reference
+for redeploying, moving the worker, or setting it up from scratch again.
 
 ---
 
-## What you'll set up (all on your side — I can't reach Cloudflare or GitHub)
+## Setup from scratch (reference)
 
 You need: the Cloudflare account that owns `clent.workers.dev`, permission to
 create a GitHub token on `clentjewell/healthhub`, and Node installed locally.
@@ -108,7 +113,33 @@ edit and save — it should commit to `main` and the site should rebuild.
   token — it stays in the worker). So passwords must be strong and unique, and
   the token is deliberately scoped to *content only, this repo only*.
 - The token is only ever posted to an origin in `ALLOWED_ORIGINS`.
-- Failed logins are vague on purpose ("incorrect email or password") and, with
-  KV bound, rate-limited.
+- Failed logins are vague on purpose ("incorrect email or password") and are
+  rate-limited (10 per IP per 15 min via the `RL` KV store). The KDF is also run
+  for unknown emails, so response timing can't be used to enumerate editors.
+- A cross-site page can't drive the login: a foreign `Origin` on the POST is
+  rejected (CSRF guard).
 - The worker is stateless — no sessions, no cookies. The CMS keeps you signed in
   locally after the handshake, so you re-enter the password only occasionally.
+
+## Local testing & active scanning (safe)
+
+Never point an active scanner at the live worker — it holds a repo-write token.
+Instead scan a **local copy with dummy secrets**:
+
+```
+cd cms-auth
+cp .dev.vars.example .dev.vars   # dummy GITHUB_TOKEN — worthless if extracted
+npx wrangler dev --port 8788     # worker at http://localhost:8788
+```
+
+Then run OWASP ZAP against `http://localhost:8788` — or just run the bundled
+helper, which starts the worker and runs ZAP's baseline + full active scan for
+you (needs Docker):
+
+```
+cd cms-auth
+./scan-local.sh                  # reports land in cms-auth/scan-report/
+```
+
+The dummy token means that even if the scanner's payloads extracted it, it
+reaches nothing. `.dev.vars` and `scan-report/` are git-ignored.

@@ -24,3 +24,8 @@ npm-debug.log*
 .DS_Store
 .vscode/
 *.swp
+
+# Local Worker dev secrets (wrangler dev)
+.dev.vars
+cms-auth/.dev.vars
+cms-auth/scan-report/

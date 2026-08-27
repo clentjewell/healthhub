@@ -26,20 +26,23 @@
  *   • Use strong, unique passwords. Rotate them by regenerating a hash.
  *   • Scope the GitHub token as tightly as possible: fine-grained PAT, only the
  *     one content repo, Contents = Read and write, nothing else.
- *   • Bind a KV namespace (RL) so failed attempts are rate-limited. Without it
- *     the worker still runs but cannot throttle brute force.
+ *   • Logins are throttled per IP by the RL KV counter (10 failures / 15 min),
+ *     and each attempt costs a 100k-iteration PBKDF2 — so a strong editor
+ *     password can't be brute-forced in practice.
  *
- * SECRETS / BINDINGS (set via `wrangler secret put` or the dashboard):
- *   GITHUB_TOKEN     fine-grained PAT, Contents R/W on the content repo
- *   AUTH_USERS       one editor per line: "email:pbkdf2$sha256$<iter>$<saltB64>$<hashB64>"
+ * SECRETS / BINDINGS:
+ *   GITHUB_TOKEN     (secret) fine-grained PAT, Contents R/W on the content repo
+ *   AUTH_USERS       (secret) one editor per line:
+ *                    "email:pbkdf2$sha256$<iter>$<saltB64>$<hashB64>"
  *                    generate a line with: node cms-auth/hash-password.mjs
- *   ALLOWED_ORIGINS  comma-separated site origins allowed to receive the token,
- *                    e.g. "https://healthhub-tweed-coast.clent.workers.dev,https://www.healthhubtweedcoast.com.au"
- *   RL  (optional)   KV namespace binding for rate limiting
+ *   ALLOWED_ORIGINS  (secret) comma-separated site origins allowed to receive
+ *                    the token, e.g.
+ *                    "https://healthhub-tweed-coast.clent.workers.dev,https://www.healthhubtweedcoast.com.au"
+ *   RL               (binding) KV namespace for login throttling
  */
 
 const PBKDF2_ITERATIONS = 100000;
-const RL_MAX_ATTEMPTS = 10; // per IP per window
+const RL_MAX_ATTEMPTS = 10; // failed attempts per IP per window
 const RL_WINDOW_SECONDS = 900; // 15 minutes
 
 export default {
@@ -63,8 +66,18 @@ export default {
 /* ── Login handling ──────────────────────────────────────────────────────── */
 
 async function handleLogin(request, env) {
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  // CSRF guard: a genuine login is submitted from this worker's own login page.
+  // If a cross-site page auto-submits the form, the browser sends an Origin that
+  // isn't ours — reject it. (Origin can be absent on some same-origin posts;
+  // absent is allowed, a present-but-foreign Origin is not.)
+  const selfOrigin = new URL(request.url).origin;
+  const origin = request.headers.get('Origin');
+  if (origin && origin !== selfOrigin) {
+    return new Response('Bad origin', { status: 403, headers: baseHeaders() });
+  }
 
+  // Per-IP throttle (KV counter). Blocks sequential brute force.
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   if (await isRateLimited(env, ip)) {
     return loginPage(env, 'Too many attempts. Please wait a few minutes and try again.', 429);
   }
@@ -135,7 +148,7 @@ async function verifyPbkdf2(password, stored) {
   return timingSafeEqual(new Uint8Array(bits), expected);
 }
 
-/* ── Rate limiting (optional KV) ─────────────────────────────────────────── */
+/* ── Rate limiting (KV) ──────────────────────────────────────────────────── */
 
 async function isRateLimited(env, ip) {
   if (!env.RL) return false;

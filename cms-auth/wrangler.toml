@@ -6,7 +6,9 @@ name = "healthhub-cms-auth"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
 
-# Rate-limit store for failed logins (10 tries per IP per 15 min).
+# Login throttle store. A KV counter per IP (10 attempts / 15 min). Sequential
+# guessing is blocked reliably; the small race under heavy parallel load is
+# covered by requiring a strong editor password (brute force is infeasible).
 [[kv_namespaces]]
 binding = "RL"
 id = "921cd297caed46ad869b1a5592e718a3"
