@@ -28,9 +28,9 @@ structure. Adding a brand-new page is still a developer task.
 ### Signing in
 
 1. Go to the editor address above.
-2. Click **Sign in with GitHub** and use the GitHub account you were invited with.
-
-If you don't have an account yet, ask us to invite you — see *Adding an editor* below.
+2. Enter your **email and password** and click **Sign in**. No GitHub account is
+   needed. (Ask us for the login if you don't have it — to add or change an
+   editor, see *Adding an editor* below.)
 
 ### Editing page wording
 
@@ -153,9 +153,9 @@ commits. That workflow *is* the "publish" step.
 
 ### 3. Adding an editor
 
-Invite them as a **collaborator with write access** to the `clentjewell/healthhub`
-repository. Anyone with write access can use the editor; anyone without it can
-sign in but cannot save.
+Editors sign in with an email and password — there are no GitHub accounts. To
+add one, generate a password line and add it to the CMS worker's `AUTH_USERS`
+secret. Full steps are in [`cms-auth/README.md`](../cms-auth/README.md).
 
 ---
 
@@ -167,12 +167,13 @@ Editor saves in /admin  →  CMS commits to main (GitHub API)
                         →  live site updated
 ```
 
-- Editor: **Sveltia CMS**, loaded from a CDN in [`public/admin/index.html`](../public/admin/index.html).
-  The config is Decap-compatible, so switching to Decap CMS is a one-line change
-  of that script tag.
-- Fields in [`public/admin/config.yml`](../public/admin/config.yml) intentionally
-  mirror the Zod schemas in [`src/content.config.ts`](../src/content.config.ts).
-  **If you add or rename a field in one, mirror it in the other**, or the CMS
+- Editor: a **custom CMS worker** in [`cms-auth/`](../cms-auth/) — email+password
+  login, forms generated from each content file, Save commits to `main` via a
+  server-side GitHub token. `/admin` on the site redirects to it.
+- The forms are generated from the files themselves, so they track
+  [`src/content.config.ts`](../src/content.config.ts) automatically — a new
+  field appears as a new box the next time that file is opened. Just keep values
+  valid for the schema, or the
   will write content the build rejects.
 - URL and optional-text fields are wrapped in `optionalUrl` / `optionalText`
   helpers, which treat an empty string as "not set". Without that, an editor

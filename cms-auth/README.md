@@ -1,11 +1,17 @@
-# Health Hub CMS login (email + password)
+# Health Hub CMS (email + password)
 
-A small Cloudflare Worker that lets editors sign in to `/admin` with an **email
-and password** instead of a GitHub account. On a correct password it hands the
-Sveltia CMS a pre-provisioned GitHub token so it can save content — the same
-approach as the Pottsville password gate, rebuilt for a static Cloudflare site.
+A Cloudflare Worker that is the whole content editor: sign in with an **email
+and password**, edit content in plain forms, click Save — which commits to
+GitHub and rebuilds the site. No GitHub accounts for editors; the repo token
+stays on the server and never reaches the browser. The Pottsville-style
+experience, rebuilt for a static Cloudflare site (no PHP).
 
-The site (`public/admin/config.yml`) points `base_url` at this worker.
+The site's `/admin` redirects here (see `public/_redirects`). Editors never see
+GitHub or Sveltia.
+
+**Adding / changing an editor:** generate a line with `node hash-password.mjs
+their@email`, then update the `AUTH_USERS` secret (`npx wrangler secret put
+AUTH_USERS`) with one line per editor.
 
 ## Status: LIVE ✅
 
