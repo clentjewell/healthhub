@@ -108,8 +108,31 @@ export const APP_JS = String.raw`
     };
   }
 
+  /* ── Image picker: live preview + auto-fill alt from the media library ──── */
+  function initImagePickers() {
+    var baseEl = document.getElementById('img-base');
+    var base = baseEl ? baseEl.getAttribute('data-base') : '';
+    var altMap = {};
+    try { altMap = JSON.parse(document.getElementById('alt-map').textContent); } catch (e) {}
+    document.querySelectorAll('.img-field').forEach(function (inp) {
+      var wrap = inp.closest('.fl');
+      var prev = wrap ? wrap.querySelector('.img-prev') : null;
+      function sync() {
+        var v = inp.value.trim();
+        if (prev) { prev.src = v ? base + v : ''; prev.style.display = v ? '' : 'none'; }
+        var form = inp.closest('form');
+        var alt = form && form.querySelector('input[name*="alt" i], textarea[name*="alt" i]');
+        if (alt && !alt.value.trim() && altMap[v]) alt.value = altMap[v];
+      }
+      inp.addEventListener('input', sync);
+      inp.addEventListener('change', sync);
+    });
+  }
+
   /* ── Wire up on load ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
+    initImagePickers();
+
     var root = document.getElementById('structured');
     if (!root) return;
     var kind = root.getAttribute('data-editor');

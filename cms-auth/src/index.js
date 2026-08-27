@@ -268,16 +268,30 @@ async function editForm(env, k, path, notice) {
   }
 
   const parsed = c.kind === 'markdown' ? parseMarkdown(text) : { data: parseYaml(text), body: null };
+
+  // Media list + alt map, for the image fields' picker and auto-fill.
+  let imgs = [], altMap = {};
+  try {
+    imgs = (await ghTree(env, IMG_PREFIX)).filter((p) => IMG_EXT.test(p))
+      .map((p) => '/' + p.replace(/^public\//, '')).sort();
+    const { map } = await readManifest(env);
+    for (const [mk, mv] of Object.entries(map)) altMap['/' + mk.replace(/^public\//, '')] = mv.alt || '';
+  } catch { /* picker degrades to a plain text field */ }
+
   const fields = renderFields(parsed.data);
   const bodyField = c.kind === 'markdown'
     ? `<label class="fl"><span class="fk">Main text (Markdown)</span>
         <textarea class="ta body" name="__body" rows="18">${esc(parsed.body)}</textarea></label>`
     : '';
   const name = path.split('/').pop();
+  const datalist = `<datalist id="imglist">${imgs.map((p) => `<option value="${esc(p)}">`).join('')}</datalist>`;
+  const altJson = `<script type="application/json" id="alt-map">${JSON.stringify(altMap).replace(/</g, '\\u003c')}</script>`;
   return shell(`Edit — ${name}`, `
     <div class="head"><h1>${esc(displayTitle(c, parsed.data, name))}</h1>
       <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a></div>
     ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+    <span id="img-base" data-base="${SITE}" hidden></span>
+    ${datalist}${altJson}
     <form method="POST" action="/save">
       <input type="hidden" name="k" value="${esc(k)}">
       <input type="hidden" name="path" value="${esc(path)}">
@@ -286,7 +300,8 @@ async function editForm(env, k, path, notice) {
       ${bodyField}
       <div class="actions"><button class="btn" type="submit">Save &amp; publish</button>
         <a class="ghost" href="/c?k=${k}">Cancel</a></div>
-    </form>`);
+    </form>
+    <script src="/app.js"></script>`);
 }
 
 async function doSave(request, env) {
@@ -341,6 +356,17 @@ function renderFields(data) {
     }
     // string
     const s = val == null ? '' : String(val);
+    // Image field: a path to an image (by key name or by value shape).
+    const isImage = (/image|photo|hero|avatar/i.test(key) && !/alt/i.test(key)) ||
+      /^\/images\/.*\.(webp|jpe?g|png|gif|avif|svg)$/i.test(s);
+    if (isImage) {
+      return `<label class="fl"><span class="fk">${esc(label)}
+          <em>(pick from the media library, or paste a path)</em></span>
+        <img class="img-prev" src="${s ? SITE + esc(s) : ''}" alt="" style="${s ? '' : 'display:none'}">
+        <input class="in img-field" type="text" list="imglist" name="f__${esc(key)}" value="${esc(s)}" placeholder="/images/…">
+        <a class="ghost imglink" href="/media" target="_blank" rel="noopener">Open media library ↗</a>
+      </label>${hidden}`;
+    }
     const multiline = s.length > 70 || s.includes('\n');
     const input = multiline
       ? `<textarea class="ta" name="f__${esc(key)}" rows="${Math.min(8, s.split('\n').length + 2)}">${esc(s)}</textarea>`
@@ -488,4 +514,7 @@ fieldset.day>legend{font-size:1.05rem;color:#2b8a9a}
 @media(max-width:640px){.mdetail{grid-template-columns:1fr}}
 .mprev{width:100%;border:1px solid #dbe5e8;border-radius:10px;background:#f0f5f6}
 .mpath{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:#5c6b75;margin:0 0 8px;word-break:break-all}
+.img-prev{display:block;max-width:220px;max-height:150px;border:1px solid #dbe5e8;border-radius:8px;margin:0 0 8px;background:#f0f5f6}
+.img-field{margin-bottom:4px}
+.imglink{display:inline-block;margin-top:2px;font-size:.82rem}
 `;
