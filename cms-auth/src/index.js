@@ -13,6 +13,7 @@ import {
   loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
 } from './lib.js';
 import { APP_JS } from './app-js.js';
+import { groupedKeys, labelFor, hintFor, previewPath } from './fields.js';
 
 // Where images live in the repo and how the CMS shows thumbnails (the live site).
 const IMG_PREFIX = 'public/images/';
@@ -105,8 +106,8 @@ function dashboard() {
     `<a class="tile" href="/c?k=${k}"><span class="tile-t">${esc(c.label)}</span>
       <span class="tile-a">Open →</span></a>`).join('');
   return shell('Website Manager', `
-    <div class="head"><h1>Website Manager</h1><a class="ghost" href="/logout">Sign out</a></div>
-    <p class="sub">Choose what to edit. Changes go live a minute or so after you save.</p>
+    <div class="head"><h1>What would you like to edit?</h1></div>
+    <p class="sub">Pick a section. Changes go live a minute or so after you save.</p>
     <div class="tiles">${cards}
       <a class="tile" href="/media"><span class="tile-t">Media library</span>
         <span class="tile-a">Images &amp; uploads →</span></a></div>`);
@@ -278,7 +279,7 @@ async function editForm(env, k, path, notice) {
     for (const [mk, mv] of Object.entries(map)) altMap['/' + mk.replace(/^public\//, '')] = mv.alt || '';
   } catch { /* picker degrades to a plain text field */ }
 
-  const fields = renderFields(parsed.data);
+  const fields = renderFields(k, parsed.data);
   const bodyField = c.kind === 'markdown'
     ? `<label class="fl"><span class="fk">Main text (Markdown)</span>
         <textarea class="ta body" name="__body" rows="18">${esc(parsed.body)}</textarea></label>`
@@ -337,42 +338,47 @@ async function doSave(request, env) {
 
 /* ── Form fields (type-aware) ────────────────────────────────────────────── */
 
-function renderFields(data) {
-  return Object.entries(data).map(([key, val]) => {
-    const label = humanize(key);
-    const t = fieldType(val);
-    const hidden = `<input type="hidden" name="t__${esc(key)}" value="${t}">`;
-    if (t === 'boolean') {
-      return `<label class="fl fl-row"><input type="checkbox" name="f__${esc(key)}" ${val ? 'checked' : ''}>
-        <span class="fk">${esc(label)}</span></label>${hidden}`;
-    }
-    if (t === 'number') {
-      return `<label class="fl"><span class="fk">${esc(label)}</span>
-        <input class="in" type="number" name="f__${esc(key)}" value="${esc(String(val ?? ''))}"></label>${hidden}`;
-    }
-    if (t === 'yaml') {
-      return `<label class="fl"><span class="fk">${esc(label)} <em>(advanced — keep the layout/indentation)</em></span>
-        <textarea class="ta" name="f__${esc(key)}" rows="${Math.min(16, buildYaml(val).split('\n').length + 1)}">${esc(buildYaml(val).replace(/\n$/, ''))}</textarea></label>${hidden}`;
-    }
-    // string
-    const s = val == null ? '' : String(val);
-    // Image field: a path to an image (by key name or by value shape).
-    const isImage = (/image|photo|hero|avatar/i.test(key) && !/alt/i.test(key)) ||
-      /^\/images\/.*\.(webp|jpe?g|png|gif|avif|svg)$/i.test(s);
-    if (isImage) {
-      return `<label class="fl"><span class="fk">${esc(label)}
-          <em>(pick from the media library, or paste a path)</em></span>
-        <img class="img-prev" src="${s ? SITE + esc(s) : ''}" alt="" style="${s ? '' : 'display:none'}">
-        <input class="in img-field" type="text" list="imglist" name="f__${esc(key)}" value="${esc(s)}" placeholder="/images/…">
-        <a class="ghost imglink" href="/media" target="_blank" rel="noopener">Open media library ↗</a>
-      </label>${hidden}`;
-    }
-    const multiline = s.length > 70 || s.includes('\n');
-    const input = multiline
-      ? `<textarea class="ta" name="f__${esc(key)}" rows="${Math.min(8, s.split('\n').length + 2)}">${esc(s)}</textarea>`
-      : `<input class="in" type="text" name="f__${esc(key)}" value="${esc(s)}">`;
-    return `<label class="fl"><span class="fk">${esc(label)}</span>${input}</label>${hidden}`;
+function renderFields(collection, data) {
+  return groupedKeys(collection, data).map((g) => {
+    const inner = g.keys.map((key) => renderOneField(collection, key, data[key])).join('');
+    return `<div class="group">${g.title ? `<div class="gh">${esc(g.title)}</div>` : ''}${inner}</div>`;
   }).join('');
+}
+
+function renderOneField(collection, key, val) {
+  const label = labelFor(collection, key, humanize(key));
+  const hint = hintFor(collection, key);
+  const hintHtml = hint ? `<span class="hint">${esc(hint)}</span>` : '';
+  const t = fieldType(val);
+  const hidden = `<input type="hidden" name="t__${esc(key)}" value="${t}">`;
+  if (t === 'boolean') {
+    return `<label class="fl fl-row"><input type="checkbox" name="f__${esc(key)}" ${val ? 'checked' : ''}>
+      <span class="fk">${esc(label)}</span></label>${hintHtml}${hidden}`;
+  }
+  if (t === 'number') {
+    return `<label class="fl"><span class="fk">${esc(label)}</span>
+      <input class="in" type="number" name="f__${esc(key)}" value="${esc(String(val ?? ''))}">${hintHtml}</label>${hidden}`;
+  }
+  if (t === 'yaml') {
+    const y = buildYaml(val).replace(/\n$/, '');
+    return `<label class="fl"><span class="fk">${esc(label)} <em>(advanced — keep the layout)</em></span>
+      <textarea class="ta mono" name="f__${esc(key)}" rows="${Math.min(16, y.split('\n').length + 1)}">${esc(y)}</textarea>${hintHtml}</label>${hidden}`;
+  }
+  const s = val == null ? '' : String(val);
+  const isImage = (/image|photo|hero|avatar/i.test(key) && !/alt/i.test(key)) ||
+    /^\/images\/.*\.(webp|jpe?g|png|gif|avif|svg)$/i.test(s);
+  if (isImage) {
+    return `<label class="fl"><span class="fk">${esc(label)}</span>
+      <img class="img-prev" src="${s ? SITE + esc(s) : ''}" alt="" style="${s ? '' : 'display:none'}">
+      <input class="in img-field" type="text" list="imglist" name="f__${esc(key)}" value="${esc(s)}" placeholder="/images/…">
+      <a class="ghost imglink" href="/media" target="_blank" rel="noopener">Open media library ↗</a>
+      ${hintHtml}</label>${hidden}`;
+  }
+  const multiline = s.length > 70 || s.includes('\n');
+  const input = multiline
+    ? `<textarea class="ta" name="f__${esc(key)}" rows="${Math.min(8, s.split('\n').length + 2)}">${esc(s)}</textarea>`
+    : `<input class="in" type="text" name="f__${esc(key)}" value="${esc(s)}">`;
+  return `<label class="fl"><span class="fk">${esc(label)}</span>${input}${hintHtml}</label>${hidden}`;
 }
 
 function parseFields(form) {
@@ -413,7 +419,10 @@ function loginPage(error) {
 }
 
 function shell(title, inner) {
-  return page(title, `<div class="wrap">${inner}</div>`);
+  const topbar = `<div class="topbar">
+    <a class="brand" href="/"><img src="${SITE}/images/logo.png" alt="Health Hub" height="34"><span>Website Manager</span></a>
+    <a class="ghost" href="/logout">Sign out</a></div>`;
+  return page(title, `${topbar}<div class="wrap">${inner}</div>`);
 }
 
 function page(title, inner, status = 200) {
@@ -461,15 +470,19 @@ const CSS = `
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef4f5;color:#22303a}
 .card{background:#fff;width:min(92vw,380px);margin:12vh auto;padding:30px 28px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
-.wrap{max-width:820px;margin:0 auto;padding:28px 20px 80px}
+.wrap{max-width:860px;margin:0 auto;padding:24px 20px 80px}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 22px;background:#fff;border-bottom:1px solid #dce6eb}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{display:block}
+.brand span{font-weight:700;font-size:14px;color:#22496c}
 h1{font-size:1.4rem;margin:0}
 .head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:4px}
 .sub{color:#5c6b75;margin:6px 0 22px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .tile{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #dbe5e8;border-radius:12px;padding:18px 20px;text-decoration:none;color:#22303a;transition:.15s}
-.tile:hover{border-color:#2b8a9a;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.tile:hover{border-color:#34719f;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
 .tile-t{font-weight:600;font-size:1.05rem}
-.tile-a,.row-a{color:#2b8a9a;font-size:.85rem}
+.tile-a,.row-a{color:#34719f;font-size:.85rem}
 .rows{display:flex;flex-direction:column;border:1px solid #dbe5e8;border-radius:12px;overflow:hidden;background:#fff}
 .row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;text-decoration:none;color:#22303a;border-top:1px solid #eef2f4}
 .row:first-child{border-top:0}.row:hover{background:#f5fafb}
@@ -479,20 +492,24 @@ h1{font-size:1.4rem;margin:0}
 .fk em{font-weight:400;color:#8494a0;font-style:normal;font-size:.9em}
 .in,.ta{width:100%;padding:10px 12px;border:1px solid #cdd8dc;border-radius:9px;font-size:1rem;font-family:inherit;background:#fff}
 .ta{resize:vertical;line-height:1.5}
+.ta.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem}
+.group{background:#fff;border:1px solid #dce6eb;border-radius:12px;padding:20px 22px 8px;margin:0 0 16px}
+.gh{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#1f7a80;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #eef3f5}
+.hint{display:block;font-size:11.5px;color:#8494a0;margin-top:5px}
 .ta.body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
 .actions{display:flex;align-items:center;gap:16px;margin-top:26px}
-.btn{background:#2b8a9a;color:#fff;border:0;border-radius:9px;padding:11px 20px;font-size:1rem;font-weight:600;cursor:pointer}
-.btn:hover{background:#247685}
-.ghost{color:#2b8a9a;text-decoration:none;font-size:.9rem}
+.btn{background:#34719f;color:#fff;border:0;border-radius:9px;padding:11px 20px;font-size:1rem;font-weight:600;cursor:pointer}
+.btn:hover{background:#22496c}
+.ghost{color:#34719f;text-decoration:none;font-size:.9rem}
 .err{background:#fdecec;border:1px solid #f5b5b5;color:#a12;padding:10px 12px;border-radius:9px;font-size:.9rem}
 .ok{background:#eaf7ee;border:1px solid #b6e0c2;color:#1c6b34;padding:10px 12px;border-radius:9px;font-size:.9rem}
 fieldset.day,fieldset.faq-item{border:1px solid #dbe5e8;border-radius:12px;padding:8px 18px 18px;margin:16px 0;background:#fff}
 fieldset.day>legend,fieldset.faq-item>legend{font-weight:600;padding:0 8px}
-fieldset.day>legend{font-size:1.05rem;color:#2b8a9a}
+fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .srow{display:grid;grid-template-columns:1.4fr 1fr 1.4fr auto;gap:10px;align-items:end;padding:10px 0;border-top:1px solid #eef2f4}
 .srow:first-of-type{border-top:0}
 .srow .fl{margin:0}
-.add-btn{margin-top:10px;background:#eaf5f6;color:#1f6b78;border:1px dashed #9cc7ce;border-radius:9px;padding:9px 14px;font-size:.9rem;font-weight:600;cursor:pointer}
+.add-btn{margin-top:10px;background:#eaf5f6;color:#1f7a80;border:1px dashed #9cc7ce;border-radius:9px;padding:9px 14px;font-size:.9rem;font-weight:600;cursor:pointer}
 .add-btn:hover{background:#dcecef}
 .rm{background:#fff;color:#a12;border:1px solid #f0c0c0;border-radius:8px;padding:9px 12px;font-size:.85rem;cursor:pointer;height:fit-content}
 .rm:hover{background:#fdecec}
@@ -504,7 +521,7 @@ fieldset.day>legend{font-size:1.05rem;color:#2b8a9a}
 .hint{color:#8494a0;font-size:.85rem}
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .mcard{display:flex;flex-direction:column;background:#fff;border:1px solid #dbe5e8;border-radius:10px;overflow:hidden;text-decoration:none;color:#22303a}
-.mcard:hover{border-color:#2b8a9a}
+.mcard:hover{border-color:#34719f}
 .mthumb{aspect-ratio:1;background:#f0f5f6;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .mthumb img{width:100%;height:100%;object-fit:cover}
 .mname{font-size:.72rem;padding:8px 8px 2px;word-break:break-all;color:#3a4a54}
