@@ -130,5 +130,23 @@ const ogImageUrl = new URL(ogImage, site.url).href;
       <slot />
     </main>
     <Footer />
+
+    {/* CMS live preview: inert unless the page is opened with ?cms-preview=1
+        inside the content editor. It applies the editor's keystrokes to the
+        [data-cms] elements above, and only trusts messages from the CMS origin. */}
+    <script>
+      if (new URLSearchParams(location.search).has('cms-preview')) {
+        const CMS_ORIGIN = 'https://healthhub-cms-auth.clent.workers.dev';
+        document.documentElement.setAttribute('data-cms-preview', '');
+        addEventListener('message', (e) => {
+          if (e.origin !== CMS_ORIGIN || !e.data || e.data.type !== 'cms') return;
+          const { key, value } = e.data;
+          document.querySelectorAll('[data-cms="' + key + '"]').forEach((el) => { el.textContent = value; });
+          document.querySelectorAll('[data-cms-img="' + key + '"]').forEach((el) => { if (value) el.setAttribute('src', value); });
+        });
+        // Tell the editor we're ready for updates.
+        try { parent.postMessage({ type: 'cms-preview-ready' }, CMS_ORIGIN); } catch (_) {}
+      }
+    </script>
   </body>
 </html>

@@ -16,7 +16,9 @@
 
 /*
   X-Content-Type-Options: nosniff
-  X-Frame-Options: SAMEORIGIN
+  # No X-Frame-Options: it can't express an allow-list. Framing is controlled by
+  # the CSP frame-ancestors below, which permits only the site and the CMS
+  # (for the content editor's live preview).
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://raw.githubusercontent.com; font-src 'self' data: https://unpkg.com; frame-src https://maps.google.com https://www.google.com; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com https://sveltia-cms-auth.clent.workers.dev; form-action 'self' https://formsubmit.co; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://raw.githubusercontent.com; font-src 'self' data: https://unpkg.com; frame-src https://maps.google.com https://www.google.com; connect-src 'self' https://formsubmit.co; form-action 'self' https://formsubmit.co; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'

@@ -10,9 +10,10 @@ const { eyebrow, title, lede } = Astro.props;
 
 <header class="page-header">
   <div class="narrow">
-    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-    <h1>{title}</h1>
-    {lede && <p class="lede">{lede}</p>}
+    {/* data-cms hooks let the CMS live-preview update these as you type. */}
+    {eyebrow && <p class="eyebrow" data-cms="eyebrow">{eyebrow}</p>}
+    <h1 data-cms="heading">{title}</h1>
+    {lede && <p class="lede" data-cms="lede">{lede}</p>}
   </div>
 </header>
 
