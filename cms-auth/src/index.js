@@ -329,24 +329,37 @@ async function editForm(env, k, path, notice) {
   const datalist = `<datalist id="imglist">${imgs.map((p) => `<option value="${esc(p)}">`).join('')}</datalist>`;
   const altJson = `<script type="application/json" id="alt-map">${JSON.stringify(altMap).replace(/</g, '\\u003c')}</script>`;
   const live = SITE + previewPath(k, name);
-  return shell(`Edit — ${name}`, `
-    <div class="head"><h1>${esc(displayTitle(c, parsed.data, name))}</h1>
-      <span class="headlinks">
-        <a class="ghost" href="${esc(live)}" target="_blank" rel="noopener">View live ↗</a>
-        <a class="ghost" href="/history?k=${k}&path=${encodeURIComponent(path)}">Version history</a>
-        <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a></span></div>
-    ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+  const previewSrc = live + (live.includes('?') ? '&' : '?') + 'cms-preview=1';
+  return page(`Edit — ${name}`, `
+    ${topbarHtml()}
+    <div class="editbar">
+      <span class="eb-title">${esc(displayTitle(c, parsed.data, name))}</span>
+      <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a>
+      <a class="ghost" href="/history?k=${k}&path=${encodeURIComponent(path)}">Version history</a>
+      <a class="ghost" href="${esc(live)}" target="_blank" rel="noopener">View live ↗</a>
+      <span class="eb-spacer"></span>
+      <span id="save-status" class="save-status"></span>
+      <button class="btn" type="submit" form="editform">Save &amp; publish</button>
+    </div>
+    ${notice ? `<p class="ok wrap-msg">${esc(notice)}</p>` : ''}
     <span id="img-base" data-base="${SITE}" hidden></span>
     ${datalist}${altJson}
-    <form method="POST" action="/save">
-      <input type="hidden" name="k" value="${esc(k)}">
-      <input type="hidden" name="path" value="${esc(path)}">
-      <input type="hidden" name="sha" value="${esc(sha)}">
-      ${fields}
-      ${bodyField}
-      <div class="actions"><button class="btn" type="submit">Save &amp; publish</button>
-        <a class="ghost" href="/c?k=${k}">Cancel</a></div>
-    </form>
+    <div class="twopane" data-preview-origin="${SITE}">
+      <div class="pane-fields">
+        <form id="editform" method="POST" action="/save">
+          <input type="hidden" name="k" value="${esc(k)}">
+          <input type="hidden" name="path" value="${esc(path)}">
+          <input type="hidden" name="sha" value="${esc(sha)}">
+          ${fields}
+          ${bodyField}
+        </form>
+      </div>
+      <div class="pane-preview">
+        <div class="pv-toolbar"><span class="pv-badge">Live preview</span>
+          <button type="button" class="ghost" id="pv-reload">↻ Refresh</button></div>
+        <iframe id="pv" src="${esc(previewSrc)}" title="Live preview" referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
     <script src="/app.js"></script>`);
 }
 
@@ -463,11 +476,13 @@ function loginPage(error) {
     </form>`);
 }
 
-function shell(title, inner) {
-  const topbar = `<div class="topbar">
+function topbarHtml() {
+  return `<div class="topbar">
     <a class="brand" href="/"><img src="${SITE}/images/logo.png" alt="Health Hub" height="34"><span>Website Manager</span></a>
     <a class="ghost" href="/logout">Sign out</a></div>`;
-  return page(title, `${topbar}<div class="wrap">${inner}</div>`);
+}
+function shell(title, inner) {
+  return page(title, `${topbarHtml()}<div class="wrap">${inner}</div>`);
 }
 
 function page(title, inner, status = 200) {
@@ -486,6 +501,7 @@ function page(title, inner, status = 200) {
       'Content-Security-Policy':
         "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; " +
         "img-src 'self' data: https://healthhub-tweed-coast.clent.workers.dev https://www.healthhubtweedcoast.com.au https://healthhubtweedcoast.com.au; " +
+        `frame-src ${SITE} https://www.healthhubtweedcoast.com.au; ` +
         "form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
     },
   });
@@ -549,6 +565,19 @@ h1{font-size:1.4rem;margin:0}
 .vrow strong{font-size:14px}
 .vmeta{color:#8494a0;font-size:12px;margin-left:10px}
 .vrow form{margin:0}
+.editbar{position:sticky;top:57px;z-index:15;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:11px 22px;background:#f5fafb;border-bottom:1px solid #dce6eb}
+.eb-title{font-weight:700;color:#22496c;font-size:15px}
+.eb-spacer{flex:1}
+.save-status{font-size:12px;color:#8494a0}
+.wrap-msg{max-width:860px;margin:12px auto 0;padding-inline:20px}
+.twopane{display:grid;grid-template-columns:minmax(360px,460px) 1fr;height:calc(100vh - 110px)}
+@media(max-width:900px){.twopane{grid-template-columns:1fr;height:auto}}
+.pane-fields{overflow-y:auto;padding:20px;border-right:1px solid #dce6eb;background:#eef4f5}
+.pane-preview{position:relative;display:flex;flex-direction:column;background:#fff;min-height:60vh}
+.pv-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #dce6eb;background:#fff}
+.pv-badge{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#1f7a80}
+.pane-preview iframe{flex:1;width:100%;border:0}
+@media(max-width:900px){.pane-preview{height:70vh}}
 .ta.body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
 .actions{display:flex;align-items:center;gap:16px;margin-top:26px}
 .btn{background:#34719f;color:#fff;border:0;border-radius:9px;padding:11px 20px;font-size:1rem;font-weight:600;cursor:pointer}

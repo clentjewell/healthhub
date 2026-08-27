@@ -129,9 +129,45 @@ export const APP_JS = String.raw`
     });
   }
 
+  /* ── Live preview: push field edits into the preview iframe ────────────── */
+  function initLivePreview() {
+    var pane = document.querySelector('.twopane');
+    var iframe = document.getElementById('pv');
+    if (!pane || !iframe) return;
+    var origin = pane.getAttribute('data-preview-origin');
+    var form = document.getElementById('editform');
+    if (!form) return;
+
+    function keyOf(el) {
+      var n = el.getAttribute('name') || '';
+      if (n.indexOf('f__') === 0) return n.slice(3);
+      if (n === '__body') return null; // body is Markdown; not live-previewed
+      return null;
+    }
+    function post(key, value) {
+      try { iframe.contentWindow.postMessage({ type: 'cms', key: key, value: value }, origin); } catch (e) {}
+    }
+    function sendAll() {
+      form.querySelectorAll('[name^="f__"]').forEach(function (el) {
+        var k = keyOf(el); if (k) post(k, el.value);
+      });
+    }
+    // The preview page announces when it's ready; send the current values then.
+    window.addEventListener('message', function (e) {
+      if (e.origin === origin && e.data && e.data.type === 'cms-preview-ready') sendAll();
+    });
+    form.addEventListener('input', function (e) {
+      var k = keyOf(e.target); if (k) post(k, e.target.value);
+      var s = document.getElementById('save-status'); if (s) s.textContent = 'Unsaved changes…';
+    });
+    var reload = document.getElementById('pv-reload');
+    if (reload) reload.addEventListener('click', function () { iframe.contentWindow.location.reload(); });
+  }
+
   /* ── Wire up on load ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initImagePickers();
+    initLivePreview();
 
     var root = document.getElementById('structured');
     if (!root) return;
