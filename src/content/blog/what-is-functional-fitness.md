@@ -1,18 +1,18 @@
 ---
-title: "What Is Functional Fitness, and Why Does It Matter as You Age?"
-metaTitle: "What Is Functional Fitness? — Health Hub Tweed Coast"
-metaDescription: "What functional fitness actually is, what the evidence says about its benefits as you age, and what to expect as a beginner — from Katie Verkerk at Health Hub Tweed Coast."
-excerpt: "Not all exercise is built the same way. Here's what makes functional fitness different, what the research says, and what to expect if you're starting out."
+title: What Is Functional Fitness, and Why Does It Matter as You Age?
+metaTitle: What Is Functional Fitness? — Health Hub Tweed Coast
+metaDescription: What functional fitness actually is, what the evidence says about its benefits as you age, and what to expect as a beginner — from Katie Verkerk at Health Hub Tweed Coast.
+excerpt: Not all exercise is built the same way. Here's what makes functional fitness different, what the research says, and what to expect if you're starting out.
 order: 3
-category: "Functional Fitness"
-author: "Katie Verkerk"
-authorId: "katie-verkerk"
+category: Functional Fitness
+author: Katie Verkerk
+authorId: katie-verkerk
 publishDate: 2026-08-21
-readingMinutes: 3
-ctaLabel: "View class times"
-ctaHref: "/event/health-hub-studio-time-table/"
-image: "/images/blog/what-is-functional-fitness-hero.webp"
-imageAlt: "A seated medicine-ball twist — a core exercise of the kind used in a Function & Flow session."
+readingMinutes: 4
+ctaLabel: View class times
+ctaHref: /event/health-hub-studio-time-table/
+image: /images/blog/what-is-functional-fitness-hero.webp
+imageAlt: A seated medicine-ball twist — a core exercise of the kind used in a Function & Flow session.
 draft: false
 ---
 
