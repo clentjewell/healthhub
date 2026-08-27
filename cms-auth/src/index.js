@@ -10,9 +10,15 @@
 import {
   COLLECTIONS, verifyLogin, createSession, readSession, sessionCookie,
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
-  loadYamlSnippet,
+  loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
 } from './lib.js';
 import { APP_JS } from './app-js.js';
+
+// Where images live in the repo and how the CMS shows thumbnails (the live site).
+const IMG_PREFIX = 'public/images/';
+const SITE = 'https://healthhub-tweed-coast.clent.workers.dev';
+const IMG_EXT = /\.(webp|jpe?g|png|gif|avif|svg)$/i;
+const MAX_UPLOAD = 8 * 1024 * 1024; // 8 MB
 
 // Collections edited with a structured (repeatable-row) editor instead of the
 // generic field form. Their whole value is submitted as JSON by app.js.
@@ -57,6 +63,9 @@ async function route(request, env) {
   if (p === '/c' && url.searchParams.get('k')) return listCollection(env, url.searchParams.get('k'));
   if (p === '/edit') return editForm(env, url.searchParams.get('k'), url.searchParams.get('path'));
   if (p === '/save' && request.method === 'POST') return doSave(request, env);
+  if (p === '/media') return mediaPage(env, url.searchParams.get('path'));
+  if (p === '/media/upload' && request.method === 'POST') return doUpload(request, env);
+  if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
   return redirect('/');
 }
 
@@ -98,7 +107,117 @@ function dashboard() {
   return shell('Website Manager', `
     <div class="head"><h1>Website Manager</h1><a class="ghost" href="/logout">Sign out</a></div>
     <p class="sub">Choose what to edit. Changes go live a minute or so after you save.</p>
-    <div class="tiles">${cards}</div>`);
+    <div class="tiles">${cards}
+      <a class="tile" href="/media"><span class="tile-t">Media library</span>
+        <span class="tile-a">Images &amp; uploads →</span></a></div>`);
+}
+
+/* ── Media library ───────────────────────────────────────────────────────── */
+
+async function mediaPage(env, focusPath) {
+  const [paths, manifest] = await Promise.all([ghTree(env, IMG_PREFIX), readManifest(env)]);
+  const images = paths.filter((p) => IMG_EXT.test(p)).sort();
+  const folders = [...new Set(images.map((p) => p.slice(IMG_PREFIX.length).split('/').slice(0, -1).join('/')).filter(Boolean))].sort();
+
+  // Detail view for one image.
+  if (focusPath) {
+    const rel = focusPath.replace(/^public\//, '');
+    const meta = manifest.map[focusPath] || {};
+    return shell('Image details', `
+      <div class="head"><h1>Image details</h1><a class="ghost" href="/media">← Media library</a></div>
+      <div class="mdetail">
+        <img class="mprev" src="${SITE}/${esc(rel)}" alt="">
+        <form method="POST" action="/media/save">
+          <input type="hidden" name="path" value="${esc(focusPath)}">
+          <p class="mpath">${esc(focusPath.slice(IMG_PREFIX.length))}</p>
+          <label class="fl"><span class="fk">Title</span><input class="in" name="title" value="${esc(meta.title || '')}"></label>
+          <label class="fl"><span class="fk">Alt text <em>(describes the image for screen readers &amp; SEO)</em></span>
+            <input class="in" name="alt" value="${esc(meta.alt || '')}"></label>
+          <label class="fl"><span class="fk">Description</span>
+            <textarea class="ta" name="description" rows="3">${esc(meta.description || '')}</textarea></label>
+          <label class="fl"><span class="fk">Path (use this in a content image field)</span>
+            <input class="in" value="/${esc(rel)}" readonly onclick="this.select()"></label>
+          <div class="actions"><button class="btn" type="submit">Save details</button>
+            <a class="ghost" href="/media">Back</a></div>
+        </form>
+      </div>`);
+  }
+
+  const cards = images.map((p) => {
+    const rel = p.replace(/^public\//, '');
+    const m = manifest.map[p] || {};
+    return `<a class="mcard" href="/media?path=${encodeURIComponent(p)}">
+      <span class="mthumb"><img loading="lazy" src="${SITE}/${esc(rel)}" alt=""></span>
+      <span class="mname">${esc(p.slice(IMG_PREFIX.length))}</span>
+      ${m.alt ? `<span class="mmeta">alt ✓</span>` : `<span class="mmeta warn">no alt</span>`}</a>`;
+  }).join('');
+
+  const folderOpts = ['(top level)', ...folders].map((f) =>
+    `<option value="${f === '(top level)' ? '' : esc(f)}">${esc(f)}</option>`).join('');
+
+  return shell('Media library', `
+    <div class="head"><h1>Media library</h1><a class="ghost" href="/">← All sections</a></div>
+    <form class="upload" method="POST" action="/media/upload" enctype="multipart/form-data">
+      <h2 class="uh">Upload a new image</h2>
+      <div class="urow">
+        <label class="fl"><span class="fk">Image file</span><input class="in" type="file" name="file" accept="image/*" required></label>
+        <label class="fl"><span class="fk">Folder</span><select class="in" name="folder">${folderOpts}</select></label>
+      </div>
+      <div class="urow">
+        <label class="fl"><span class="fk">Alt text</span><input class="in" name="alt" placeholder="What the image shows"></label>
+        <label class="fl"><span class="fk">Title</span><input class="in" name="title"></label>
+      </div>
+      <label class="fl"><span class="fk">Description</span><textarea class="ta" name="description" rows="2"></textarea></label>
+      <div class="actions"><button class="btn" type="submit">Upload</button>
+        <span class="hint">Max 8 MB. Best to resize large photos before uploading.</span></div>
+    </form>
+    <p class="sub">${images.length} images. Click one to edit its details or copy its path.</p>
+    <div class="mgrid">${cards}</div>`);
+}
+
+async function doUpload(request, env) {
+  const form = await request.formData();
+  const file = form.get('file');
+  if (!file || typeof file === 'string' || !file.name) return mediaPage(env, null);
+  if (!IMG_EXT.test(file.name)) return errorPage('That file type isn’t a supported image (webp, jpg, png, gif, avif, svg).');
+  const buf = new Uint8Array(await file.arrayBuffer());
+  if (buf.length > MAX_UPLOAD) return errorPage('That image is larger than 8 MB — please resize it and try again.');
+
+  const folder = String(form.get('folder') || '').replace(/[^a-z0-9/-]/gi, '');
+  const base = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+|-+$/g, '');
+  const path = `${IMG_PREFIX}${folder ? folder + '/' : ''}${base}`;
+
+  if (await ghGetOrNull(env, path)) return errorPage(`An image named “${esc(base)}” already exists in that folder. Rename the file and upload again.`);
+
+  await ghPutBinary(env, path, buf, `media: add ${path} (via CMS)`);
+
+  // Save metadata.
+  const alt = String(form.get('alt') || ''); const title = String(form.get('title') || ''); const description = String(form.get('description') || '');
+  if (alt || title || description) {
+    const { map, sha } = await readManifest(env);
+    map[path] = { alt, title, description };
+    await writeManifest(env, map, sha, `media: metadata for ${path}`);
+  }
+  return redirect(`/media?path=${encodeURIComponent(path)}`);
+}
+
+async function doMediaSave(request, env) {
+  const form = await request.formData();
+  const path = String(form.get('path') || '');
+  if (!path) return redirect('/media');
+  const { map, sha } = await readManifest(env);
+  map[path] = {
+    alt: String(form.get('alt') || ''),
+    title: String(form.get('title') || ''),
+    description: String(form.get('description') || ''),
+  };
+  await writeManifest(env, map, sha, `media: update details for ${path}`);
+  return redirect(`/media?path=${encodeURIComponent(path)}`);
+}
+
+function errorPage(msg) {
+  return shell('Notice', `<div class="head"><h1>Notice</h1><a class="ghost" href="/media">← Media library</a></div>
+    <p class="err">${msg}</p>`);
 }
 
 async function listCollection(env, k) {
@@ -352,4 +471,21 @@ fieldset.day>legend{font-size:1.05rem;color:#2b8a9a}
 .rm{background:#fff;color:#a12;border:1px solid #f0c0c0;border-radius:8px;padding:9px 12px;font-size:.85rem;cursor:pointer;height:fit-content}
 .rm:hover{background:#fdecec}
 @media(max-width:640px){.srow{grid-template-columns:1fr}}
+.upload{background:#fff;border:1px solid #dbe5e8;border-radius:12px;padding:18px 20px;margin:8px 0 22px}
+.uh{font-size:1rem;margin:0 0 8px}
+.urow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.urow{grid-template-columns:1fr}}
+.hint{color:#8494a0;font-size:.85rem}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.mcard{display:flex;flex-direction:column;background:#fff;border:1px solid #dbe5e8;border-radius:10px;overflow:hidden;text-decoration:none;color:#22303a}
+.mcard:hover{border-color:#2b8a9a}
+.mthumb{aspect-ratio:1;background:#f0f5f6;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mthumb img{width:100%;height:100%;object-fit:cover}
+.mname{font-size:.72rem;padding:8px 8px 2px;word-break:break-all;color:#3a4a54}
+.mmeta{font-size:.7rem;padding:0 8px 8px;color:#1c6b34}
+.mmeta.warn{color:#b46a00}
+.mdetail{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+@media(max-width:640px){.mdetail{grid-template-columns:1fr}}
+.mprev{width:100%;border:1px solid #dbe5e8;border-radius:10px;background:#f0f5f6}
+.mpath{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:#5c6b75;margin:0 0 8px;word-break:break-all}
 `;

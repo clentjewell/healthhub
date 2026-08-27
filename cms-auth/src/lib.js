@@ -145,6 +145,47 @@ export async function ghPut(env, path, text, sha, message) {
   return res.json();
 }
 
+/** Like ghGet but returns null (instead of throwing) on 404 — for the manifest. */
+export async function ghGetOrNull(env, path) {
+  const res = await gh(env, 'GET', `/repos/${REPO}/contents/${path}?ref=${BRANCH}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`get ${path}: ${res.status}`);
+  const data = await res.json();
+  return { text: b64ToUtf8(data.content.replace(/\n/g, '')), sha: data.sha };
+}
+
+/** Commit binary content (Uint8Array) — used for image uploads. */
+export async function ghPutBinary(env, path, bytes, message) {
+  const res = await gh(env, 'PUT', `/repos/${REPO}/contents/${path}`, {
+    message, content: bytesToB64(bytes), branch: BRANCH,
+  });
+  if (!res.ok) { const t = await res.text(); throw new Error(`upload ${path}: ${res.status} ${t.slice(0, 200)}`); }
+  return res.json();
+}
+
+/** Recursively list files under a prefix (via the git tree API). */
+export async function ghTree(env, prefix) {
+  const res = await gh(env, 'GET', `/repos/${REPO}/git/trees/${BRANCH}?recursive=1`);
+  if (!res.ok) throw new Error(`tree: ${res.status}`);
+  const data = await res.json();
+  return (data.tree || [])
+    .filter((t) => t.type === 'blob' && t.path.startsWith(prefix))
+    .map((t) => t.path);
+}
+
+/* Media metadata manifest (git-tracked, not part of the site build). */
+export const MANIFEST = 'cms-media.json';
+export async function readManifest(env) {
+  const f = await ghGetOrNull(env, MANIFEST);
+  if (!f) return { map: {}, sha: null };
+  try { return { map: JSON.parse(f.text) || {}, sha: f.sha }; }
+  catch { return { map: {}, sha: f.sha }; }
+}
+export async function writeManifest(env, map, sha, message) {
+  const text = JSON.stringify(map, null, 2) + '\n';
+  return ghPut(env, MANIFEST, text, sha, message);
+}
+
 /* ── Content parse / build ───────────────────────────────────────────────── */
 
 // JSON schema = no automatic Date objects for `2026-08-21`; dates stay strings,
@@ -192,6 +233,13 @@ function b64urlDecode(str) {
 function b64ToUtf8(b64) { return new TextDecoder().decode(b64ToBytes(b64)); }
 function utf8ToB64(str) {
   const bytes = new TextEncoder().encode(str);
-  let s = ''; for (const b of bytes) s += String.fromCharCode(b);
+  return bytesToB64(bytes);
+}
+function bytesToB64(bytes) {
+  let s = '';
+  // Chunk to avoid call-stack limits on large images.
+  for (let i = 0; i < bytes.length; i += 8192) {
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  }
   return btoa(s);
 }
