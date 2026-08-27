@@ -1,287 +1,307 @@
 /**
- * Health Hub CMS — email + password login for the Sveltia/Decap editor.
+ * Health Hub CMS — a simple, password-gated content editor on Cloudflare.
  *
- * WHY THIS EXISTS
- * ───────────────
- * The stock Sveltia auth worker logs editors in with GitHub OAuth, which means
- * every editor needs their own GitHub account with access to the repo. The
- * client wanted the simpler Pottsville-style experience: an email and a
- * password, no GitHub account. This worker provides exactly that.
+ * Sign in with email + password → edit content in plain forms → Save commits to
+ * GitHub, which rebuilds and deploys the site. No GitHub account for editors;
+ * the repo token stays on the server and never reaches the browser.
  *
- * HOW IT WORKS
- * ────────────
- *   1. The editor opens /admin. Sveltia opens this worker's /auth in a popup.
- *   2. This worker shows an email + password form.
- *   3. On a correct password it hands the CMS a pre-provisioned GitHub token
- *      (a fine-grained PAT stored as a secret here), using the exact postMessage
- *      handshake Sveltia expects — so from the CMS's point of view it's an
- *      ordinary successful login.
- *
- * SECURITY MODEL — READ THIS
- * ──────────────────────────
- * The token this worker holds can write to the content repo. So *anyone who
- * knows an editor password can commit content* (they cannot see the token; it
- * never leaves the worker). That is the same trade-off as Pottsville's password
- * gate. Consequences:
- *   • Use strong, unique passwords. Rotate them by regenerating a hash.
- *   • Scope the GitHub token as tightly as possible: fine-grained PAT, only the
- *     one content repo, Contents = Read and write, nothing else.
- *   • Logins are throttled per IP by the RL KV counter (10 failures / 15 min),
- *     and each attempt costs a 100k-iteration PBKDF2 — so a strong editor
- *     password can't be brute-forced in practice.
- *
- * SECRETS / BINDINGS:
- *   GITHUB_TOKEN     (secret) fine-grained PAT, Contents R/W on the content repo
- *   AUTH_USERS       (secret) one editor per line:
- *                    "email:pbkdf2$sha256$<iter>$<saltB64>$<hashB64>"
- *                    generate a line with: node cms-auth/hash-password.mjs
- *   ALLOWED_ORIGINS  (secret) comma-separated site origins allowed to receive
- *                    the token, e.g.
- *                    "https://healthhub-tweed-coast.clent.workers.dev,https://www.healthhubtweedcoast.com.au"
- *   RL               (binding) KV namespace for login throttling
+ * Secrets/bindings: GITHUB_TOKEN, AUTH_USERS, SESSION_SECRET, RL (KV).
  */
+import {
+  COLLECTIONS, verifyLogin, createSession, readSession, sessionCookie,
+  ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
+  loadYamlSnippet,
+} from './lib.js';
 
-const PBKDF2_ITERATIONS = 100000;
-const RL_MAX_ATTEMPTS = 10; // failed attempts per IP per window
-const RL_WINDOW_SECONDS = 900; // 15 minutes
+const RL_MAX = 10, RL_WINDOW = 900;
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-
-    if (url.pathname === '/auth') {
-      if (request.method === 'GET') return loginPage(env, '');
-      if (request.method === 'POST') return handleLogin(request, env);
-      return new Response('Method Not Allowed', { status: 405, headers: baseHeaders() });
+    try {
+      return await route(request, env);
+    } catch (e) {
+      return page('Something went wrong', `<div class="card"><h1>Something went wrong</h1>
+        <p class="err">${esc(e.message || String(e))}</p>
+        <p><a href="/">Back to the dashboard</a></p></div>`, 500);
     }
-
-    // Health check / anything else.
-    return new Response('Health Hub CMS auth. Open /admin on the site to sign in.', {
-      status: url.pathname === '/' ? 200 : 404,
-      headers: baseHeaders(),
-    });
   },
 };
 
-/* ── Login handling ──────────────────────────────────────────────────────── */
+async function route(request, env) {
+  const url = new URL(request.url);
+  const p = url.pathname;
+  const session = await readSession(env, request);
 
-async function handleLogin(request, env) {
-  // CSRF guard: a genuine login is submitted from this worker's own login page.
-  // If a cross-site page auto-submits the form, the browser sends an Origin that
-  // isn't ours — reject it. (Origin can be absent on some same-origin posts;
-  // absent is allowed, a present-but-foreign Origin is not.)
-  // A cross-site auto-submit carries the attacker's real origin, so we block a
-  // present-and-different Origin. A same-origin submit may arrive with the
-  // Origin omitted or as the literal "null" (some referrer policies do this) —
-  // both are allowed, since neither identifies a foreign site.
+  if (p === '/login' && request.method === 'POST') return doLogin(request, env);
+  if (p === '/logout') {
+    return redirect('/login', { 'Set-Cookie': sessionCookie('', 0) });
+  }
+
+  // Everything below needs a session.
+  if (!session) {
+    if (p === '/login' || p === '/') return loginPage();
+    return redirect('/login');
+  }
+
+  if (p === '/' || p === '/login') return dashboard();
+  if (p === '/c' && url.searchParams.get('k')) return listCollection(env, url.searchParams.get('k'));
+  if (p === '/edit') return editForm(env, url.searchParams.get('k'), url.searchParams.get('path'));
+  if (p === '/save' && request.method === 'POST') return doSave(request, env);
+  return redirect('/');
+}
+
+/* ── Login ───────────────────────────────────────────────────────────────── */
+
+async function doLogin(request, env) {
   const selfOrigin = new URL(request.url).origin;
   const origin = request.headers.get('Origin');
-  if (origin && origin !== 'null' && origin !== selfOrigin) {
-    return new Response('Bad origin', { status: 403, headers: baseHeaders() });
-  }
+  if (origin && origin !== 'null' && origin !== selfOrigin) return new Response('Bad origin', { status: 403 });
 
-  // Per-IP throttle (KV counter). Blocks sequential brute force.
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  if (await isRateLimited(env, ip)) {
-    return loginPage(env, 'Too many attempts. Please wait a few minutes and try again.', 429);
-  }
+  if (await rateLimited(env, ip)) return loginPage('Too many attempts. Please wait a few minutes.');
 
   const form = await request.formData();
-  const email = String(form.get('email') || '').trim().toLowerCase();
-  const password = String(form.get('password') || '');
+  const email = String(form.get('email') || '');
+  const ok = await verifyLogin(env, email, String(form.get('password') || ''));
+  if (!ok) { await bumpFail(env, ip); return loginPage('Incorrect email or password.'); }
 
-  const ok = await verifyCredentials(env, email, password);
-  if (!ok) {
-    await recordFailure(env, ip);
-    // Deliberately vague — don't reveal whether the email exists.
-    return loginPage(env, 'Incorrect email or password.', 401);
-  }
-
-  if (!env.GITHUB_TOKEN) {
-    return loginPage(env, 'Server not configured: missing GITHUB_TOKEN.', 500);
-  }
-  const allowed = String(env.ALLOWED_ORIGINS || '')
-    .split(',').map((s) => s.trim()).filter(Boolean);
-  return handshakePage(env.GITHUB_TOKEN, allowed);
+  const value = await createSession(env, email.trim().toLowerCase());
+  return redirect('/', { 'Set-Cookie': sessionCookie(value, 28800) });
 }
 
-// A structurally valid hash used only to spend the same PBKDF2 time when the
-// email is unknown, so an attacker can't tell "no such editor" from "wrong
-// password" by timing the response (email enumeration). It matches no password.
-const DUMMY_HASH =
-  'pbkdf2$sha256$100000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
-
-async function verifyCredentials(env, email, password) {
-  const users = parseUsers(env.AUTH_USERS);
-  const stored = users.get(email);
-  // Always run the KDF — against the real hash if the email exists, otherwise
-  // against a dummy — so the response time doesn't reveal which emails are valid.
-  const ok = await verifyPbkdf2(password, stored || DUMMY_HASH);
-  return stored ? ok : false;
-}
-
-/** Parse "email:hash" lines (comments and blanks ignored). */
-function parseUsers(raw) {
-  const map = new Map();
-  for (const line of String(raw || '').split(/\r?\n/)) {
-    const t = line.trim();
-    if (!t || t.startsWith('#')) continue;
-    const i = t.indexOf(':');
-    if (i === -1) continue;
-    map.set(t.slice(0, i).trim().toLowerCase(), t.slice(i + 1).trim());
-  }
-  return map;
-}
-
-/** Verify a password against "pbkdf2$sha256$<iter>$<saltB64>$<hashB64>". */
-async function verifyPbkdf2(password, stored) {
-  const parts = stored.split('$');
-  if (parts.length !== 5 || parts[0] !== 'pbkdf2' || parts[1] !== 'sha256') return false;
-  const iterations = parseInt(parts[2], 10);
-  const salt = b64ToBytes(parts[3]);
-  const expected = b64ToBytes(parts[4]);
-  if (!iterations || !salt.length || !expected.length) return false;
-
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(password), { name: 'PBKDF2' }, false, ['deriveBits'],
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
-    keyMaterial, expected.length * 8,
-  );
-  return timingSafeEqual(new Uint8Array(bits), expected);
-}
-
-/* ── Rate limiting (KV) ──────────────────────────────────────────────────── */
-
-async function isRateLimited(env, ip) {
+async function rateLimited(env, ip) {
   if (!env.RL) return false;
-  const n = parseInt((await env.RL.get(`fail:${ip}`)) || '0', 10);
-  return n >= RL_MAX_ATTEMPTS;
+  return parseInt((await env.RL.get(`fail:${ip}`)) || '0', 10) >= RL_MAX;
 }
-async function recordFailure(env, ip) {
+async function bumpFail(env, ip) {
   if (!env.RL) return;
-  const key = `fail:${ip}`;
-  const n = parseInt((await env.RL.get(key)) || '0', 10) + 1;
-  await env.RL.put(key, String(n), { expirationTtl: RL_WINDOW_SECONDS });
+  const n = parseInt((await env.RL.get(`fail:${ip}`)) || '0', 10) + 1;
+  await env.RL.put(`fail:${ip}`, String(n), { expirationTtl: RL_WINDOW });
 }
 
 /* ── Pages ───────────────────────────────────────────────────────────────── */
 
-function loginPage(env, error, status = 200) {
-  const brand = 'Health Hub Tweed Coast';
-  const html = `<!doctype html><html lang="en"><head>
+function dashboard() {
+  const cards = Object.entries(COLLECTIONS).map(([k, c]) =>
+    `<a class="tile" href="/c?k=${k}"><span class="tile-t">${esc(c.label)}</span>
+      <span class="tile-a">Open →</span></a>`).join('');
+  return shell('Website Manager', `
+    <div class="head"><h1>Website Manager</h1><a class="ghost" href="/logout">Sign out</a></div>
+    <p class="sub">Choose what to edit. Changes go live a minute or so after you save.</p>
+    <div class="tiles">${cards}</div>`);
+}
+
+async function listCollection(env, k) {
+  const c = COLLECTIONS[k];
+  if (!c) return redirect('/');
+  const files = await ghList(env, c.dir, c.ext);
+  const rows = await Promise.all(files.map(async (f) => {
+    let title = f.name;
+    if (c.titleField) {
+      try {
+        const { text } = await ghGet(env, f.path);
+        const data = c.kind === 'markdown' ? parseMarkdown(text).data : parseYaml(text);
+        if (data[c.titleField]) title = String(data[c.titleField]);
+      } catch { /* fall back to filename */ }
+    }
+    return `<a class="row" href="/edit?k=${k}&path=${encodeURIComponent(f.path)}">
+      <span>${esc(title)}</span><span class="row-a">Edit →</span></a>`;
+  }));
+  return shell(c.label, `
+    <div class="head"><h1>${esc(c.label)}</h1><a class="ghost" href="/">← All sections</a></div>
+    <div class="rows">${rows.join('')}</div>`);
+}
+
+async function editForm(env, k, path, notice) {
+  const c = COLLECTIONS[k];
+  if (!c || !path) return redirect('/');
+  const { text, sha } = await ghGet(env, path);
+  const parsed = c.kind === 'markdown' ? parseMarkdown(text) : { data: parseYaml(text), body: null };
+  const fields = renderFields(parsed.data);
+  const bodyField = c.kind === 'markdown'
+    ? `<label class="fl"><span class="fk">Main text (Markdown)</span>
+        <textarea class="ta body" name="__body" rows="18">${esc(parsed.body)}</textarea></label>`
+    : '';
+  const name = path.split('/').pop();
+  return shell(`Edit — ${name}`, `
+    <div class="head"><h1>${esc(displayTitle(c, parsed.data, name))}</h1>
+      <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a></div>
+    ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+    <form method="POST" action="/save">
+      <input type="hidden" name="k" value="${esc(k)}">
+      <input type="hidden" name="path" value="${esc(path)}">
+      <input type="hidden" name="sha" value="${esc(sha)}">
+      ${fields}
+      ${bodyField}
+      <div class="actions"><button class="btn" type="submit">Save &amp; publish</button>
+        <a class="ghost" href="/c?k=${k}">Cancel</a></div>
+    </form>`);
+}
+
+async function doSave(request, env) {
+  const form = await request.formData();
+  const k = String(form.get('k')); const path = String(form.get('path')); const sha = String(form.get('sha'));
+  const c = COLLECTIONS[k];
+  if (!c || !path) return redirect('/');
+
+  let data;
+  try { data = parseFields(form); }
+  catch (e) { return editForm(env, k, path, null).then((r) => r); } // shouldn't happen
+
+  // Validate any scoped-YAML fields before writing.
+  let text;
+  try {
+    if (c.kind === 'markdown') text = buildMarkdown(data, String(form.get('__body') ?? ''));
+    else text = buildYaml(data);
+  } catch (e) {
+    return editForm(env, k, path, `Could not save: ${e.message}`);
+  }
+
+  try {
+    await ghPut(env, path, text, sha, `content: edit ${path} (via CMS)`);
+  } catch (e) {
+    // Most likely a stale sha (someone else saved). Reload with a message.
+    return editForm(env, k, path, `Save failed: ${e.message}. The page was reloaded with the latest version — re-apply your change.`);
+  }
+  return editForm(env, k, path, 'Saved. The site will update in about a minute.');
+}
+
+/* ── Form fields (type-aware) ────────────────────────────────────────────── */
+
+function renderFields(data) {
+  return Object.entries(data).map(([key, val]) => {
+    const label = humanize(key);
+    const t = fieldType(val);
+    const hidden = `<input type="hidden" name="t__${esc(key)}" value="${t}">`;
+    if (t === 'boolean') {
+      return `<label class="fl fl-row"><input type="checkbox" name="f__${esc(key)}" ${val ? 'checked' : ''}>
+        <span class="fk">${esc(label)}</span></label>${hidden}`;
+    }
+    if (t === 'number') {
+      return `<label class="fl"><span class="fk">${esc(label)}</span>
+        <input class="in" type="number" name="f__${esc(key)}" value="${esc(String(val ?? ''))}"></label>${hidden}`;
+    }
+    if (t === 'yaml') {
+      return `<label class="fl"><span class="fk">${esc(label)} <em>(advanced — keep the layout/indentation)</em></span>
+        <textarea class="ta" name="f__${esc(key)}" rows="${Math.min(16, buildYaml(val).split('\n').length + 1)}">${esc(buildYaml(val).replace(/\n$/, ''))}</textarea></label>${hidden}`;
+    }
+    // string
+    const s = val == null ? '' : String(val);
+    const multiline = s.length > 70 || s.includes('\n');
+    const input = multiline
+      ? `<textarea class="ta" name="f__${esc(key)}" rows="${Math.min(8, s.split('\n').length + 2)}">${esc(s)}</textarea>`
+      : `<input class="in" type="text" name="f__${esc(key)}" value="${esc(s)}">`;
+    return `<label class="fl"><span class="fk">${esc(label)}</span>${input}</label>${hidden}`;
+  }).join('');
+}
+
+function parseFields(form) {
+  const data = {};
+  for (const [name] of form) {
+    if (!name.startsWith('t__')) continue;
+    const key = name.slice(3);
+    const t = String(form.get(name));
+    const raw = form.get(`f__${key}`);
+    if (t === 'boolean') data[key] = raw != null; // checkbox present = checked
+    else if (t === 'number') data[key] = raw === '' || raw == null ? null : Number(raw);
+    else if (t === 'yaml') data[key] = loadYamlSnippet(String(raw ?? '')); // throws on bad YAML
+    else data[key] = normalizeNewlines(String(raw ?? ''));
+  }
+  return data;
+}
+
+function fieldType(v) {
+  if (typeof v === 'boolean') return 'boolean';
+  if (typeof v === 'number') return 'number';
+  if (v !== null && typeof v === 'object') return 'yaml'; // arrays + objects
+  return 'string';
+}
+
+/* ── HTML shell ──────────────────────────────────────────────────────────── */
+
+function loginPage(error) {
+  return page('Sign in', `
+    <form class="card" method="POST" action="/login" autocomplete="on">
+      <h1>Website Manager</h1><p class="sub">Sign in to edit the Health Hub website.</p>
+      ${error ? `<p class="err">${esc(error)}</p>` : ''}
+      <label class="fl"><span class="fk">Email</span>
+        <input class="in" type="email" name="email" required autocomplete="username" autofocus></label>
+      <label class="fl"><span class="fk">Password</span>
+        <input class="in" type="password" name="password" required autocomplete="current-password"></label>
+      <button class="btn" type="submit">Sign in</button>
+    </form>`);
+}
+
+function shell(title, inner) {
+  return page(title, `<div class="wrap">${inner}</div>`);
+}
+
+function page(title, inner, status = 200) {
+  const html = `<!doctype html><html lang="en-AU"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>Sign in · ${brand}</title>
-<style>
-  :root { color-scheme: light; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background:#eaf5f6; color:#2a3742; margin:0; min-height:100vh; display:grid; place-items:center; }
-  .card { background:#fff; width:min(92vw,360px); padding:32px 28px; border-radius:12px;
-    box-shadow:0 10px 40px rgba(0,0,0,.08); }
-  h1 { font-size:1.15rem; margin:0 0 4px; } p.sub { margin:0 0 20px; color:#5c6b75; font-size:.9rem; }
-  label { display:block; font-size:.8rem; font-weight:600; margin:14px 0 6px; }
-  input { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #cdd8dc;
-    border-radius:8px; font-size:1rem; }
-  button { width:100%; margin-top:22px; padding:11px; border:0; border-radius:8px; background:#2b8a9a;
-    color:#fff; font-size:1rem; font-weight:600; cursor:pointer; }
-  button:hover { background:#247685; }
-  .err { background:#fdecec; border:1px solid #f5b5b5; color:#a12; padding:10px 12px;
-    border-radius:8px; font-size:.85rem; margin-bottom:16px; }
-</style></head><body>
-  <form class="card" method="POST" action="/auth" autocomplete="on">
-    <h1>${brand}</h1>
-    <p class="sub">Sign in to edit the website.</p>
-    ${error ? `<div class="err">${escapeHtml(error)}</div>` : ''}
-    <label for="email">Email</label>
-    <input id="email" name="email" type="email" required autocomplete="username" autofocus>
-    <label for="password">Password</label>
-    <input id="password" name="password" type="password" required autocomplete="current-password">
-    <button type="submit">Sign in</button>
-  </form>
-</body></html>`;
-  // The login page has no scripts at all — lock it down to styles + its own form.
-  const csp =
-    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+<meta name="robots" content="noindex,nofollow"><title>${esc(title)} · Health Hub</title>
+<style>${CSS}</style></head><body>${inner}</body></html>`;
   return new Response(html, {
     status,
-    headers: { ...baseHeaders(), 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': csp },
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Cache-Control': 'no-store',
+      'Content-Security-Policy':
+        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; img-src 'self' data:",
+    },
   });
 }
 
-/**
- * The Sveltia/Decap popup handshake. The popup announces itself to the opener
- * (the CMS), waits for the CMS to reply, then posts the token back to the exact
- * origin the reply came from — so the token only ever goes to the CMS window.
- */
-function handshakePage(token, allowedOrigins) {
-  const payload = JSON.stringify({ provider: 'github', token });
-  // The token is posted only to an origin on the allow-list, so a page on some
-  // other origin that opened this popup can never receive it. An empty list
-  // (misconfiguration) accepts none — fail closed rather than leak the token.
-  // jsForScript() escapes '<' etc. so neither the token nor an origin string can
-  // break out of the <script> block.
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Signing in…</title></head>
-<body><script>
-  (function () {
-    var allowed = ${jsForScript(allowedOrigins)};
-    function receive(e) {
-      if (e.data !== 'authorizing:github') return;
-      if (allowed.indexOf(e.origin) === -1) return;
-      window.opener.postMessage(
-        'authorization:github:success:' + ${jsForScript(payload)}, e.origin);
-      window.removeEventListener('message', receive);
-    }
-    window.addEventListener('message', receive, false);
-    window.opener.postMessage('authorizing:github', '*');
-  })();
-</script><p style="font-family:sans-serif">Signing you in…</p></body></html>`;
-  // The page runs exactly one inline script and talks only to window.opener.
-  const csp =
-    "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'";
-  return new Response(html, {
-    status: 200,
-    headers: { ...baseHeaders(), 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': csp },
-  });
+function redirect(location, extra = {}) {
+  return new Response(null, { status: 303, headers: { Location: location, 'Cache-Control': 'no-store', ...extra } });
 }
 
-/* ── Helpers ─────────────────────────────────────────────────────────────── */
+/* ── helpers ─────────────────────────────────────────────────────────────── */
 
-function baseHeaders() {
-  return {
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    // Not 'no-referrer': that makes browsers send "Origin: null" on the login
-    // POST, which the CSRF check would then reject. This still sends no path,
-    // only the origin, cross-site.
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Cache-Control': 'no-store',
-  };
+function displayTitle(c, data, name) {
+  if (c.titleField && data[c.titleField]) return String(data[c.titleField]);
+  return name;
 }
-
-function timingSafeEqual(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-  return diff === 0;
+function humanize(key) {
+  return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, (m) => m.toUpperCase());
 }
-function b64ToBytes(b64) {
-  try {
-    const bin = atob(b64);
-    const out = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-    return out;
-  } catch { return new Uint8Array(0); }
-}
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-/** JSON for safe embedding inside an inline <script>: no '<' to start a tag,
- *  and the JS line separators U+2028/U+2029 escaped. */
-function jsForScript(value) {
-  return JSON.stringify(value)
-    .replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
-    .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+function normalizeNewlines(s) { return s.replace(/\r\n/g, '\n'); }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-export const _PBKDF2_ITERATIONS = PBKDF2_ITERATIONS; // referenced by hash-password.mjs
+const CSS = `
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef4f5;color:#22303a}
+.card{background:#fff;width:min(92vw,380px);margin:12vh auto;padding:30px 28px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.wrap{max-width:820px;margin:0 auto;padding:28px 20px 80px}
+h1{font-size:1.4rem;margin:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:4px}
+.sub{color:#5c6b75;margin:6px 0 22px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #dbe5e8;border-radius:12px;padding:18px 20px;text-decoration:none;color:#22303a;transition:.15s}
+.tile:hover{border-color:#2b8a9a;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.tile-t{font-weight:600;font-size:1.05rem}
+.tile-a,.row-a{color:#2b8a9a;font-size:.85rem}
+.rows{display:flex;flex-direction:column;border:1px solid #dbe5e8;border-radius:12px;overflow:hidden;background:#fff}
+.row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;text-decoration:none;color:#22303a;border-top:1px solid #eef2f4}
+.row:first-child{border-top:0}.row:hover{background:#f5fafb}
+.fl{display:block;margin:16px 0}
+.fl-row{display:flex;align-items:center;gap:10px}
+.fk{display:block;font-size:.82rem;font-weight:600;margin-bottom:6px;color:#3a4a54}
+.fk em{font-weight:400;color:#8494a0;font-style:normal;font-size:.9em}
+.in,.ta{width:100%;padding:10px 12px;border:1px solid #cdd8dc;border-radius:9px;font-size:1rem;font-family:inherit;background:#fff}
+.ta{resize:vertical;line-height:1.5}
+.ta.body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
+.actions{display:flex;align-items:center;gap:16px;margin-top:26px}
+.btn{background:#2b8a9a;color:#fff;border:0;border-radius:9px;padding:11px 20px;font-size:1rem;font-weight:600;cursor:pointer}
+.btn:hover{background:#247685}
+.ghost{color:#2b8a9a;text-decoration:none;font-size:.9rem}
+.err{background:#fdecec;border:1px solid #f5b5b5;color:#a12;padding:10px 12px;border-radius:9px;font-size:.9rem}
+.ok{background:#eaf7ee;border:1px solid #b6e0c2;color:#1c6b34;padding:10px 12px;border-radius:9px;font-size:.9rem}
+`;

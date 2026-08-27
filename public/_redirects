@@ -2,6 +2,10 @@
 # static `redirects`, which can only emit a meta-refresh page.
 # Docs: https://developers.cloudflare.com/workers/static-assets/redirects/
 
+# The content editor (CMS) lives on its own worker. /admin sends editors there.
+/admin   https://healthhub-cms-auth.clent.workers.dev/  302
+/admin/  https://healthhub-cms-auth.clent.workers.dev/  302
+
 # Shannon O'Hara left the Hub in September 2026; Kate Doedee took over her
 # classes. Her profile is gone, so send anyone holding the old link to the team
 # rather than a 404 — /our-practitioner/ (singular) is not a real route, so the
