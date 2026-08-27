@@ -70,9 +70,13 @@ async function handleLogin(request, env) {
   // If a cross-site page auto-submits the form, the browser sends an Origin that
   // isn't ours — reject it. (Origin can be absent on some same-origin posts;
   // absent is allowed, a present-but-foreign Origin is not.)
+  // A cross-site auto-submit carries the attacker's real origin, so we block a
+  // present-and-different Origin. A same-origin submit may arrive with the
+  // Origin omitted or as the literal "null" (some referrer policies do this) —
+  // both are allowed, since neither identifies a foreign site.
   const selfOrigin = new URL(request.url).origin;
   const origin = request.headers.get('Origin');
-  if (origin && origin !== selfOrigin) {
+  if (origin && origin !== 'null' && origin !== selfOrigin) {
     return new Response('Bad origin', { status: 403, headers: baseHeaders() });
   }
 
@@ -247,7 +251,10 @@ function baseHeaders() {
   return {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'no-referrer',
+    // Not 'no-referrer': that makes browsers send "Origin: null" on the login
+    // POST, which the CSRF check would then reject. This still sends no path,
+    // only the origin, cross-site.
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Cache-Control': 'no-store',
   };
 }
