@@ -263,7 +263,7 @@ async function listCollection(env, k) {
   if (!c) return redirect('/');
   const files = await ghList(env, c.dir, c.ext);
   const rows = await Promise.all(files.map(async (f) => {
-    let title = f.name;
+    let title = c === COLLECTIONS.pages ? pageTitle(f.name) : f.name;
     if (c.titleField) {
       try {
         const { text } = await ghGet(env, f.path);
@@ -376,7 +376,8 @@ async function doSave(request, env) {
       const data = JSON.parse(String(form.get('__json') || '{}'));
       text = buildYaml(data);
     } else {
-      const data = parseFields(form);
+      // Pages re-nest their dotted keys (hero.heading → hero: { heading }).
+      const data = k === 'pages' ? unflatten(parseFields(form)) : parseFields(form);
       text = c.kind === 'markdown'
         ? buildMarkdown(data, String(form.get('__body') ?? ''))
         : buildYaml(data);
@@ -397,14 +398,36 @@ async function doSave(request, env) {
 /* ── Form fields (type-aware) ────────────────────────────────────────────── */
 
 function renderFields(collection, data) {
+  // Pages like home.yml are nested (hero: {...}, welcome: {...}). Expand each
+  // nested section into friendly labelled fields grouped under a section header,
+  // using dotted names (hero.heading) that doSave() re-nests. Scalars and arrays
+  // stay in the normal grouped flow. Other collections are unaffected.
+  if (collection === 'pages') {
+    const scalars = {}, sections = [];
+    for (const [key, val] of Object.entries(data)) {
+      if (val !== null && typeof val === 'object' && !Array.isArray(val)) sections.push([key, val]);
+      else scalars[key] = val;
+    }
+    let html = groupedKeys(collection, scalars).map((g) => {
+      const inner = g.keys.map((key) => renderOneField(collection, key, scalars[key])).join('');
+      return `<div class="group">${g.title ? `<div class="gh">${esc(g.title)}</div>` : ''}${inner}</div>`;
+    }).join('');
+    for (const [section, obj] of sections) {
+      const inner = Object.entries(obj)
+        .map(([ck, cv]) => renderOneField(collection, `${section}.${ck}`, cv, humanize(ck)))
+        .join('');
+      html += `<div class="group"><div class="gh">${esc(humanize(section))}</div>${inner}</div>`;
+    }
+    return html;
+  }
   return groupedKeys(collection, data).map((g) => {
     const inner = g.keys.map((key) => renderOneField(collection, key, data[key])).join('');
     return `<div class="group">${g.title ? `<div class="gh">${esc(g.title)}</div>` : ''}${inner}</div>`;
   }).join('');
 }
 
-function renderOneField(collection, key, val) {
-  const label = labelFor(collection, key, humanize(key));
+function renderOneField(collection, key, val, labelOverride) {
+  const label = labelOverride || labelFor(collection, key, humanize(key));
   const hint = hintFor(collection, key);
   const hintHtml = hint ? `<span class="hint">${esc(hint)}</span>` : '';
   const t = fieldType(val);
@@ -423,7 +446,10 @@ function renderOneField(collection, key, val) {
       <textarea class="ta mono" name="f__${esc(key)}" rows="${Math.min(16, y.split('\n').length + 1)}">${esc(y)}</textarea>${hintHtml}</label>${hidden}`;
   }
   const s = val == null ? '' : String(val);
-  const isImage = (/image|photo|hero|avatar/i.test(key) && !/alt/i.test(key)) ||
+  // Match on the leaf segment so a section named "hero" (hero.heading) is not
+  // mistaken for an image field; a real /images/… value is always treated as one.
+  const leaf = key.split('.').pop();
+  const isImage = (/image|photo|hero|avatar/i.test(leaf) && !/alt/i.test(leaf)) ||
     /^\/images\/.*\.(webp|jpe?g|png|gif|avif|svg)$/i.test(s);
   if (isImage) {
     return `<label class="fl"><span class="fk">${esc(label)}</span>
@@ -452,6 +478,23 @@ function parseFields(form) {
     else data[key] = normalizeNewlines(String(raw ?? ''));
   }
   return data;
+}
+
+/** Rebuild nested objects from dotted field names, preserving key order.
+ *  { 'hero.heading': 'x', metaTitle: 'y' } → { hero: { heading: 'x' }, metaTitle: 'y' } */
+function unflatten(flat) {
+  const out = {};
+  for (const [k, v] of Object.entries(flat)) {
+    if (!k.includes('.')) { out[k] = v; continue; }
+    const parts = k.split('.');
+    let cur = out;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (cur[parts[i]] == null || typeof cur[parts[i]] !== 'object') cur[parts[i]] = {};
+      cur = cur[parts[i]];
+    }
+    cur[parts[parts.length - 1]] = v;
+  }
+  return out;
 }
 
 function fieldType(v) {
@@ -513,8 +556,20 @@ function redirect(location, extra = {}) {
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
+// Friendly names for the site's fixed pages, so the "Page text" list and the
+// editor header read "Home page" rather than the raw "home.yml" filename.
+const PAGE_TITLES = {
+  home: 'Home page', blog: 'Blog page', booking: 'Booking page',
+  contact: 'Contact page', events: 'Events page', faq: 'FAQ page',
+  practitioners: 'Practitioners page',
+};
+function pageTitle(name) {
+  const slug = name.replace(/\.[^.]+$/, '');
+  return PAGE_TITLES[slug] || humanize(slug);
+}
 function displayTitle(c, data, name) {
   if (c.titleField && data[c.titleField]) return String(data[c.titleField]);
+  if (c === COLLECTIONS.pages) return pageTitle(name);
   return name;
 }
 function humanize(key) {
