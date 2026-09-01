@@ -1,13 +1,6 @@
-# Booking page content — editable in the CMS under "Pages → Make a Booking".
-metaTitle: Make a Booking · Health Hub Tweed Coast
-metaDescription: >-
-  Book acupuncture, naturopathy, yoga, pilates or sound therapy at Health Hub Tweed Coast, Hastings Point. Each practitioner takes their own bookings.
 eyebrow: Appointments
 heading: Make a Booking
-lede: >-
-  Each practitioner manages their own bookings — book online where available, or
-  get in touch directly.
-# Optional note shown under the practitioner list. Leave blank to hide.
-extraNote: >-
-  Also available by arrangement: Kirtan & Harmonium Chant with Melissa Redman —
-  0413 267 544.
+lede: Each practitioner manages their own bookings — book online where available, or get in touch directly.
+metaTitle: Make a Booking · Health Hub Tweed Coast
+metaDescription: Book acupuncture, naturopathy, yoga, pilates or sound therapy at Health Hub Tweed Coast, Hastings Point. Each practitioner takes their own bookings.
+extraNote: 'Also available by arrangement: Kirtan & Harmonium Chant with Melissa Redman — 0413 267 544.'
