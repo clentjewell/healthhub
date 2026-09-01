@@ -5,6 +5,7 @@ import CtaBand from '@components/CtaBand.astro';
 import Icon from '@components/Icon.astro';
 import AddToCalendar from '@components/AddToCalendar.astro';
 import Timetable from '@components/Timetable.astro';
+import FeesBox from '@components/FeesBox.astro';
 import { CATEGORY_LABEL } from '../../lib/format';
 import { getSettings, formatAddress } from '../../lib/content';
 import { sessionLabel } from '../../lib/calendar';
@@ -22,7 +23,7 @@ const { Content } = await render(entry);
 const {
   title, category, summary, schedule, image, price,
   instructor, instructorPhone, instructorEmail, instructorWebsite, location, bookingUrl,
-  sessions, showTimetable,
+  sessions, showTimetable, feeGroups,
 } = entry.data;
 
 const cfg = await getSettings();
@@ -137,6 +138,7 @@ const schema = [
           <div class="prose">
             <Content />
           </div>
+          {feeGroups.length > 0 && <FeesBox groups={feeGroups} heading="Times & Fees" id="fees" />}
         </div>
 
         <aside class="ev-aside">

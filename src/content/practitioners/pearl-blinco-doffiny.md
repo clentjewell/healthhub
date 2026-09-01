@@ -5,12 +5,8 @@ order: 7
 image: "/images/practitioners/pearl-blinco-doffiny.webp"
 phone: "0467 512 368"
 service: "crystal-sound-bowls"
+classPage: "/event/crystal-sound-bowls#fees"
 facebook: "https://www.facebook.com/profile.php?id=61584055244098"
-feeGroups:
-  - title: "Sound Bowl Sessions"
-    items:
-      - label: "Sunday 5:00–6:00pm"
-        price: "$20 / class"
 ---
 ### Pearl – Sound Bowl Therapist & Founder of Twizted
 
@@ -53,5 +49,3 @@ Pearl’s classes are suitable for beginners, seasoned meditators, and anyone se
 * Quiet integration time to allow your body and mind to absorb the experience
 
 You’re welcome to lie down, sit comfortably, or find any position that supports your relaxation. No prior experience is needed—just comfortable clothing and a willingness to unwind.
-
-## Times and Fees of Classes and Sessions

@@ -5,16 +5,8 @@ order: 3
 image: "/images/practitioners/monique-carole.webp"
 phone: "0416 066 310"
 service: "pilates-body-balance"
+classPage: "/event/pilates-and-body-balance#fees"
 facebook: "https://www.facebook.com/HolisticHealthAndFitnessCoaching/"
-feeGroups:
-  - title: "Class Options"
-    items:
-      - label: "Chair Pilates (8:15–8:45am)"
-        price: "$10"
-      - label: "Mat Pilates (8:45–9:30am)"
-        price: "$15"
-      - label: "Stay for both classes (8:15–9:30am)"
-        price: "$20"
 ---
 ### Wellbeing Coach
 
@@ -47,5 +39,3 @@ Pilates also supports the mind and nervous system. Its mindful, breath-focused a
 Ultimately, Pilates clears the mind, steadies the body, and helps us rediscover an inner rhythm that builds resilience and grace.
 
 Just 30 minutes a day practicing Pilates daily can help regulate mood, improve focus and foster a healthier mindset and a foundation for well-being that flows into every part of daily life.
-
-## Fee and Class Times

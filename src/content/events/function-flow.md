@@ -17,6 +17,12 @@ sessions:
   - day: Wednesday
     start: "16:30"
     end: "17:15"
+feeGroups:
+  - title: "Group Classes"
+    duration: "Wednesdays · 10:15–11:00am & 4:30–5:15pm"
+    items:
+      - label: "Casual class"
+        price: "$15"
 ---
 ### Function & Flow Exercise Class
 

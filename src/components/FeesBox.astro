@@ -1,0 +1,66 @@
+---
+/**
+ * Shared "Times & Fees" box — used on practitioner profiles and (per the client
+ * review) on event pages, so class times and fees live in one place.
+ */
+interface FeeItem { label: string; price?: string }
+interface FeeGroup {
+  title: string; duration?: string; price?: string; note?: string; items?: FeeItem[];
+}
+interface Props { groups: FeeGroup[]; heading?: string; id?: string }
+const { groups, heading = 'Times & Fees', id } = Astro.props;
+---
+
+{groups && groups.length > 0 && (
+  <section class="fees" id={id}>
+    <h2 class="fees-h">{heading}</h2>
+    <div class="fees-grid">
+      {groups.map((g) => (
+        <div class="fee-box">
+          <div class="fee-head">
+            <h3>{g.title}</h3>
+            {g.price && <span class="fee-price">{g.price}</span>}
+          </div>
+          {g.duration && <p class="fee-duration">{g.duration}</p>}
+          {g.note && <p class="fee-note">{g.note}</p>}
+          {g.items && g.items.length > 0 && (
+            <ul class="fee-list">
+              {g.items.map((it) => (
+                <li>
+                  <span class="fee-label">{it.label}</span>
+                  {it.price && <span class="fee-price-sm">{it.price}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .fees { margin-top: 44px; }
+  .fees-h { font-size: 1.5rem; margin-bottom: 20px; }
+  .fees-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .fee-box {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); padding: 22px 24px;
+  }
+  .fee-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .fee-head h3 { font-size: 1.05rem; color: var(--color-heading); line-height: 1.3; }
+  .fee-price { font-weight: 700; color: var(--color-accent); font-size: 1.05rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .fee-duration {
+    font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--color-accent); font-weight: 600; margin: 6px 0 0;
+  }
+  .fee-note { font-size: 13px; color: var(--color-text-muted); margin: 8px 0 0; line-height: 1.5; }
+  .fee-list { list-style: none; margin: 14px 0 0; padding: 0; }
+  .fee-list li {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 8px 0; border-top: 1px solid var(--color-surface-tint);
+  }
+  .fee-list li:first-child { border-top: none; }
+  .fee-label { color: var(--color-text); font-size: 14px; }
+  .fee-price-sm { font-weight: 700; color: var(--color-accent); white-space: nowrap; font-variant-numeric: tabular-nums; }
+</style>

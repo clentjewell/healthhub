@@ -5,15 +5,7 @@ order: 4
 image: "/images/practitioners/kate-doedee.webp"
 phone: "0405 115 996"
 service: "hatha-yin-yoga"
-feeGroups:
-  - title: "Class Fees"
-    items:
-      - label: "Casual Class"
-        price: "$24"
-      - label: "5× Class Pass"
-        price: "$110"
-      - label: "10× Class Pass"
-        price: "$200"
+classPage: "/event/hatha-yin-yoga#fees"
 ---
 ### HATHA & YIN YOGA TEACHER
 
@@ -49,7 +41,3 @@ You may arrive feeling wound up but you will leave feeling calm & relaxed.
 Yin-Yang Yoga:
 
 A Yin–Yang yoga class blends two complementary energies into one beautifully balanced practice. It’s the kind of class that leaves people feeling both spacious and steady, softened yet awake. A Yin–Yang class weaves together the slow, meditative stillness of Yin with the warm, flowing movement of Yang, creating a practice that nourishes both body and mind.
-
-## Class Times & Fees
-
-**Monday Yin-Yang:** 7:30 – 8:45 am (75mins)

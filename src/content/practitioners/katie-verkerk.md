@@ -6,11 +6,7 @@ image: "/images/practitioners/katie-verkerk.webp"
 bookingUrl: "https://visibook.com/functionandflow?pp=calintro"
 phone: "0434 570 512"
 service: "function-flow"
-feeGroups:
-  - title: "Group Classes"
-    items:
-      - label: "Casual class"
-        price: "$15"
+classPage: "/event/function-flow#fees"
 ---
 ### Function & Flow Wellness
 
@@ -27,7 +23,3 @@ Throughout the class, I weave in core and pelvic‑floor awareness, helping you 
 We finish with a cool‑down that brings your nervous system back to calm — stretching, breathing, and integrating the work you’ve done so you leave feeling strong, centred, and uplifted.
 
 My goal is for you to walk out feeling like you’ve worked hard in the best possible way: empowered, capable, and proud of what your body can do.
-
-## Class Times & Fees
-
-**Wednesday** 6:00 – 6:45 am (45mins)

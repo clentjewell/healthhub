@@ -72,6 +72,13 @@ const practitioners = defineCollection({
     phone: optionalText,
     /** Service (id) this practitioner offers. */
     service: optionalText,
+    /**
+     * Link to this practitioner's class page for its full times & fees. Per the
+     * client review, class times and fees live on the event page, not the
+     * profile — the profile links across to them. Empty for practitioners who
+     * run no class (e.g. one-to-one consults).
+     */
+    classPage: optionalText,
     modalities: z.array(z.string()).default([]),
     /** Social / external links shown in the profile hero. */
     facebook: optionalUrl,
@@ -127,6 +134,26 @@ const events = defineCollection({
     bookingUrl: optionalUrl,
     image: optionalText,
     summary: z.string(),
+    /**
+     * Times & fees for this class, shown in a box on the event page. Per the
+     * client review these live here (on the event) rather than on the
+     * practitioner profile. Same shape as the practitioner `feeGroups`: a group
+     * is either a single priced option (title + price) or a set of options
+     * (title + items[]), with an optional `duration` line for the "when".
+     */
+    feeGroups: z
+      .array(
+        z.object({
+          title: z.string(),
+          duration: optionalText,
+          price: z.string().optional(),
+          note: z.string().optional(),
+          items: z
+            .array(z.object({ label: z.string(), price: z.string().optional() }))
+            .default([]),
+        }),
+      )
+      .default([]),
     /**
      * Weekly slots, used to build the "Add to calendar" links (see
      * lib/calendar.ts). Left empty for by-appointment offerings and for the

@@ -5,27 +5,9 @@ order: 5
 image: "/images/practitioners/rebecca-lindsay.webp"
 phone: "0411 417 337"
 service: "embodied-movement-dance"
+classPage: "/event/embodied-movement-dance#fees"
 facebook: "https://www.facebook.com/rebecca.lindsay.7547"
 instagram: "https://www.instagram.com/yourwisdomyourway/"
-feeGroups:
-  - title: "Weekly Class"
-    items:
-      - label: "Thursdays 11:00am – 12:00pm"
-        price: "$24 / class"
-  - title: "Class Passes"
-    items:
-      - label: "5× Class Pass"
-        price: "$110"
-      - label: "10× Class Pass"
-        price: "$200"
-  - title: "Workshops"
-    items:
-      - label: "Fri 27 Mar 2026, 7:00–8:15pm"
-        price: "$30"
-      - label: "Fri 1 May 2026, 7:00–8:15pm"
-        price: "$30"
-      - label: "Fri 5 Jun, 7:00–8:15pm"
-        price: "$30"
 ---
 ### Embodied Movement & Dance
 
@@ -77,5 +59,3 @@ A class in embodied movement and dance invites participants into a slow, intuiti
 * A deeper relationship with their own intuition and aliveness
 
 This creates a space where movement becomes a pathway to wisdom, healing, and self-discovery.
-
-## Times and Fees of Classes and Sessions

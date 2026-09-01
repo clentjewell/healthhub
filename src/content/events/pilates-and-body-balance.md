@@ -20,12 +20,19 @@ sessions:
     start: "08:45"
     end: "09:30"
     label: Balance & Mat Pilates
+feeGroups:
+  - title: "Class Options"
+    duration: "Wednesdays"
+    items:
+      - label: "Chair Pilates · 8:15–8:45am"
+        price: "$10"
+      - label: "Mat Pilates · 8:45–9:30am"
+        price: "$15"
+      - label: "Stay for both · 8:15–9:30am"
+        price: "$20"
 ---
 ### Pilates and Body Balance
 
 Our Chair and Mat Pilates classes are lead by Wellness Coach Monique Carole. Each class includes gentle but powerful Pilates exercises and mindful movement specific to your needs. Focusing on controlled movements that bring stability, strength, and mobility to the entire body – enhancing core strength and rejuvenating both body and mind.
 
-* Chair Pilates 8.15-8.45am $10
-* Mat Pilates 8.45-9.30am $15
-* Stay for both classes 8.15-9.30am $20
-* Book now 0416 066 310
+To book, call Monique on 0416 066 310.

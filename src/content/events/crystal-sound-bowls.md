@@ -13,6 +13,10 @@ sessions:
   - day: Sunday
     start: "17:00"
     end: "18:00"
+feeGroups:
+  - title: "Sound Bowl Session"
+    duration: "Every 3rd Sunday · 5:00 – 6:00pm"
+    price: "$20"
 ---
 ### Crystal Sound Bowls
 
@@ -26,6 +30,4 @@ Pearl’s classes are suitable for beginners, seasoned meditators, and anyone se
 
 You’re welcome to lie down, sit comfortably, or find any position that supports your relaxation. No prior experience is needed—just comfortable clothing and a willingness to unwind.
 
-Sunday 5:00-6:00pm
-
-Contact Pearl 0467 512 368 to book.
+Contact Pearl on 0467 512 368 to book.

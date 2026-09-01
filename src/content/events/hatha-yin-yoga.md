@@ -15,6 +15,16 @@ sessions:
     start: "07:30"
     end: "08:45"
     label: Yin Yang Yoga
+feeGroups:
+  - title: "Yin-Yang Yoga"
+    duration: "Mondays · 75 minutes"
+    items:
+      - label: "Casual class"
+        price: "$24"
+      - label: "5× class pass"
+        price: "$110"
+      - label: "10× class pass"
+        price: "$200"
 ---
 ### Hatha & Yin Yoga
 
@@ -22,8 +32,4 @@ On Monday mornings, Yin-Yang Yoga blends two complementary energies into one bal
 
 We’ll explore asana (through correct alignment & use of props), pranayama (breath control), meditation & yoga philosophy (ancient wisdom & ethics) to directly connect us to the self & to the elements & strengths of the universe. It’s all there for us…we just need to slow down & tune in.
 
-* Monday – Yin Yang Yoga 7:30am-8:45am (75mins)
-* Casual class: $24
-* 5 x class pass: $110
-* 10 x class pass: $200
-* Make a Booking 0405 115 996
+To book, call Kate on 0405 115 996.
