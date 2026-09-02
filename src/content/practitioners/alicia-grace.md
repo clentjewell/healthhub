@@ -52,7 +52,7 @@ feeGroups:
 
 Hi there! My name is Alicia (she/her). I am a 550 hour Trauma-Informed Yoga Teacher and Founder of Omne Yoga, a yoga meditation service dedicated to providing accessible and inclusive yoga classes. I believe yoga can be an incredible ally to building resilience, strength and mindfulness for day to day living and as such should be a welcoming practice to all who wish to utilise it.
 
-Outside of yoag teaching, I am a mother to my beautiful boy Elijah, work in health care and spend most of spare days in nature with family.
+Outside of yoga teaching, I am a mother to my beautiful boy Elijah, work in health care and spend most of spare days in nature with family.
 
 If you are seeking a yoga class that is inclusive, empowering and blends traditional yoga with evidence-based and trauma-informed practices, look no further.
 

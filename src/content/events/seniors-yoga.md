@@ -34,4 +34,4 @@ feeGroups:
 
 **Seniors Yoga with Alicia**
 
-These classes are specifically directed towards older students and those seeking a practice tailored to injuries or reduced physical movement. You will enjoy a supportive environment with a pace that leaves you relaxed, flexable and feeling stronger.
+These classes are specifically directed towards older students and those seeking a practice tailored to injuries or reduced physical movement. You will enjoy a supportive environment with a pace that leaves you relaxed, flexible and feeling stronger.
