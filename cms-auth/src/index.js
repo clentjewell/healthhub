@@ -327,13 +327,20 @@ function slugify(s) {
 
 /** Schema-valid starting frontmatter for a new entry (hidden until published). */
 function newEntryData(k, title) {
+  // Empty strings are fine — optionalText/optionalUrl coerce them to undefined.
+  // Listing every editable field means it shows up (blank) in the editor.
   if (k === 'practitioners') {
-    return { name: title, role: 'Practitioner', order: 99, active: false, image: '', phone: '', service: '', feeGroups: [] };
+    return {
+      name: title, role: 'Practitioner', order: 99, active: false,
+      image: '', bookingUrl: '', phone: '', service: '',
+      facebook: '', instagram: '', website: '', feeGroups: [],
+    };
   }
   // events
   return {
-    title, order: 99, category: 'other', summary: title, image: '',
-    instructor: '', instructorPhone: '', location: 'Health Hub Tweed Coast, Hastings Point',
+    title, order: 99, category: 'other', schedule: '', summary: title, image: '',
+    instructor: '', instructorPhone: '', price: '', bookingUrl: '',
+    location: 'Health Hub Tweed Coast, Hastings Point',
     active: false, sessions: [], feeGroups: [], coTeachers: [],
   };
 }
