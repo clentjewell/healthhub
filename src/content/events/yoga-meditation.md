@@ -27,6 +27,25 @@ sessions:
   - day: Sunday
     start: "08:00"
     end: "09:15"
+feeGroups:
+  - title: "Yoga & Meditation"
+    duration: "Tue 6:00–7:15pm · Fri 9:30–10:45am · Sun 8:00–9:15am (75 min)"
+    items:
+      - label: "Casual class"
+        price: "$24"
+      - label: "5-class pass"
+        price: "$110"
+      - label: "10-class pass"
+        price: "$200"
+  - title: "Yin Yoga"
+    duration: "Wed 6:00–7:15pm (75 min)"
+    items:
+      - label: "Casual class"
+        price: "$24"
+      - label: "5-class pass"
+        price: "$110"
+      - label: "10-class pass"
+        price: "$200"
 ---
 ### Yoga & Meditation
 

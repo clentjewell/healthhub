@@ -18,6 +18,16 @@ sessions:
   - day: Thursday
     start: "09:30"
     end: "10:30"
+feeGroups:
+  - title: "Seniors Yoga"
+    duration: "Tue & Thu 9:30–10:30am (60 min)"
+    items:
+      - label: "Casual class"
+        price: "$18"
+      - label: "5-class pass"
+        price: "$85"
+      - label: "10-class pass"
+        price: "$160"
 ---
 ### Senior’s Yoga
 
