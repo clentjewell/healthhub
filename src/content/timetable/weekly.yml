@@ -39,11 +39,12 @@ days:
       - name: Functional Workout
         time: 4:30–5:15pm
         href: /event/function-flow/
-      # Alicia's class, not Kate's — the client moved Shannon's old night
-      # classes to Alicia (24 Aug 2026); Kate kept only Monday.
+      # Alicia's Wednesday Yin (client moved Shannon's old night classes to
+      # Alicia, 24 Aug 2026). Yin for both teachers lives on the Hatha & Yin
+      # Yoga page, so this links there rather than to Yoga & Meditation.
       - name: Yin Yoga
         time: 6:00–7:15pm
-        href: /event/yoga-meditation/
+        href: /event/hatha-yin-yoga/
   - day: Thursday
     sessions:
       - name: Acupuncture Consultations
