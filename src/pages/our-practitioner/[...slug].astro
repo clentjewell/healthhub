@@ -84,7 +84,8 @@ const schema = [
         {modalities.length > 0 && <p class="prac-modalities">{modalities.join(' · ')}</p>}
         <div class="prac-hero-actions">
           {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
-          {telHref && <a href={telHref} class="btn btn-ghost">Call {phone}</a>}
+          {/* Phone-only booking: the call is the primary action, not a secondary one. */}
+          {telHref && <a href={telHref} class={`btn ${bookingUrl ? 'btn-ghost' : 'btn-primary'}`}>Call to book — {phone}</a>}
           {!bookingUrl && !telHref && <a href="/make-a-booking" class="btn btn-primary">Make a booking</a>}
         </div>
         {
@@ -129,7 +130,7 @@ const schema = [
         <h2>Ready to book with {firstName}?</h2>
         <div class="book-cta-actions">
           {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
-          {telHref && <a href={telHref} class="btn btn-ghost">Call {phone}</a>}
+          {telHref && <a href={telHref} class={`btn ${bookingUrl ? 'btn-ghost' : 'btn-primary'}`}>Call to book — {phone}</a>}
           {!bookingUrl && !telHref && <a href="/make-a-booking" class="btn btn-primary">Make a booking</a>}
         </div>
       </section>

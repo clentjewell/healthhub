@@ -7,7 +7,7 @@ summary: "A full-body functional workout blending strength, mobility, stability 
 image: "/images/events/function-flow.webp"
 instructor: "Katie Verkerk"
 instructorPhone: "0434 570 512"
-instructorWebsite: "https://visibook.com/functionandflow?pp=calintro"
+bookingUrl: "https://visibook.com/functionandflow?pp=calintro"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 sessions:

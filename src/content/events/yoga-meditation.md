@@ -8,6 +8,7 @@ image: "/images/events/yoga-meditation.webp"
 instructor: "Alicia Grace"
 instructorPhone: "0406 987 909"
 instructorWebsite: "https://www.omneyoga.com/"
+bookingUrl: "https://www.omneyoga.com/appointments"
 price: "$24"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true

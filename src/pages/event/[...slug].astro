@@ -111,7 +111,9 @@ const schema = [
           </div>
           <div class="ev-actions">
             {bookingUrl && <a href={bookingUrl} class="btn btn-primary">Book online</a>}
-            {telHref && <a href={telHref} class="btn btn-ghost">Call {phone}</a>}
+            {/* When the class books by phone (no online link), the call IS the
+                booking — make it the primary action rather than a secondary one. */}
+            {telHref && <a href={telHref} class={`btn ${bookingUrl ? 'btn-ghost' : 'btn-primary'}`}>Call to book — {phone}</a>}
             {!bookingUrl && !telHref && <a href="/make-a-booking" class="btn btn-primary">Enquire</a>}
             <AddToCalendar
               title={title}
@@ -186,8 +188,8 @@ const schema = [
               </div>
             )
           }
-          <a href={bookingUrl ?? '/make-a-booking'} class="btn btn-primary ev-aside-cta">
-            {bookingUrl ? 'Book online' : 'Enquire'}
+          <a href={bookingUrl ?? telHref ?? '/make-a-booking'} class="btn btn-primary ev-aside-cta">
+            {bookingUrl ? 'Book online' : telHref ? `Call to book — ${phone}` : 'Enquire'}
           </a>
         </aside>
       </div>

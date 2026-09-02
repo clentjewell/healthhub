@@ -1,5 +1,5 @@
 ---
-title: "Senior’s Yoga"
+title: "Seniors Yoga"
 order: 3
 category: "course"
 schedule: "Tuesday & Thursday 9:30am – 10:30am"
@@ -8,6 +8,7 @@ image: "/images/events/seniors-yoga.webp"
 instructor: "Alicia Grace"
 instructorPhone: "0406 987 909"
 instructorWebsite: "https://www.omneyoga.com/"
+bookingUrl: "https://www.omneyoga.com/appointments"
 price: "$18"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
@@ -29,8 +30,8 @@ feeGroups:
       - label: "10-class pass"
         price: "$160"
 ---
-### Senior’s Yoga
+### Seniors Yoga
 
-**Senior’s Yoga with Alicia**
+**Seniors Yoga with Alicia**
 
 These classes are specifically directed towards older students and those seeking a practice tailored to injuries or reduced physical movement. You will enjoy a supportive environment with a pace that leaves you relaxed, flexable and feeling stronger.
