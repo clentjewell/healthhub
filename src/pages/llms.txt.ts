@@ -16,9 +16,9 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 
 export const GET: APIRoute = async () => {
   const s = await getSettings();
-  const practitioners = (await getCollection('practitioners')).sort(
-    (a, b) => a.data.order - b.data.order,
-  );
+  const practitioners = (await getCollection('practitioners'))
+    .filter((p) => p.data.active)
+    .sort((a, b) => a.data.order - b.data.order);
   const services = (await getCollection('services'))
     .filter((x) => !x.data.draft)
     .sort((a, b) => a.data.order - b.data.order);

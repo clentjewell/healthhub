@@ -66,6 +66,12 @@ const practitioners = defineCollection({
     /** Professional title, e.g. "Acupuncturist". TODO: confirm per-person (Phase 3). */
     role: z.string().default('Practitioner'),
     order: z.number().default(99),
+    /**
+     * Show on the site. New profiles created in the CMS start hidden
+     * (active: false) so they can be filled in before going live; existing
+     * profiles have no flag and default to shown.
+     */
+    active: z.boolean().default(true),
     image: z.string().optional(),
     /** Per-practitioner booking link (platform varies; empty = phone/contact only). */
     bookingUrl: optionalUrl,

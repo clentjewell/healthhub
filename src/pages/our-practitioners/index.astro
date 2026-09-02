@@ -9,9 +9,9 @@ import { itemListNode, breadcrumbNode } from '../../lib/schema';
 
 const page = await getPage('practitioners');
 
-const practitioners = (await getCollection('practitioners')).sort(
-  (a, b) => a.data.order - b.data.order,
-);
+const practitioners = (await getCollection('practitioners'))
+  .filter((p) => p.data.active)
+  .sort((a, b) => a.data.order - b.data.order);
 
 /** First meaningful sentence of a bio, for the card excerpt. */
 function excerpt(body: string | undefined, max = 120): string {

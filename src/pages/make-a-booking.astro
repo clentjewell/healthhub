@@ -6,9 +6,9 @@ import { getPage } from '../lib/content';
 
 const page = await getPage('booking');
 
-const practitioners = (await getCollection('practitioners')).sort(
-  (a, b) => a.data.order - b.data.order,
-);
+const practitioners = (await getCollection('practitioners'))
+  .filter((p) => p.data.active)
+  .sort((a, b) => a.data.order - b.data.order);
 
 // Resolve each practitioner's service label for display.
 const rows = await Promise.all(

@@ -26,6 +26,21 @@ const MAX_UPLOAD = 8 * 1024 * 1024; // 8 MB
 // generic field form. Their whole value is submitted as JSON by app.js.
 const STRUCTURED = { timetable: true, faq: true };
 
+// Fields shown as friendly add/remove-row editors (app.js builds the UI and
+// submits them as JSON) instead of a raw-YAML box.
+const FRIENDLY_FIELDS = new Set(['sessions', 'feeGroups', 'coTeachers']);
+// Friendly fields to ALWAYS show for a collection, even when the entry has none
+// yet — so an editor can add class times, fees or a co-teacher to any entry.
+const ALWAYS_SHOW = {
+  events: ['sessions', 'feeGroups', 'coTeachers'],
+  practitioners: ['feeGroups'],
+};
+// Collections an editor can create new entries in, with the wording for the form.
+const CREATABLE = {
+  practitioners: { titleField: 'name', titleLabel: 'Full name', noun: 'practitioner' },
+  events: { titleField: 'title', titleLabel: 'Class / event name', noun: 'class or event' },
+};
+
 const RL_MAX = 10, RL_WINDOW = 900;
 
 export default {
@@ -63,6 +78,8 @@ async function route(request, env) {
 
   if (p === '/' || p === '/login') return dashboard();
   if (p === '/c' && url.searchParams.get('k')) return listCollection(env, url.searchParams.get('k'));
+  if (p === '/new' && url.searchParams.get('k')) return newEntryForm(url.searchParams.get('k'));
+  if (p === '/create' && request.method === 'POST') return doCreate(request, env);
   if (p === '/edit') return editForm(env, url.searchParams.get('k'), url.searchParams.get('path'));
   if (p === '/save' && request.method === 'POST') return doSave(request, env);
   if (p === '/media') return mediaPage(env, url.searchParams.get('path'));
@@ -275,8 +292,76 @@ async function listCollection(env, k) {
       <span>${esc(title)}</span><span class="row-a">Edit →</span></a>`;
   }));
   return shell(c.label, `
-    <div class="head"><h1>${esc(c.label)}</h1><a class="ghost" href="/">← All sections</a></div>
+    <div class="head"><h1>${esc(c.label)}</h1>
+      <span class="headlinks">
+        ${CREATABLE[k] ? `<a class="btn" href="/new?k=${k}">+ Add new</a>` : ''}
+        <a class="ghost" href="/">← All sections</a></span></div>
     <div class="rows">${rows.join('')}</div>`);
+}
+
+/* ── Create a new entry ──────────────────────────────────────────────────── */
+
+function newEntryForm(k, notice) {
+  const c = COLLECTIONS[k]; const cr = CREATABLE[k];
+  if (!c || !cr) return redirect('/');
+  return shell(`New ${c.label}`, `
+    <div class="head"><h1>Add a new ${esc(cr.noun)}</h1>
+      <a class="ghost" href="/c?k=${k}">← ${esc(c.label)}</a></div>
+    ${notice ? `<p class="err wrap-msg">${esc(notice)}</p>` : ''}
+    <form method="POST" action="/create" class="narrow-form">
+      <input type="hidden" name="k" value="${esc(k)}">
+      <label class="fl"><span class="fk">${esc(cr.titleLabel)}</span>
+        <input class="in" name="title" required autofocus></label>
+      <p class="hint">It starts hidden, so you can fill in the details before it goes live.
+        After you create it you'll go straight to the editor.</p>
+      <div class="actions"><button class="btn" type="submit">Create &amp; edit →</button>
+        <a class="ghost" href="/c?k=${k}">Cancel</a></div>
+    </form>`);
+}
+
+function slugify(s) {
+  return String(s).toLowerCase().trim()
+    .replace(/['’]/g, '').replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'untitled';
+}
+
+/** Schema-valid starting frontmatter for a new entry (hidden until published). */
+function newEntryData(k, title) {
+  if (k === 'practitioners') {
+    return { name: title, role: 'Practitioner', order: 99, active: false, image: '', phone: '', service: '', feeGroups: [] };
+  }
+  // events
+  return {
+    title, order: 99, category: 'other', summary: title, image: '',
+    instructor: '', instructorPhone: '', location: 'Health Hub Tweed Coast, Hastings Point',
+    active: false, sessions: [], feeGroups: [], coTeachers: [],
+  };
+}
+
+async function doCreate(request, env) {
+  const form = await request.formData();
+  const k = String(form.get('k'));
+  const c = COLLECTIONS[k]; const cr = CREATABLE[k];
+  if (!c || !cr) return redirect('/');
+  const title = String(form.get('title') || '').trim();
+  if (!title) return newEntryForm(k, 'Please enter a name.');
+
+  // Pick a unique slug (append -2, -3… if the file already exists).
+  const base = slugify(title);
+  let slug = base, n = 2, path;
+  while (true) {
+    path = `${c.dir}/${slug}${c.ext}`;
+    if (!(await ghGetOrNull(env, path))) break;
+    slug = `${base}-${n++}`;
+  }
+  const bodyStart = k === 'practitioners' ? `### ${title}\n\nWrite the bio here.\n` : `### ${title}\n\nWrite the description here.\n`;
+  const text = buildMarkdown(newEntryData(k, title), bodyStart);
+  try {
+    await ghPut(env, path, text, undefined, `content: create ${path} (via CMS)`);
+  } catch (e) {
+    return newEntryForm(k, `Could not create: ${e.message}`);
+  }
+  return redirect(`/edit?k=${k}&path=${encodeURIComponent(path)}`);
 }
 
 async function editForm(env, k, path, notice) {
@@ -420,16 +505,42 @@ function renderFields(collection, data) {
     }
     return html;
   }
-  return groupedKeys(collection, data).map((g) => {
-    const inner = g.keys.map((key) => renderOneField(collection, key, data[key])).join('');
+  // Always surface the friendly list editors (class times, fees, co-teachers)
+  // for this collection, even when the entry has none yet, so they can be added.
+  const data2 = { ...data };
+  for (const key of (ALWAYS_SHOW[collection] || [])) if (!(key in data2)) data2[key] = [];
+  return groupedKeys(collection, data2).map((g) => {
+    const inner = g.keys.map((key) => renderOneField(collection, key, data2[key])).join('');
     return `<div class="group">${g.title ? `<div class="gh">${esc(g.title)}</div>` : ''}${inner}</div>`;
   }).join('');
+}
+
+/** Friendly add/remove-row editor for a list field (class times, fees, …).
+ *  app.js builds the rows from the seed JSON and writes the edited value back
+ *  into the hidden input as JSON on submit; parseFields reads it as t=json. */
+function renderRepeat(key, val, label, hint) {
+  const seed = JSON.stringify(Array.isArray(val) ? val : []).replace(/</g, '\\u003c');
+  return `<div class="fl fl-block">
+    <span class="fk">${esc(label)}</span>
+    ${hint ? `<span class="hint">${esc(hint)}</span>` : ''}
+    <div class="repeat" data-kind="${esc(key)}">
+      <div class="repeat-rows"></div>
+      <button type="button" class="add-btn repeat-add">+ Add</button>
+      <script type="application/json" class="repeat-seed">${seed}</script>
+    </div>
+    ${/* Pre-seeded with the current value so a JS failure can't wipe it on save;
+         app.js overwrites this on submit with the edited value. */ ''}
+    <input type="hidden" name="f__${esc(key)}" value="${esc(seed)}">
+    <input type="hidden" name="t__${esc(key)}" value="json">
+  </div>`;
 }
 
 function renderOneField(collection, key, val, labelOverride) {
   const label = labelOverride || labelFor(collection, key, humanize(key));
   const hint = hintFor(collection, key);
   const hintHtml = hint ? `<span class="hint">${esc(hint)}</span>` : '';
+  // Class times / fees / co-teachers get a friendly add/remove-row editor.
+  if (FRIENDLY_FIELDS.has(key)) return renderRepeat(key, val, label, hint);
   const t = fieldType(val);
   const hidden = `<input type="hidden" name="t__${esc(key)}" value="${t}">`;
   if (t === 'boolean') {
@@ -475,6 +586,12 @@ function parseFields(form) {
     if (t === 'boolean') data[key] = raw != null; // checkbox present = checked
     else if (t === 'number') data[key] = raw === '' || raw == null ? null : Number(raw);
     else if (t === 'yaml') data[key] = loadYamlSnippet(String(raw ?? '')); // throws on bad YAML
+    else if (t === 'json') {
+      // Friendly list editors (class times, fees, co-teachers). Omit the key
+      // entirely when the list is empty so the frontmatter stays clean.
+      const v = JSON.parse(String(raw || 'null'));
+      if (Array.isArray(v) ? v.length : v != null) data[key] = v;
+    }
     else data[key] = normalizeNewlines(String(raw ?? ''));
   }
   return data;
@@ -651,6 +768,22 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .rm{background:#fff;color:#a12;border:1px solid #f0c0c0;border-radius:8px;padding:9px 12px;font-size:.85rem;cursor:pointer;height:fit-content}
 .rm:hover{background:#fdecec}
 @media(max-width:640px){.srow{grid-template-columns:1fr}}
+/* Friendly list editors (class times, fees, co-teachers) */
+.fl-block{display:block}
+.narrow-form{max-width:560px}
+.repeat{margin-top:8px}
+.repeat-rows{display:flex;flex-direction:column;gap:12px}
+.rrow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;background:#fff;border:1px solid #dbe5e8;border-radius:11px;padding:14px}
+.rrow .fl{margin:0}
+.srow3{grid-template-columns:1.1fr .8fr .8fr 1.4fr auto}
+.fee-group{grid-template-columns:1fr;gap:12px}
+.fee-items-wrap{border-top:1px solid #eef2f4;padding-top:10px}
+.fk.sub{font-size:.78rem;color:#5b6b76;display:block;margin-bottom:6px}
+.fee-items{display:flex;flex-direction:column;gap:8px}
+.item-row{display:grid;grid-template-columns:1fr .5fr auto;gap:8px;align-items:center}
+.rm-item{background:#fff;color:#a12;border:1px solid #f0c0c0;border-radius:8px;width:34px;height:34px;font-size:1rem;line-height:1;cursor:pointer}
+.rm-item:hover{background:#fdecec}
+@media(max-width:640px){.rrow,.srow3{grid-template-columns:1fr}}
 .upload{background:#fff;border:1px solid #dbe5e8;border-radius:12px;padding:18px 20px;margin:8px 0 22px}
 .uh{font-size:1rem;margin:0 0 8px}
 .urow{display:grid;grid-template-columns:1fr 1fr;gap:14px}

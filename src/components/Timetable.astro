@@ -14,7 +14,7 @@ if (!entry) throw new Error('Missing src/content/timetable/weekly.yml');
 const { days, note } = entry.data;
 
 const practitioners = (await getCollection('practitioners'))
-  .filter((p) => p.data.phone)
+  .filter((p) => p.data.active && p.data.phone)
   .sort((a, b) => a.data.order - b.data.order);
 ---
 

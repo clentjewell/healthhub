@@ -164,10 +164,152 @@ export const APP_JS = String.raw`
     if (reload) reload.addEventListener('click', function () { iframe.contentWindow.location.reload(); });
   }
 
+  /* ── Friendly list editors: class times, fees, co-teachers ────────────── */
+  function selectDay(val) {
+    var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    var s = el('select', { class: 'in s-day' });
+    days.forEach(function (d) {
+      var o = el('option', { value: d }, [d]);
+      if (d === val) o.selected = true;
+      s.appendChild(o);
+    });
+    return s;
+  }
+  function timeInput(cls, val) {
+    var i = el('input', { class: 'in ' + cls, type: 'time' });
+    if (val) i.value = val;
+    return i;
+  }
+  function feeItemRow(it) {
+    it = it || {};
+    return el('div', { class: 'item-row' }, [
+      input('i-label', it.label), input('i-price', it.price), btn('rm rm-item', '×'),
+    ]);
+  }
+
+  var BUILDERS = {
+    sessions: {
+      row: function (s) {
+        s = s || {};
+        return el('div', { class: 'rrow srow3' }, [
+          field('Day', selectDay(s.day)),
+          field('Start', timeInput('s-start', s.start)),
+          field('End', timeInput('s-end', s.end)),
+          field('Label (optional)', input('s-label', s.label)),
+          btn('rm rm-row', 'Remove'),
+        ]);
+      },
+      serialize: function (host) {
+        var out = [];
+        host.querySelectorAll('.rrow').forEach(function (r) {
+          var start = r.querySelector('.s-start').value.trim();
+          var end = r.querySelector('.s-end').value.trim();
+          if (!start || !end) return;
+          var o = { day: r.querySelector('.s-day').value, start: start, end: end };
+          var label = r.querySelector('.s-label').value.trim(); if (label) o.label = label;
+          out.push(o);
+        });
+        return out;
+      },
+    },
+    coTeachers: {
+      row: function (t) {
+        t = t || {};
+        return el('div', { class: 'rrow' }, [
+          field('Name', input('c-name', t.name)),
+          field('When (e.g. Wednesday 6:00–7:15pm)', input('c-when', t.when)),
+          field('Phone', input('c-phone', t.phone)),
+          field('Note (optional)', textarea('c-note', t.note, 2)),
+          btn('rm rm-row', 'Remove'),
+        ]);
+      },
+      serialize: function (host) {
+        var out = [];
+        host.querySelectorAll('.rrow').forEach(function (r) {
+          var name = r.querySelector('.c-name').value.trim();
+          if (!name) return;
+          var o = { name: name };
+          var when = r.querySelector('.c-when').value.trim(); if (when) o.when = when;
+          var phone = r.querySelector('.c-phone').value.trim(); if (phone) o.phone = phone;
+          var note = r.querySelector('.c-note').value.trim(); if (note) o.note = note;
+          out.push(o);
+        });
+        return out;
+      },
+    },
+    feeGroups: {
+      row: function (g) {
+        g = g || {};
+        var itemsHost = el('div', { class: 'fee-items' }, (g.items || []).map(feeItemRow));
+        var addItem = btn('add-btn add-item', '+ Add a price line');
+        addItem.addEventListener('click', function () { itemsHost.appendChild(feeItemRow({})); });
+        return el('div', { class: 'rrow fee-group' }, [
+          field('Box title (e.g. Yoga & Meditation)', input('g-title', g.title)),
+          field('When (e.g. Mon 7:30–8:45am)', input('g-duration', g.duration)),
+          field('Single price (optional)', input('g-price', g.price)),
+          field('Note (optional)', input('g-note', g.note)),
+          el('div', { class: 'fee-items-wrap' }, [
+            el('span', { class: 'fk sub' }, ['Price lines (label + price)']), itemsHost, addItem,
+          ]),
+          btn('rm rm-row', 'Remove this box'),
+        ]);
+      },
+      serialize: function (host) {
+        var out = [];
+        host.querySelectorAll('.fee-group').forEach(function (r) {
+          var title = r.querySelector('.g-title').value.trim();
+          if (!title) return;
+          var o = { title: title };
+          var dur = r.querySelector('.g-duration').value.trim(); if (dur) o.duration = dur;
+          var price = r.querySelector('.g-price').value.trim(); if (price) o.price = price;
+          var note = r.querySelector('.g-note').value.trim(); if (note) o.note = note;
+          var items = [];
+          r.querySelectorAll('.item-row').forEach(function (ir) {
+            var label = ir.querySelector('.i-label').value.trim();
+            var ip = ir.querySelector('.i-price').value.trim();
+            if (!label) return;
+            var io = { label: label }; if (ip) io.price = ip;
+            items.push(io);
+          });
+          if (items.length) o.items = items;
+          out.push(o);
+        });
+        return out;
+      },
+    },
+  };
+
+  function initRepeatables() {
+    document.querySelectorAll('.repeat').forEach(function (root) {
+      var kind = root.getAttribute('data-kind');
+      var builder = BUILDERS[kind];
+      if (!builder) return;
+      var rowsHost = root.querySelector('.repeat-rows');
+      var seed = [];
+      try { seed = JSON.parse(root.querySelector('.repeat-seed').textContent) || []; } catch (e) {}
+      seed.forEach(function (item) { rowsHost.appendChild(builder.row(item)); });
+      root.querySelector('.repeat-add').addEventListener('click', function () {
+        rowsHost.appendChild(builder.row({}));
+      });
+      root.addEventListener('click', function (e) {
+        if (e.target.classList.contains('rm-row')) { var r = e.target.closest('.rrow'); if (r) r.remove(); }
+        else if (e.target.classList.contains('rm-item')) { var it = e.target.closest('.item-row'); if (it) it.remove(); }
+      });
+      var hidden = root.parentNode.querySelector('input[name="f__' + kind + '"]');
+      var form = root.closest('form');
+      if (form && hidden) {
+        form.addEventListener('submit', function () {
+          hidden.value = JSON.stringify(builder.serialize(rowsHost));
+        });
+      }
+    });
+  }
+
   /* ── Wire up on load ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initImagePickers();
     initLivePreview();
+    initRepeatables();
 
     var root = document.getElementById('structured');
     if (!root) return;
