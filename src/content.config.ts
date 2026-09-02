@@ -177,6 +177,22 @@ const events = defineCollection({
         }),
       )
       .default([]),
+    /**
+     * Other teachers who run this class on different days (e.g. Yin Yoga is
+     * taught by Kate on Mondays and Alicia on Wednesdays). Shown as an "Also
+     * taught by" note in the sidebar so one page can cover a class shared
+     * across teachers without pretending they're the same session.
+     */
+    coTeachers: z
+      .array(
+        z.object({
+          name: z.string(),
+          when: optionalText,
+          phone: optionalText,
+          note: optionalText,
+        }),
+      )
+      .default([]),
     /** Renders the full weekly timetable table on this event's page. */
     showTimetable: z.boolean().default(false),
     featured: z.boolean().default(false),

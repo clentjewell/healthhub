@@ -23,7 +23,7 @@ const { Content } = await render(entry);
 const {
   title, category, summary, schedule, image, price,
   instructor, instructorPhone, instructorEmail, instructorWebsite, location, bookingUrl,
-  sessions, showTimetable, feeGroups,
+  sessions, showTimetable, feeGroups, coTeachers,
 } = entry.data;
 
 const cfg = await getSettings();
@@ -166,6 +166,26 @@ const schema = [
               <dd><a href={instructorWebsite} target="_blank" rel="noopener">Visit site →</a></dd></>
             )}
           </dl>
+          {
+            coTeachers.length > 0 && (
+              <div class="ev-coteach">
+                <h3 class="ev-coteach-h">Also taught by</h3>
+                {coTeachers.map((t) => {
+                  const ctTel = t.phone?.match(/\+?\d[\d\s()-]{5,}/)?.[0].trim();
+                  return (
+                    <div class="ev-coteach-item">
+                      <p class="ev-coteach-name">{t.name}</p>
+                      {t.when && <p class="ev-coteach-when">{t.when}</p>}
+                      {t.note && <p class="ev-coteach-note">{t.note}</p>}
+                      {ctTel && (
+                        <a href={`tel:${ctTel.replace(/[^\d+]/g, '')}`} class="ev-coteach-tel">Call {ctTel}</a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          }
           <a href={bookingUrl ?? '/make-a-booking'} class="btn btn-primary ev-aside-cta">
             {bookingUrl ? 'Book online' : 'Enquire'}
           </a>
@@ -258,6 +278,24 @@ const schema = [
     font-variant-numeric: tabular-nums;
   }
   .ev-aside-cta { width: 100%; }
+
+  /* "Also taught by" — a co-teacher who runs this class on another day */
+  .ev-coteach {
+    margin: 4px 0 22px; padding-top: 18px;
+    border-top: 1px solid var(--color-border);
+  }
+  .ev-coteach-h {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--color-text-muted); font-weight: 600; margin-bottom: 10px;
+  }
+  .ev-coteach-item + .ev-coteach-item { margin-top: 14px; }
+  .ev-coteach-name { margin: 0; font-weight: 700; color: var(--color-heading); font-size: 14.5px; }
+  .ev-coteach-when {
+    margin: 2px 0 0; font-size: 13px; color: var(--color-accent);
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .ev-coteach-note { margin: 6px 0 0; font-size: 13px; color: var(--color-text-muted); line-height: 1.5; }
+  .ev-coteach-tel { display: inline-block; margin-top: 6px; font-size: 13.5px; font-weight: 600; }
 
   .ev-more { background: var(--color-surface-tint); }
   .ev-more-h { font-size: 1.5rem; margin-bottom: 24px; }

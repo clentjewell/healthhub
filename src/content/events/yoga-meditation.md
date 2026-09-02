@@ -37,15 +37,6 @@ feeGroups:
         price: "$110"
       - label: "10-class pass"
         price: "$200"
-  - title: "Yin Yoga"
-    duration: "Wed 6:00–7:15pm (75 min)"
-    items:
-      - label: "Casual class"
-        price: "$24"
-      - label: "5-class pass"
-        price: "$110"
-      - label: "10-class pass"
-        price: "$200"
 ---
 ### Yoga & Meditation
 

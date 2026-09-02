@@ -16,7 +16,7 @@ sessions:
     end: "08:45"
     label: Yin Yang Yoga
 feeGroups:
-  - title: "Yin-Yang Yoga"
+  - title: "Yin-Yang Yoga · with Kate"
     duration: "Mon 7:30–8:45am (75 min)"
     items:
       - label: "Casual class"
@@ -25,6 +25,20 @@ feeGroups:
         price: "$110"
       - label: "10-class pass"
         price: "$200"
+  - title: "Yin Yoga · with Alicia"
+    duration: "Wed 6:00–7:15pm (75 min)"
+    items:
+      - label: "Casual class"
+        price: "$24"
+      - label: "5-class pass"
+        price: "$110"
+      - label: "10-class pass"
+        price: "$200"
+coTeachers:
+  - name: "Alicia Grace"
+    when: "Wednesday 6:00–7:15pm"
+    phone: "0406 987 909"
+    note: "Evening Yin Yoga based on Traditional Chinese Medicine principles."
 ---
 ### Hatha & Yin Yoga
 
@@ -32,4 +46,8 @@ On Monday mornings, Yin-Yang Yoga blends two complementary energies into one bal
 
 We’ll explore asana (through correct alignment & use of props), pranayama (breath control), meditation & yoga philosophy (ancient wisdom & ethics) to directly connect us to the self & to the elements & strengths of the universe. It’s all there for us…we just need to slow down & tune in.
 
-To book, call Kate on 0405 115 996.
+To book Monday Yin-Yang Yoga, call Kate on 0405 115 996.
+
+### Wednesday evening Yin Yoga with Alicia
+
+Prefer the evenings? Alicia Grace also teaches a Yin Yoga class on **Wednesday evenings, 6:00–7:15pm** — a slow-paced, floor-based practice based on Traditional Chinese Medicine principles, making space to rest, release and wind down at the end of the day. To book, call Alicia on 0406 987 909.
