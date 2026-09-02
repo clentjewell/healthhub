@@ -5,7 +5,16 @@ order: 4
 image: "/images/practitioners/kate-doedee.webp"
 phone: "0405 115 996"
 service: "hatha-yin-yoga"
-classPage: "/event/hatha-yin-yoga#fees"
+feeGroups:
+  - title: "Yin-Yang Yoga"
+    duration: "Mon 7:30–8:45am (75 min)"
+    items:
+      - label: "Casual class"
+        price: "$24"
+      - label: "5-class pass"
+        price: "$110"
+      - label: "10-class pass"
+        price: "$200"
 ---
 ### HATHA & YIN YOGA TEACHER
 

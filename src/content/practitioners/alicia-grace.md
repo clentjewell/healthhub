@@ -10,31 +10,42 @@ facebook: "https://www.facebook.com/alicia.bingham.52/"
 instagram: "https://www.instagram.com/omneyoga"
 website: "https://www.omneyoga.com"
 feeGroups:
-  - title: "Seniors Yoga"
-    items:
-      - label: "Casual (60 mins)"
-        price: "$18"
-      - label: "5 Class Pass"
-        price: "$85"
-      - label: "10 Class Pass"
-        price: "$160"
   - title: "Yoga & Meditation"
+    duration: "Tue 6:00–7:15pm · Fri 9:30–10:45am · Sun 8:00–9:15am (75 min)"
     items:
-      - label: "Casual (75 mins)"
+      - label: "Casual class"
         price: "$24"
-      - label: "5 Class Pass"
+      - label: "5-class pass"
         price: "$110"
-      - label: "10 Class Pass"
+      - label: "10-class pass"
         price: "$200"
-  - title: "1:1 Private Yoga Sessions (in-person & online)"
+  - title: "Yin Yoga"
+    duration: "Wed 6:00–7:15pm (75 min)"
     items:
-      - label: "Initial Session (90 min)"
+      - label: "Casual class"
+        price: "$24"
+      - label: "5-class pass"
+        price: "$110"
+      - label: "10-class pass"
+        price: "$200"
+  - title: "Seniors Yoga"
+    duration: "Tue & Thu 9:30–10:30am (60 min)"
+    items:
+      - label: "Casual class"
+        price: "$18"
+      - label: "5-class pass"
+        price: "$85"
+      - label: "10-class pass"
+        price: "$160"
+  - title: "1:1 Private Yoga (in-person & online)"
+    items:
+      - label: "Initial session (90 min)"
         price: "$120"
-      - label: "Follow-Up Session (60 min)"
+      - label: "Follow-up session (60 min)"
         price: "$90"
-      - label: "Start-Up Package (1× Initial + 2× Follow-Up)"
+      - label: "Start-up package (1 initial + 2 follow-ups)"
         price: "$275"
-      - label: "5 Pack (5× Follow-Up)"
+      - label: "5 pack (5 follow-ups)"
         price: "$400"
 ---
 ### Trauma-Informed Yoga Teacher
@@ -62,19 +73,6 @@ A general style of class structured similar to a traditional yoga class. It will
 
 YIN YOGA
 
-A slow-paced, floor-based evening practice. Poses are held for longer with the support of props, making space to rest, release and wind down at the end of the day.
+A slow-paced, floor-based evening practice based on Traditional Chinese Medicine principles. Poses are held for longer with the support of props, making space to rest, release and wind down at the end of the day.
 
-## Dates & times for Yoga Classes
-
-**YOGA CLASSES**
-
-Please arrive 10mins before class to sign in & get settled
-
-* TUESDAY Seniors Yoga 9:30am – 10:30am
-* TUESDAY Yoga & Meditation 6:00pm – 7:15pm
-* WEDNESDAY Yin Yoga 6:00pm – 7:15pm
-* THURSDAY Seniors Yoga 9:30am – 10:30am
-* FRIDAY  Hatha Yoga 9:30am – 10:45am
-* SUNDAY HATHA Yoga 8:00am – 9:15am
-
-Payment available in-studio (Cash and EFTPOS).
+Please arrive 10 minutes before class to sign in and get settled. Payment available in-studio (cash and EFTPOS). Full class times and fees are listed below.

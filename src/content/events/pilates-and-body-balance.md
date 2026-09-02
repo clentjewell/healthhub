@@ -20,16 +20,6 @@ sessions:
     start: "08:45"
     end: "09:30"
     label: Balance & Mat Pilates
-feeGroups:
-  - title: "Class Options"
-    duration: "Wednesdays"
-    items:
-      - label: "Chair Pilates · 8:15–8:45am"
-        price: "$10"
-      - label: "Mat Pilates · 8:45–9:30am"
-        price: "$15"
-      - label: "Stay for both · 8:15–9:30am"
-        price: "$20"
 ---
 ### Pilates and Body Balance
 

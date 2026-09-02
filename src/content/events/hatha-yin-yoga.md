@@ -15,16 +15,6 @@ sessions:
     start: "07:30"
     end: "08:45"
     label: Yin Yang Yoga
-feeGroups:
-  - title: "Yin-Yang Yoga"
-    duration: "Mondays · 75 minutes"
-    items:
-      - label: "Casual class"
-        price: "$24"
-      - label: "5× class pass"
-        price: "$110"
-      - label: "10× class pass"
-        price: "$200"
 ---
 ### Hatha & Yin Yoga
 

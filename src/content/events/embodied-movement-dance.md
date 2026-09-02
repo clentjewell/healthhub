@@ -19,19 +19,6 @@ sessions:
     start: "19:00"
     end: "20:15"
     label: Embodied Movement & Dance (1st Friday of the month)
-feeGroups:
-  - title: "Weekly Class"
-    duration: "Thursdays · 11:00am – 12:00pm"
-    items:
-      - label: "Casual class"
-        price: "$24"
-      - label: "5× class pass"
-        price: "$110"
-      - label: "10× class pass"
-        price: "$200"
-  - title: "Monthly Session"
-    duration: "1st Friday · 7:00 – 8:15pm"
-    price: "$30"
 ---
 ### Embodied Movement & Dance
 

@@ -13,10 +13,6 @@ sessions:
   - day: Sunday
     start: "17:00"
     end: "18:00"
-feeGroups:
-  - title: "Sound Bowl Session"
-    duration: "Every 3rd Sunday · 5:00 – 6:00pm"
-    price: "$20"
 ---
 ### Crystal Sound Bowls
 

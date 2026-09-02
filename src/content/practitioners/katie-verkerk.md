@@ -6,7 +6,12 @@ image: "/images/practitioners/katie-verkerk.webp"
 bookingUrl: "https://visibook.com/functionandflow?pp=calintro"
 phone: "0434 570 512"
 service: "function-flow"
-classPage: "/event/function-flow#fees"
+feeGroups:
+  - title: "Group Classes"
+    duration: "Wed 10:15–11:00am & 4:30–5:15pm (45 min)"
+    items:
+      - label: "Casual class"
+        price: "$15"
 ---
 ### Function & Flow Wellness
 
