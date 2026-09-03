@@ -11,9 +11,10 @@ import { blogPostingNode, breadcrumbNode } from '../../lib/schema';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = (await getCollection('blog')).filter(
-    (p) => import.meta.env.DEV || !p.data.draft,
-  );
+  // Build every post, drafts included, so a new post created in the CMS has a
+  // working (noindexed, unlinked) page to preview. Draft posts are still kept
+  // out of the /blog listing and the homepage; they just aren't discoverable.
+  const posts = await getCollection('blog');
   return posts.map((p) => ({ params: { slug: p.id } }));
 };
 
@@ -54,6 +55,7 @@ const schema = [
   path={PATH}
   ogType="article"
   ogImage={d.image}
+  noindex={d.draft}
   schema={schema}
 >
   <article class="post">

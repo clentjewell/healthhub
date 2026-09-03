@@ -39,6 +39,7 @@ const ALWAYS_SHOW = {
 const CREATABLE = {
   practitioners: { titleField: 'name', titleLabel: 'Full name', noun: 'practitioner' },
   events: { titleField: 'title', titleLabel: 'Class / event name', noun: 'class or event' },
+  blog: { titleField: 'title', titleLabel: 'Post headline', noun: 'blog post' },
 };
 
 const RL_MAX = 10, RL_WINDOW = 900;
@@ -329,6 +330,14 @@ function slugify(s) {
 function newEntryData(k, title) {
   // Empty strings are fine — optionalText/optionalUrl coerce them to undefined.
   // Listing every editable field means it shows up (blank) in the editor.
+  if (k === 'blog') {
+    const today = new Date().toISOString().slice(0, 10);
+    return {
+      title, metaTitle: '', metaDescription: '', excerpt: '', order: 99,
+      category: '', author: '', authorId: '', publishDate: today,
+      image: '', imageAlt: '', draft: true,
+    };
+  }
   if (k === 'practitioners') {
     return {
       name: title, role: 'Practitioner', order: 99, active: false,
@@ -361,7 +370,9 @@ async function doCreate(request, env) {
     if (!(await ghGetOrNull(env, path))) break;
     slug = `${base}-${n++}`;
   }
-  const bodyStart = k === 'practitioners' ? `### ${title}\n\nWrite the bio here.\n` : `### ${title}\n\nWrite the description here.\n`;
+  const bodyStart = k === 'practitioners' ? `### ${title}\n\nWrite the bio here.\n`
+    : k === 'blog' ? `Write your post here.\n`
+    : `### ${title}\n\nWrite the description here.\n`;
   const text = buildMarkdown(newEntryData(k, title), bodyStart);
   try {
     await ghPut(env, path, text, undefined, `content: create ${path} (via CMS)`);
@@ -369,6 +380,27 @@ async function doCreate(request, env) {
     return newEntryForm(k, `Could not create: ${e.message}`);
   }
   return redirect(`/edit?k=${k}&path=${encodeURIComponent(path)}`);
+}
+
+/** Link targets for the timetable's "Link" dropdown, so an editor picks a
+ *  class or practitioner by name instead of typing a URL path. */
+async function linkOptions(env) {
+  async function forCollection(k, prefix, label, titleField, skip) {
+    const c = COLLECTIONS[k];
+    const files = await ghList(env, c.dir, c.ext);
+    return Promise.all(files.map(async (f) => {
+      const slug = f.name.replace(/\.md$/, '');
+      if (skip && skip.includes(slug)) return null;
+      let title = slug;
+      try { title = parseMarkdown((await ghGet(env, f.path)).text).data[titleField] || slug; } catch { /* slug */ }
+      return { label: `${label}: ${title}`, href: `${prefix}${slug}/` };
+    }));
+  }
+  const [events, pracs] = await Promise.all([
+    forCollection('events', '/event/', 'Class', 'title', ['health-hub-studio-time-table']),
+    forCollection('practitioners', '/our-practitioner/', 'Practitioner', 'name'),
+  ]);
+  return [...events, ...pracs].filter(Boolean);
 }
 
 async function editForm(env, k, path, notice) {
@@ -381,6 +413,10 @@ async function editForm(env, k, path, notice) {
   if (STRUCTURED[k]) {
     const data = parseYaml(text);
     const json = JSON.stringify(data).replace(/</g, '\\u003c');
+    // The timetable's "Link" field is a dropdown of the site's classes and
+    // practitioners, so an editor never has to type a URL.
+    const linkOpts = k === 'timetable' ? await linkOptions(env) : [];
+    const linkJson = JSON.stringify(linkOpts).replace(/</g, '\\u003c');
     return shell(c.label, `
       <div class="head"><h1>${esc(c.label)}</h1>
         <span class="headlinks">
@@ -395,6 +431,7 @@ async function editForm(env, k, path, notice) {
         <input type="hidden" id="__json" name="__json">
         <div id="structured" data-editor="${esc(k)}"></div>
         <script type="application/json" id="structured-data">${json}</script>
+        <script type="application/json" id="link-options">${linkJson}</script>
         <div class="actions"><button class="btn" type="submit">Save &amp; publish</button>
           <a class="ghost" href="/">Cancel</a></div>
       </form>

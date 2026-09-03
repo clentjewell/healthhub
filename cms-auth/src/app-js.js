@@ -27,23 +27,39 @@ export const APP_JS = String.raw`
   function btn(cls, txt) { var b = el('button', { class: cls, type: 'button' }, [txt]); return b; }
 
   /* ── Timetable editor ─────────────────────────────────────────────────── */
-  function sessionRow(s) {
+  function linkSelect(val, opts) {
+    var sel = el('select', { class: 'in s-href' });
+    sel.appendChild(el('option', { value: '' }, ['— No link —']));
+    var found = false;
+    (opts || []).forEach(function (o) {
+      var op = el('option', { value: o.href }, [o.label]);
+      if (o.href === val) { op.selected = true; found = true; }
+      sel.appendChild(op);
+    });
+    if (val && !found) {
+      var custom = el('option', { value: val }, [val + ' (current)']);
+      custom.selected = true;
+      sel.appendChild(custom);
+    }
+    return sel;
+  }
+  function sessionRow(s, opts) {
     s = s || {};
     var wrap = el('div', { class: 'srow' }, [
       field('Class / session', input('s-name', s.name)),
       field('Time (as shown)', input('s-time', s.time)),
-      field('Link (optional)', input('s-href', s.href)),
+      field('Links to', linkSelect(s.href, opts)),
       btn('rm', 'Remove'),
     ]);
     return wrap;
   }
-  function initTimetable(root, data) {
+  function initTimetable(root, data, opts) {
     var days = (data.days || []);
     var host = el('div', {});
     days.forEach(function (d) {
-      var sessWrap = el('div', { class: 'sessions' }, (d.sessions || []).map(sessionRow));
+      var sessWrap = el('div', { class: 'sessions' }, (d.sessions || []).map(function (s) { return sessionRow(s, opts); }));
       var add = btn('add-btn', '+ Add a class to ' + d.day);
-      add.addEventListener('click', function () { sessWrap.appendChild(sessionRow({})); });
+      add.addEventListener('click', function () { sessWrap.appendChild(sessionRow({}, opts)); });
       host.appendChild(el('fieldset', { class: 'day', 'data-day': d.day }, [
         el('legend', {}, [d.day]), sessWrap, add,
       ]));
@@ -316,7 +332,9 @@ export const APP_JS = String.raw`
     var kind = root.getAttribute('data-editor');
     var data = {};
     try { data = JSON.parse(document.getElementById('structured-data').textContent); } catch (e) {}
-    var serialize = kind === 'timetable' ? initTimetable(root, data)
+    var linkOpts = [];
+    try { linkOpts = JSON.parse(document.getElementById('link-options').textContent) || []; } catch (e) {}
+    var serialize = kind === 'timetable' ? initTimetable(root, data, linkOpts)
       : kind === 'faq' ? initFaq(root, data) : null;
     if (!serialize) return;
     root.closest('form').addEventListener('submit', function () {
