@@ -24,9 +24,9 @@ const { title, summary, href, provider, image } = Astro.props;
   <div class="svc-media">
     {
       image ? (
-        <img src={image} alt={title} loading="lazy" width="360" height="240" />
+        <img src={image} alt={title} loading="lazy" width="360" height="270" />
       ) : (
-        <PlaceholderImage label={title} ratio="3/2" icon="image" />
+        <PlaceholderImage label={title} ratio="4/3" icon="image" />
       )
     }
   </div>
@@ -55,7 +55,10 @@ const { title, summary, href, provider, image } = Astro.props;
     border-color: var(--color-accent);
   }
 
-  .svc-media { aspect-ratio: 3/2; overflow: hidden; background: var(--color-surface-tint); }
+  /* Match the source images (900×675 = 4/3). A 3/2 frame is wider than the
+     photos, so object-fit: cover would crop their top and bottom — which cut
+     off Amanda's head on the home page. 4/3 shows each photo in full. */
+  .svc-media { aspect-ratio: 4/3; overflow: hidden; background: var(--color-surface-tint); }
   .svc-media img {
     width: 100%; height: 100%; object-fit: cover;
     filter: saturate(0.92) contrast(1.02);
