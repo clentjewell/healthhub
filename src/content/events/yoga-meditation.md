@@ -2,8 +2,8 @@
 title: "Yoga & Meditation"
 order: 2
 category: "course"
-schedule: "Tuesday, Wednesday, Friday & Sunday — see class times"
-summary: "Inclusive, choice-based yoga and meditation taught with a trauma-informed lens, drawing on Hatha, Ashtanga and Yin."
+schedule: "Tuesday to Sunday — see class times"
+summary: "Inclusive, trauma-informed yoga with Alicia Grace — from gentle Seniors Yoga to Yoga & Meditation and evening Yin, plus 1:1 private sessions."
 image: "/images/events/yoga-meditation.webp"
 instructor: "Alicia Grace"
 instructorPhone: "0406 987 909"
@@ -14,6 +14,10 @@ location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 sessions:
   - day: Tuesday
+    start: "09:30"
+    end: "10:30"
+    label: Seniors Yoga
+  - day: Tuesday
     start: "18:00"
     end: "19:15"
     label: Yoga & Meditation
@@ -21,6 +25,10 @@ sessions:
     start: "18:00"
     end: "19:15"
     label: Yin Yoga
+  - day: Thursday
+    start: "09:30"
+    end: "10:30"
+    label: Seniors Yoga
   - day: Friday
     start: "09:30"
     end: "10:45"
