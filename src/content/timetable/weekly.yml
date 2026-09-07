@@ -40,11 +40,11 @@ days:
         time: 4:30–5:15pm
         href: /event/function-flow/
       # Alicia's Wednesday Yin (client moved Shannon's old night classes to
-      # Alicia, 24 Aug 2026). Yin for both teachers lives on the Hatha & Yin
-      # Yoga page, so this links there rather than to Yoga & Meditation.
+      # Alicia, 24 Aug 2026). Listed on Alicia's own event page with her other
+      # classes, per the client review.
       - name: Yin Yoga
         time: 6:00–7:15pm
-        href: /event/hatha-yin-yoga/
+        href: /event/yoga-meditation/
   - day: Thursday
     sessions:
       - name: Acupuncture Consultations
