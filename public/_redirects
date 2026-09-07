@@ -22,3 +22,8 @@
 # said naturopathy, which is Amanda Ross's field, not Katie's.
 /event/naturopathic-health-seminars-with-katie-verkerk/  /event/function-flow/  301
 /event/naturopathic-health-seminars-with-katie-verkerk   /event/function-flow/  301
+
+# Seniors Yoga was folded into Alicia Grace's Yoga & Meditation page (her single
+# class page), so its standalone event page was retired. Send old links there.
+/event/seniors-yoga/  /event/yoga-meditation/  301
+/event/seniors-yoga   /event/yoga-meditation/  301
