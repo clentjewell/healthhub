@@ -48,11 +48,9 @@ const services = defineCollection({
     order: z.number().default(99),
     icon: z.string().optional(),
     image: z.string().optional(),
-    /** Practitioner (id) who offers this service — services are 1:1 with a provider. */
+    /** Practitioner (id) who offers this service — services are 1:1 with a
+     *  provider. Booking details come from that practitioner, not the service. */
     provider: optionalText,
-    /** Booking pathway for this service (varies per provider — not all Halaxy). */
-    bookingUrl: optionalUrl,
-    bookingPhone: optionalText,
     draft: z.boolean().default(false),
     placeholder: z.boolean().default(false),
   }),

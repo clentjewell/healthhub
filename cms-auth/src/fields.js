@@ -86,10 +86,14 @@ export const FIELD_META = {
     groups: [
       { title: 'Service', fields: ['title', 'shortTitle', 'summary'] },
       { title: 'Image & icon', fields: ['image', 'icon'] },
-      { title: 'Settings', fields: ['order', 'practitioner'] },
+      { title: 'Settings', fields: ['order', 'provider'] },
     ],
-    labels: { title: 'Name', shortTitle: 'Short name', summary: 'Summary', image: 'Image', icon: 'Icon', order: 'Order', practitioner: 'Practitioner (slug)' },
-    hints: { shortTitle: 'Used in menus/cards; falls back to the name.', order: 'Lower numbers appear first.' },
+    labels: { title: 'Name', shortTitle: 'Short name', summary: 'Summary', image: 'Image', icon: 'Icon', order: 'Order', provider: 'Practitioner who offers this (slug)' },
+    hints: {
+      shortTitle: 'Used in menus/cards; falls back to the name.',
+      order: 'Lower numbers appear first.',
+      provider: 'The practitioner’s slug, e.g. dr-malcolm-mckay. The service card links to their profile, and booking details come from them.',
+    },
   },
 
   pages: {
