@@ -9,6 +9,12 @@
 # slash — and never a path that merely starts with it. 301 = permanent (keeps
 # search ranking); 302 = temporary.
 
+# Serve the new site's index.html as the directory index. Listed before
+# index.php so that during a zero-downtime cutover (deploying over the old
+# WordPress files) the new home page wins immediately over any leftover
+# WordPress index.php.
+DirectoryIndex index.html index.php
+
 # Canonical host: send www → non-www (preserving the path + query), so the site
 # has one address for SEO. The non-www form matches src/data/site.ts.
 <IfModule mod_rewrite.c>
