@@ -304,7 +304,7 @@ async function mediaPage(env, focusPath) {
         <form method="POST" action="/media/delete" class="mdelete" data-confirm="Delete this image permanently? Any page still using it will lose it.">
           <input type="hidden" name="path" value="/${esc(rel)}">
           <input type="hidden" name="redirect" value="/media">
-          <button class="ghost danger" type="submit">Delete image</button>
+          <button class="btn-danger" type="submit">🗑 Delete this image</button>
         </form>
       </div>`);
   }
@@ -312,10 +312,17 @@ async function mediaPage(env, focusPath) {
   const cards = images.map((p) => {
     const rel = p.replace(/^public\//, '');
     const m = manifest.map[p] || {};
-    return `<a class="mcard" href="/media?path=${encodeURIComponent(p)}">
-      <span class="mthumb"><img loading="lazy" src="${SITE}/${esc(rel)}" alt=""></span>
-      <span class="mname">${esc(p.slice(IMG_PREFIX.length))}</span>
-      ${m.alt ? `<span class="mmeta">alt ✓</span>` : `<span class="mmeta warn">no alt</span>`}</a>`;
+    return `<div class="mcard">
+      <form class="mcard-del" method="POST" action="/media/delete" data-confirm="Delete “${esc(p.slice(IMG_PREFIX.length))}” permanently? Any page still using it will lose it.">
+        <input type="hidden" name="path" value="/${esc(rel)}">
+        <input type="hidden" name="redirect" value="/media">
+        <button type="submit" title="Delete image" aria-label="Delete image">🗑</button>
+      </form>
+      <a class="mcard-link" href="/media?path=${encodeURIComponent(p)}">
+        <span class="mthumb"><img loading="lazy" src="${SITE}/${esc(rel)}" alt=""></span>
+        <span class="mname">${esc(p.slice(IMG_PREFIX.length))}</span>
+        ${m.alt ? `<span class="mmeta">alt ✓</span>` : `<span class="mmeta warn">no alt yet</span>`}</a>
+    </div>`;
   }).join('');
 
   const folderOpts = ['(top level)', ...folders].map((f) =>
@@ -1047,18 +1054,18 @@ async function doSave(request, env) {
   const c = COLLECTIONS[k];
   if (!c || !path) return redirect('/');
 
-  let text;
+  let text, savedData;
   try {
     if (STRUCTURED[k]) {
       // Whole value arrives as JSON from app.js.
-      const data = JSON.parse(String(form.get('__json') || '{}'));
-      text = buildYaml(data);
+      savedData = JSON.parse(String(form.get('__json') || '{}'));
+      text = buildYaml(savedData);
     } else {
       // Pages re-nest their dotted keys (hero.heading → hero: { heading }).
-      const data = k === 'pages' ? unflatten(parseFields(form)) : parseFields(form);
+      savedData = k === 'pages' ? unflatten(parseFields(form)) : parseFields(form);
       text = c.kind === 'markdown'
-        ? buildMarkdown(data, String(form.get('__body') ?? ''))
-        : buildYaml(data);
+        ? buildMarkdown(savedData, String(form.get('__body') ?? ''))
+        : buildYaml(savedData);
     }
   } catch (e) {
     return editForm(env, k, path, `Could not save: ${e.message}`);
@@ -1070,7 +1077,32 @@ async function doSave(request, env) {
     // Most likely a stale sha (someone else saved). Reload with a message.
     return editForm(env, k, path, `Save failed: ${e.message}. The page was reloaded with the latest version — re-apply your change.`);
   }
+  // Keep the media library's alt text in step with alt entered on content.
+  try { await syncAltFromData(env, savedData); } catch { /* best-effort */ }
   return editForm(env, k, path, 'Saved. The site will update in about a minute.');
+}
+
+/** Propagate image+alt pairs from saved content into the media manifest, so the
+ *  media library shows the alt text you typed on any page. Non-destructive: only
+ *  writes non-empty alts, and only when they differ from what's stored. */
+async function syncAltFromData(env, data) {
+  const isImg = (v) => typeof v === 'string' && /^\/images\/.+\.(webp|jpe?g|png|gif|avif|svg)$/i.test(v);
+  const pairs = [];
+  (function walk(o) {
+    if (Array.isArray(o)) return o.forEach(walk);
+    if (o && typeof o === 'object') {
+      const alt = [o.imageAlt, o.alt, o.imgAlt].find((a) => typeof a === 'string' && a.trim());
+      for (const v of Object.values(o)) if (isImg(v) && alt) pairs.push({ path: 'public' + v, alt: alt.trim() });
+      Object.values(o).forEach(walk);
+    }
+  })(data);
+  if (!pairs.length) return;
+  const { map, sha } = await readManifest(env);
+  let changed = false;
+  for (const { path, alt } of pairs) {
+    if (!map[path] || map[path].alt !== alt) { map[path] = { ...(map[path] || {}), alt }; changed = true; }
+  }
+  if (changed) await writeManifest(env, map, sha, 'media: sync alt text from content (via CMS)');
 }
 
 /* ── Form fields (type-aware) ────────────────────────────────────────────── */
@@ -1410,14 +1442,20 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .urow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.urow{grid-template-columns:1fr}}
 .hint{color:#8494a0;font-size:.85rem}
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-.mcard{display:flex;flex-direction:column;background:#fff;border:1px solid #dbe5e8;border-radius:10px;overflow:hidden;text-decoration:none;color:#22303a}
-.mcard:hover{border-color:#34719f}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.mcard{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid #dbe5e8;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.mcard:hover{border-color:#34719f;box-shadow:0 6px 18px rgba(52,113,159,.14)}
+.mcard-link{display:flex;flex-direction:column;text-decoration:none;color:#22303a}
 .mthumb{aspect-ratio:1;background:#f0f5f6;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .mthumb img{width:100%;height:100%;object-fit:cover}
-.mname{font-size:.72rem;padding:8px 8px 2px;word-break:break-all;color:#3a4a54}
-.mmeta{font-size:.7rem;padding:0 8px 8px;color:#1c6b34}
+.mname{font-size:.74rem;padding:9px 9px 2px;word-break:break-all;color:#3a4a54}
+.mmeta{font-size:.7rem;padding:0 9px 9px;color:#1c6b34}
 .mmeta.warn{color:#b46a00}
+.mcard-del{position:absolute;top:7px;right:7px;z-index:2}
+.mcard-del button{width:32px;height:32px;padding:0;border:0;border-radius:8px;background:rgba(255,255,255,.94);box-shadow:0 1px 5px rgba(0,0,0,.28);cursor:pointer;font-size:15px;line-height:32px}
+.mcard-del button:hover{background:#fdeceb}
+.btn-danger{background:#b3261e;color:#fff;border:0;border-radius:9px;padding:11px 18px;font-size:1rem;font-weight:600;cursor:pointer}
+.btn-danger:hover{background:#8f1e17}
 .mdetail{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
 @media(max-width:640px){.mdetail{grid-template-columns:1fr}}
 .mprev{width:100%;border:1px solid #dbe5e8;border-radius:10px;background:#f0f5f6}
