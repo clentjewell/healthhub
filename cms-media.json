@@ -5,7 +5,7 @@
     "description": ""
   },
   "public/images/rebecca.webp": {
-    "alt": "",
+    "alt": "Portrait of Rebecca Lindsay",
     "title": "",
     "description": ""
   },
@@ -41,5 +41,74 @@
   },
   "public/images/who-we-are-family.webp": {
     "alt": "A smiling family together outdoors under a blue sky"
+  },
+  "public/images/practitioners/alicia-grace.webp": {
+    "alt": "Portrait of Alicia Grace"
+  },
+  "public/images/practitioners/amanda-ross.webp": {
+    "alt": "Portrait of Amanda Ross"
+  },
+  "public/images/practitioners/dr-malcolm-mckay.webp": {
+    "alt": "Portrait of Dr Malcolm McKay"
+  },
+  "public/images/practitioners/kate-doedee.webp": {
+    "alt": "Portrait of Kate Doedee"
+  },
+  "public/images/practitioners/katie-verkerk.webp": {
+    "alt": "Portrait of Katie Verkerk"
+  },
+  "public/images/practitioners/monique-carole.webp": {
+    "alt": "Portrait of Monique Carole"
+  },
+  "public/images/practitioners/pearl-blinco-doffiny.webp": {
+    "alt": "Portrait of Pearl Blinco-Doffiny"
+  },
+  "public/images/events/crystal-sound-bowls.webp": {
+    "alt": "Crystal Sound Bowls"
+  },
+  "public/images/events/embodied-movement-dance.webp": {
+    "alt": "Embodied Movement & Dance"
+  },
+  "public/images/events/function-flow.webp": {
+    "alt": "Function & Flow Exercise Class"
+  },
+  "public/images/events/hatha-yin-yoga.webp": {
+    "alt": "Hatha & Yin Yoga"
+  },
+  "public/images/events/health-hub-studio-time-table.webp": {
+    "alt": "Health Hub Studio Time Table"
+  },
+  "public/images/events/pilates-and-body-balance.webp": {
+    "alt": "Pilates and Body Balance"
+  },
+  "public/images/events/womens-health-with-dr-mal-mckay-acupuncturist.webp": {
+    "alt": "Women’s Health with Dr Mal McKay Acupuncturist"
+  },
+  "public/images/events/yoga-meditation.webp": {
+    "alt": "Yoga & Meditation"
+  },
+  "public/images/services/acupuncture.webp": {
+    "alt": "Acupuncture & Traditional Chinese Medicine"
+  },
+  "public/images/services/crystal-sound-bowls.webp": {
+    "alt": "Crystal Sound Bowls"
+  },
+  "public/images/services/embodied-movement-dance.webp": {
+    "alt": "Embodied Movement & Dance"
+  },
+  "public/images/services/function-flow.webp": {
+    "alt": "Function & Flow Group Exercise"
+  },
+  "public/images/services/hatha-yin-yoga.webp": {
+    "alt": "Hatha & Yin Yoga"
+  },
+  "public/images/services/naturopathy.webp": {
+    "alt": "Naturopath"
+  },
+  "public/images/services/pilates-body-balance.webp": {
+    "alt": "Pilates & Body Balance"
+  },
+  "public/images/services/yoga-meditation.webp": {
+    "alt": "Yoga & Meditation"
   }
 }
