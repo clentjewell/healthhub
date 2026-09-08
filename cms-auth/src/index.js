@@ -1278,6 +1278,7 @@ function esc(s) {
 const CSS = `
 :root{color-scheme:light}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef4f5;color:#22303a}
 .card{background:#fff;width:min(92vw,380px);margin:12vh auto;padding:30px 28px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
 .wrap{max-width:860px;margin:0 auto;padding:24px 20px 80px}
@@ -1400,6 +1401,7 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .btn-ghost-sm:hover{background:#eef4f5}
 /* Media library modal */
 .mlib-overlay{position:fixed;inset:0;background:rgba(20,35,45,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.mlib-overlay[hidden]{display:none}
 .mlib{background:#fff;border-radius:14px;width:min(920px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
 .mlib-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #e2ebef;flex-wrap:wrap}
 .mlib-head strong{font-size:1.05rem;color:#22496c}
