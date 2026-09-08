@@ -1,33 +1,15 @@
-# Practitioners index page content — editable in the CMS under "Pages".
-metaTitle: Our Practitioners · Health Hub Tweed Coast
-metaDescription: >-
-  Meet the eight practitioners at Health Hub Tweed Coast, Hastings Point — acupuncture, naturopathy, yoga, pilates, movement and sound therapy.
 eyebrow: Meet the team
 heading: Our Practitioners
-lede: >-
-  A multidisciplinary team of practitioners and teachers under one roof — each
-  leading their own service, from acupuncture and naturopathy to yoga, pilates,
-  movement and sound.
-
-# "Who We Are" intro shown below the team grid. Edit the wording here; the
-# bullet list is a simple YAML list — keep one "- " line per point.
+lede: A multidisciplinary team of practitioners and teachers under one roof — each leading their own service, from acupuncture and naturopathy to yoga, pilates, movement and sound.
+metaTitle: Our Practitioners · Health Hub Tweed Coast
+metaDescription: Meet the eight practitioners at Health Hub Tweed Coast, Hastings Point — acupuncture, naturopathy, yoga, pilates, movement and sound therapy.
 whoWeAre:
   eyebrow: Who we are
   heading: Here to help you heal and live your fullest life
   paragraphs:
-    - >-
-      We are a group of therapists, practitioners and teachers who have come
-      together with the sole purpose of helping you heal and live your fullest
-      life.
-    - >-
-      Realise your dreams of health, wellbeing, freedom and abundance. Whether
-      it's overcoming a debilitating health condition, finding the inspiration
-      to kick a habit, shifting destructive patterns, or simply relaxing and
-      unwinding — the Health Hub is here for you.
-  # Optional photo shown beside the checklist (as on the old site). Add it in
-  # the CMS: Pages → Our Practitioners → Who We Are → Image → Open media library.
-  # Leave blank and the checklist simply centres on its own.
-  image: ""
+    - We are a group of therapists, practitioners and teachers who have come together with the sole purpose of helping you heal and live your fullest life.
+    - Realise your dreams of health, wellbeing, freedom and abundance. Whether it's overcoming a debilitating health condition, finding the inspiration to kick a habit, shifting destructive patterns, or simply relaxing and unwinding — the Health Hub is here for you.
+  image: /images/our-practitioners.webp
   imageAlt: A family smiling together
   pointsIntro: The Health Hub is where…
   points:
