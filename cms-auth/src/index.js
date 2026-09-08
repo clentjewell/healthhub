@@ -103,6 +103,7 @@ async function route(request, env) {
   if (p === '/media/upload-inline' && request.method === 'POST') return doUploadInline(request, env);
   if (p === '/media/file') return doMediaFile(url, env);
   if (p === '/media/delete' && request.method === 'POST') return doMediaDelete(request, env);
+  if (p === '/media/rescan-alt') return doRescanAlt(env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
   if (p === '/activity') return activityPage(env);
   if (p === '/reorder' && request.method === 'POST') return doReorder(request, env);
@@ -275,7 +276,7 @@ async function activityPage(env) {
 
 /* ── Media library ───────────────────────────────────────────────────────── */
 
-async function mediaPage(env, focusPath) {
+async function mediaPage(env, focusPath, notice) {
   const [paths, manifest] = await Promise.all([ghTree(env, IMG_PREFIX), readManifest(env)]);
   const images = paths.filter((p) => IMG_EXT.test(p)).sort();
   const folders = [...new Set(images.map((p) => p.slice(IMG_PREFIX.length).split('/').slice(0, -1).join('/')).filter(Boolean))].sort();
@@ -316,7 +317,7 @@ async function mediaPage(env, focusPath) {
       <form class="mcard-del" method="POST" action="/media/delete" data-confirm="Delete “${esc(p.slice(IMG_PREFIX.length))}” permanently? Any page still using it will lose it.">
         <input type="hidden" name="path" value="/${esc(rel)}">
         <input type="hidden" name="redirect" value="/media">
-        <button type="submit" title="Delete image" aria-label="Delete image">🗑</button>
+        <button type="submit" title="Delete image" aria-label="Delete image">✕</button>
       </form>
       <a class="mcard-link" href="/media?path=${encodeURIComponent(p)}">
         <span class="mthumb"><img loading="lazy" src="${SITE}/${esc(rel)}" alt=""></span>
@@ -329,8 +330,12 @@ async function mediaPage(env, focusPath) {
     `<option value="${f === '(top level)' ? '' : esc(f)}">${esc(f)}</option>`).join('');
 
   return shell('Media library', `
-    <div class="head"><h1>Media library</h1><a class="ghost" href="/">← All sections</a></div>
-    <p class="sub">${images.length} image${images.length === 1 ? '' : 's'}. Click one to edit its details, copy its path, or delete it.</p>
+    <div class="head"><h1>Media library</h1>
+      <span class="headlinks">
+        <a class="ghost" href="/media/rescan-alt">↻ Refresh alt from pages</a>
+        <a class="ghost" href="/">← All sections</a></span></div>
+    ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+    <p class="sub">${images.length} image${images.length === 1 ? '' : 's'}. Click one to edit its details, copy its path, or delete it. Hover an image for its delete button.</p>
     <details class="upload-d">
       <summary>＋ Upload a new image</summary>
       <form class="upload" method="POST" action="/media/upload" enctype="multipart/form-data">
@@ -1077,32 +1082,71 @@ async function doSave(request, env) {
     // Most likely a stale sha (someone else saved). Reload with a message.
     return editForm(env, k, path, `Save failed: ${e.message}. The page was reloaded with the latest version — re-apply your change.`);
   }
-  // Keep the media library's alt text in step with alt entered on content.
-  try { await syncAltFromData(env, savedData); } catch { /* best-effort */ }
+  // Keep the media library's alt text in step with alt entered on content —
+  // both structured fields and <img> tags embedded in the Markdown body.
+  try { await syncAltFromData(env, savedData, String(form.get('__body') || '')); } catch { /* best-effort */ }
   return editForm(env, k, path, 'Saved. The site will update in about a minute.');
 }
 
-/** Propagate image+alt pairs from saved content into the media manifest, so the
- *  media library shows the alt text you typed on any page. Non-destructive: only
- *  writes non-empty alts, and only when they differ from what's stored. */
-async function syncAltFromData(env, data) {
-  const isImg = (v) => typeof v === 'string' && /^\/images\/.+\.(webp|jpe?g|png|gif|avif|svg)$/i.test(v);
+const isImgPath = (v) => typeof v === 'string' && /^\/images\/.+\.(webp|jpe?g|png|gif|avif|svg)$/i.test(v);
+
+/** Collect {path, alt} pairs from a content entry's fields and Markdown body. */
+function collectAltPairs(data, body) {
   const pairs = [];
   (function walk(o) {
     if (Array.isArray(o)) return o.forEach(walk);
     if (o && typeof o === 'object') {
       const alt = [o.imageAlt, o.alt, o.imgAlt].find((a) => typeof a === 'string' && a.trim());
-      for (const v of Object.values(o)) if (isImg(v) && alt) pairs.push({ path: 'public' + v, alt: alt.trim() });
+      for (const v of Object.values(o)) if (isImgPath(v) && alt) pairs.push({ path: 'public' + v, alt: alt.trim() });
       Object.values(o).forEach(walk);
     }
   })(data);
-  if (!pairs.length) return;
+  for (const tag of String(body || '').match(/<img\b[^>]*>/gi) || []) {
+    const src = (tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i) || [])[1];
+    const alt = (tag.match(/\balt\s*=\s*["']([^"']*)["']/i) || [])[1];
+    if (src && isImgPath(src) && alt && alt.trim()) pairs.push({ path: 'public' + src, alt: alt.trim() });
+  }
+  return pairs;
+}
+
+/** Write alt pairs into the manifest. Non-destructive: only non-empty alts, and
+ *  only when different from what's stored. Returns how many entries changed. */
+async function applyAltPairs(env, pairs) {
+  if (!pairs.length) return 0;
   const { map, sha } = await readManifest(env);
-  let changed = false;
+  let changed = 0;
   for (const { path, alt } of pairs) {
-    if (!map[path] || map[path].alt !== alt) { map[path] = { ...(map[path] || {}), alt }; changed = true; }
+    if (!map[path] || map[path].alt !== alt) { map[path] = { ...(map[path] || {}), alt }; changed++; }
   }
   if (changed) await writeManifest(env, map, sha, 'media: sync alt text from content (via CMS)');
+  return changed;
+}
+
+async function syncAltFromData(env, data, body) {
+  await applyAltPairs(env, collectAltPairs(data, body));
+}
+
+/** One-off backfill: scan every content file and copy its image alt text into
+ *  the media library, so existing pages' alts show without re-saving each one. */
+async function doRescanAlt(env) {
+  const pairs = [];
+  for (const c of Object.values(COLLECTIONS)) {
+    if (c.kind !== 'markdown' && c.kind !== 'yaml') continue;
+    let files = [];
+    try { files = await ghList(env, c.dir, c.ext); } catch { continue; }
+    for (const f of files) {
+      try {
+        const { text } = await ghGet(env, f.path);
+        if (c.kind === 'markdown') { const { data, body } = parseMarkdown(text); pairs.push(...collectAltPairs(data, body)); }
+        else pairs.push(...collectAltPairs(parseYaml(text), ''));
+      } catch { /* skip unreadable file */ }
+    }
+  }
+  let changed = 0;
+  try { changed = await applyAltPairs(env, pairs); } catch { /* ignore */ }
+  return mediaPage(env, null, changed
+    ? `Alt text refreshed — updated ${changed} image${changed === 1 ? '' : 's'} from your pages.`
+    : 'Alt text is already up to date with your pages.');
 }
 
 /* ── Form fields (type-aware) ────────────────────────────────────────────── */
@@ -1451,9 +1495,9 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .mname{font-size:.74rem;padding:9px 9px 2px;word-break:break-all;color:#3a4a54}
 .mmeta{font-size:.7rem;padding:0 9px 9px;color:#1c6b34}
 .mmeta.warn{color:#b46a00}
-.mcard-del{position:absolute;top:7px;right:7px;z-index:2}
-.mcard-del button{width:32px;height:32px;padding:0;border:0;border-radius:8px;background:rgba(255,255,255,.94);box-shadow:0 1px 5px rgba(0,0,0,.28);cursor:pointer;font-size:15px;line-height:32px}
-.mcard-del button:hover{background:#fdeceb}
+.mcard-del{position:absolute;top:7px;right:7px;z-index:5}
+.mcard-del button{width:30px;height:30px;padding:0;border:2px solid #fff;border-radius:50%;background:#b3261e;color:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35);cursor:pointer;font-size:14px;font-weight:700;line-height:26px;text-align:center}
+.mcard-del button:hover{background:#8f1e17}
 .btn-danger{background:#b3261e;color:#fff;border:0;border-radius:9px;padding:11px 18px;font-size:1rem;font-weight:600;cursor:pointer}
 .btn-danger:hover{background:#8f1e17}
 .mdetail{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
