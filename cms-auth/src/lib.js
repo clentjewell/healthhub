@@ -16,7 +16,7 @@ const SESSION_HOURS = 8;
  */
 export const COLLECTIONS = {
   blog: { label: 'Blog posts', dir: 'src/content/blog', ext: '.md', kind: 'markdown', titleField: 'title' },
-  pages: { label: 'Page text', dir: 'src/content/pages', ext: '.yml', kind: 'yaml', titleField: 'heading' },
+  pages: { label: 'Pages', dir: 'src/content/pages', ext: '.yml', kind: 'yaml', titleField: 'heading' },
   practitioners: { label: 'Practitioners', dir: 'src/content/practitioners', ext: '.md', kind: 'markdown', titleField: 'name' },
   events: { label: 'Events & classes', dir: 'src/content/events', ext: '.md', kind: 'markdown', titleField: 'title' },
   services: { label: 'Services', dir: 'src/content/services', ext: '.md', kind: 'markdown', titleField: 'title' },
