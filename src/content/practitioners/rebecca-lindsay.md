@@ -1,14 +1,15 @@
 ---
-name: "Rebecca Lindsay"
-role: "Embodiment Coach & Psychotherapist"
+name: Rebecca Lindsay
+role: Embodiment Coach & Psychotherapist
+image: /images/practitioners/rebecca-lindsay.webp
+phone: 0411 417 337
+service: embodied-movement-dance
+facebook: https://www.facebook.com/rebecca.lindsay.7547
+instagram: https://www.instagram.com/yourwisdomyourway/
+classPage: /event/embodied-movement-dance/
 order: 5
-image: "/images/practitioners/rebecca-lindsay.webp"
-phone: "0411 417 337"
-service: "embodied-movement-dance"
-classPage: "/event/embodied-movement-dance/"
-facebook: "https://www.facebook.com/rebecca.lindsay.7547"
-instagram: "https://www.instagram.com/yourwisdomyourway/"
 ---
+
 ### Embodied Movement & Dance
 
 *Qualifications: Graduate Diploma of Gestalt Psychotherapy | Feminine Embodiment Coaching Certification | Doula Certification | Qualified Hatha Yoga Teacher 200hrs | Diploma Reflexology | Diploma Remedial Massage | Diploma Contemporary Music | Certificate Gendai Reiki Ho | Certificate Pre Natal Yoga*
