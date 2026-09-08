@@ -9,6 +9,14 @@
 # slash — and never a path that merely starts with it. 301 = permanent (keeps
 # search ranking); 302 = temporary.
 
+# Canonical host: send www → non-www (preserving the path + query), so the site
+# has one address for SEO. The non-www form matches src/data/site.ts.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^www\.healthhubtweedcoast\.com\.au$ [NC]
+  RewriteRule ^ https://healthhubtweedcoast.com.au%{REQUEST_URI} [R=301,L]
+</IfModule>
+
 # The content editor (CMS) lives on its own Cloudflare Worker.
 RedirectMatch 302 ^/admin/?$ https://healthhub-cms-auth.clent.workers.dev/
 

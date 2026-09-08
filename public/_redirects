@@ -2,6 +2,11 @@
 # static `redirects`, which can only emit a meta-refresh page.
 # Docs: https://developers.cloudflare.com/workers/static-assets/redirects/
 
+# Canonical host: www → non-www (matches src/data/site.ts). Operative host
+# canonicalisation lives in public/.htaccess for cPanel; this is here for parity
+# if Cloudflare ever serves the apex domain.
+https://www.healthhubtweedcoast.com.au/*  https://healthhubtweedcoast.com.au/:splat  301
+
 # The content editor (CMS) lives on its own worker. /admin sends editors there.
 /admin   https://healthhub-cms-auth.clent.workers.dev/  302
 /admin/  https://healthhub-cms-auth.clent.workers.dev/  302
