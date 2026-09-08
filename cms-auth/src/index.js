@@ -85,6 +85,7 @@ async function route(request, env) {
   if (p === '/save' && request.method === 'POST') return doSave(request, env);
   if (p === '/media') return mediaPage(env, url.searchParams.get('path'));
   if (p === '/media/upload' && request.method === 'POST') return doUpload(request, env);
+  if (p === '/media/upload-inline' && request.method === 'POST') return doUploadInline(request, env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
   if (p === '/history') return historyPage(env, url.searchParams.get('k'), url.searchParams.get('path'));
   if (p === '/restore' && request.method === 'POST') return doRestore(request, env);
@@ -197,22 +198,35 @@ async function mediaPage(env, focusPath) {
     <div class="mgrid">${cards}</div>`);
 }
 
+/** Shared upload core. Validates the file, picks a unique path (auto-suffixing
+ *  duplicates so an upload never fails on a name clash), commits it, and returns
+ *  { path, base } — or throws an Error with a friendly message. */
+async function saveUpload(env, file, folderRaw) {
+  if (!file || typeof file === 'string' || !file.name) throw new Error('No image was chosen.');
+  if (!IMG_EXT.test(file.name)) throw new Error('That file type isn’t a supported image (webp, jpg, png, gif, avif, svg).');
+  const buf = new Uint8Array(await file.arrayBuffer());
+  if (buf.length > MAX_UPLOAD) throw new Error('That image is larger than 8 MB — please resize it and try again.');
+
+  const folder = String(folderRaw || '').replace(/[^a-z0-9/-]/gi, '');
+  const dir = `${IMG_PREFIX}${folder ? folder + '/' : ''}`;
+  const clean = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+|-+$/g, '');
+  const dot = clean.lastIndexOf('.');
+  const stem = dot > 0 ? clean.slice(0, dot) : clean;
+  const ext = dot > 0 ? clean.slice(dot) : '';
+  // Auto-suffix -1, -2… if the name is taken, so uploads never error on a clash.
+  let base = clean, n = 1;
+  while (await ghGetOrNull(env, dir + base)) base = `${stem}-${n++}${ext}`;
+  const path = dir + base;
+  await ghPutBinary(env, path, buf, `media: add ${path} (via CMS)`);
+  return { path, base };
+}
+
 async function doUpload(request, env) {
   const form = await request.formData();
-  const file = form.get('file');
-  if (!file || typeof file === 'string' || !file.name) return mediaPage(env, null);
-  if (!IMG_EXT.test(file.name)) return errorPage('That file type isn’t a supported image (webp, jpg, png, gif, avif, svg).');
-  const buf = new Uint8Array(await file.arrayBuffer());
-  if (buf.length > MAX_UPLOAD) return errorPage('That image is larger than 8 MB — please resize it and try again.');
-
-  const folder = String(form.get('folder') || '').replace(/[^a-z0-9/-]/gi, '');
-  const base = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+|-+$/g, '');
-  const path = `${IMG_PREFIX}${folder ? folder + '/' : ''}${base}`;
-
-  if (await ghGetOrNull(env, path)) return errorPage(`An image named “${esc(base)}” already exists in that folder. Rename the file and upload again.`);
-
-  await ghPutBinary(env, path, buf, `media: add ${path} (via CMS)`);
-
+  let path;
+  try {
+    ({ path } = await saveUpload(env, form.get('file'), form.get('folder')));
+  } catch (e) { return errorPage(e.message); }
   // Save metadata.
   const alt = String(form.get('alt') || ''); const title = String(form.get('title') || ''); const description = String(form.get('description') || '');
   if (alt || title || description) {
@@ -221,6 +235,21 @@ async function doUpload(request, env) {
     await writeManifest(env, map, sha, `media: metadata for ${path}`);
   }
   return redirect(`/media?path=${encodeURIComponent(path)}`);
+}
+
+/** Inline upload used by the image field's "Upload" button. Returns JSON so the
+ *  editor can drop the new image straight into the field without a page change. */
+async function doUploadInline(request, env) {
+  const json = (obj, status = 200) => new Response(JSON.stringify(obj),
+    { status, headers: { 'content-type': 'application/json' } });
+  try {
+    const form = await request.formData();
+    const { path } = await saveUpload(env, form.get('file'), form.get('folder'));
+    // Stored as public/images/… ; the content field wants the URL path /images/…
+    return json({ ok: true, path: '/' + path.replace(/^public\//, '') });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 400);
+  }
 }
 
 async function doMediaSave(request, env) {
@@ -617,11 +646,25 @@ function renderOneField(collection, key, val, labelOverride) {
   const isImage = (/image|photo|hero|avatar/i.test(leaf) && !/alt/i.test(leaf)) ||
     /^\/images\/.*\.(webp|jpe?g|png|gif|avif|svg)$/i.test(s);
   if (isImage) {
-    return `<label class="fl"><span class="fk">${esc(label)}</span>
+    // WordPress-style: a preview, one button that opens the file picker and
+    // uploads in place (app.js handles it), and a Remove button. The path field
+    // stays as an "Advanced" fallback (type a path or pick from the library).
+    return `<div class="fl imgwrap">
+      <span class="fk">${esc(label)}</span>
       <img class="img-prev" src="${s ? SITE + esc(s) : ''}" alt="" style="${s ? '' : 'display:none'}">
-      <input class="in img-field" type="text" list="imglist" name="f__${esc(key)}" value="${esc(s)}" placeholder="/images/…">
-      <a class="ghost imglink" href="/media" target="_blank" rel="noopener">Open media library ↗</a>
-      ${hintHtml}</label>${hidden}`;
+      <div class="imgbtns">
+        <button type="button" class="btn-sm img-upload">${s ? 'Change image' : 'Upload image'}</button>
+        <button type="button" class="ghost img-clear"${s ? '' : ' hidden'}>Remove</button>
+        <span class="img-status" role="status"></span>
+      </div>
+      <input type="file" class="img-file" accept="image/*" hidden>
+      <input class="in img-field" type="hidden" name="f__${esc(key)}" value="${esc(s)}">
+      <details class="img-adv">
+        <summary>Advanced — type a path or use the full library</summary>
+        <input class="in img-path" type="text" list="imglist" value="${esc(s)}" placeholder="/images/…">
+        <a class="ghost" href="/media" target="_blank" rel="noopener">Open media library ↗</a>
+      </details>
+      ${hintHtml}</div>${hidden}`;
   }
   const multiline = s.length > 70 || s.includes('\n');
   const input = multiline
@@ -860,6 +903,17 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .mprev{width:100%;border:1px solid #dbe5e8;border-radius:10px;background:#f0f5f6}
 .mpath{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:#5c6b75;margin:0 0 8px;word-break:break-all}
 .img-prev{display:block;max-width:220px;max-height:150px;border:1px solid #dbe5e8;border-radius:8px;margin:0 0 8px;background:#f0f5f6}
-.img-field{margin-bottom:4px}
+.imgwrap{display:block;margin-bottom:14px}
+.imgbtns{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-sm{background:#34719f;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:.9rem;font-weight:600;cursor:pointer}
+.btn-sm:hover{background:#22496c}
+.btn-sm:disabled{opacity:.6;cursor:default}
+.img-status{font-size:.82rem;color:#5c6b75}
+.img-status.busy{color:#8a6d00}
+.img-status.ok{color:#1f7a80}
+.img-status.err{color:#b3261e}
+.img-adv{margin-top:8px}
+.img-adv summary{font-size:.8rem;color:#5c6b75;cursor:pointer}
+.img-adv .img-path{margin:8px 0 4px}
 .imglink{display:inline-block;margin-top:2px;font-size:.82rem}
 `;

@@ -124,24 +124,69 @@ export const APP_JS = String.raw`
     };
   }
 
-  /* ── Image picker: live preview + auto-fill alt from the media library ──── */
+  /* ── Image field: upload-in-place (WordPress-style), preview, remove ────── */
   function initImagePickers() {
     var baseEl = document.getElementById('img-base');
     var base = baseEl ? baseEl.getAttribute('data-base') : '';
     var altMap = {};
     try { altMap = JSON.parse(document.getElementById('alt-map').textContent); } catch (e) {}
-    document.querySelectorAll('.img-field').forEach(function (inp) {
-      var wrap = inp.closest('.fl');
-      var prev = wrap ? wrap.querySelector('.img-prev') : null;
-      function sync() {
-        var v = inp.value.trim();
+
+    document.querySelectorAll('.imgwrap').forEach(function (wrap) {
+      var field = wrap.querySelector('.img-field');   // hidden value (name=f__…)
+      var prev = wrap.querySelector('.img-prev');
+      var fileInp = wrap.querySelector('.img-file');
+      var uploadBtn = wrap.querySelector('.img-upload');
+      var clearBtn = wrap.querySelector('.img-clear');
+      var pathInp = wrap.querySelector('.img-path');
+      var status = wrap.querySelector('.img-status');
+      if (!field) return;
+
+      // Apply a value everywhere: preview, buttons, advanced field, live preview,
+      // and auto-fill a blank alt from the media library's saved alt text.
+      function apply(v, opts) {
+        v = (v || '').trim();
+        field.value = v;
+        if (pathInp && (!opts || opts.setPath !== false)) pathInp.value = v;
         if (prev) { prev.src = v ? base + v : ''; prev.style.display = v ? '' : 'none'; }
-        var form = inp.closest('form');
+        if (uploadBtn) uploadBtn.textContent = v ? 'Change image' : 'Upload image';
+        if (clearBtn) clearBtn.hidden = !v;
+        var form = field.closest('form');
         var alt = form && form.querySelector('input[name*="alt" i], textarea[name*="alt" i]');
         if (alt && !alt.value.trim() && altMap[v]) alt.value = altMap[v];
+        // Nudge the live preview (initLivePreview listens for input on the form).
+        field.dispatchEvent(new Event('input', { bubbles: true }));
       }
-      inp.addEventListener('input', sync);
-      inp.addEventListener('change', sync);
+
+      if (uploadBtn && fileInp) {
+        uploadBtn.addEventListener('click', function () { fileInp.click(); });
+        fileInp.addEventListener('change', function () {
+          var f = fileInp.files && fileInp.files[0];
+          if (!f) return;
+          if (status) { status.textContent = 'Uploading…'; status.className = 'img-status busy'; }
+          if (uploadBtn) uploadBtn.disabled = true;
+          var fd = new FormData();
+          fd.append('file', f);
+          fetch('/media/upload-inline', { method: 'POST', body: fd })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+            .then(function (res) {
+              if (res.ok && res.j && res.j.ok) {
+                apply(res.j.path);
+                if (status) { status.textContent = 'Uploaded ✓'; status.className = 'img-status ok'; }
+              } else {
+                if (status) { status.textContent = (res.j && res.j.error) || 'Upload failed.'; status.className = 'img-status err'; }
+              }
+            })
+            .catch(function () { if (status) { status.textContent = 'Upload failed — check your connection.'; status.className = 'img-status err'; } })
+            .then(function () { if (uploadBtn) uploadBtn.disabled = false; fileInp.value = ''; });
+        });
+      }
+      if (clearBtn) clearBtn.addEventListener('click', function () {
+        apply(''); if (status) { status.textContent = ''; status.className = 'img-status'; }
+      });
+      if (pathInp) {
+        pathInp.addEventListener('input', function () { apply(pathInp.value, { setPath: false }); });
+        pathInp.addEventListener('change', function () { apply(pathInp.value, { setPath: false }); });
+      }
     });
   }
 
