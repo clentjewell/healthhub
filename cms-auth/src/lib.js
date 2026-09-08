@@ -243,12 +243,19 @@ export async function ghPutBinary(env, path, bytes, message) {
   return res.json();
 }
 
-/** Delete a file from the repo (looks up its sha first). */
+/** Delete a file from the repo. Looks up its blob sha from the parent directory
+ *  listing (which returns a sha for files of any size — the single-file contents
+ *  GET errors for files over 1 MB, so photos couldn't be deleted). */
 export async function ghDelete(env, path, message) {
-  const meta = await gh(env, 'GET', `/repos/${REPO}/contents/${encodeURI(path)}?ref=${BRANCH}`);
-  if (!meta.ok) throw new Error(`delete lookup ${path}: ${meta.status}`);
-  const sha = (await meta.json()).sha;
-  const res = await gh(env, 'DELETE', `/repos/${REPO}/contents/${encodeURI(path)}`, { message, sha, branch: BRANCH });
+  const slash = path.lastIndexOf('/');
+  const dir = path.slice(0, slash);
+  const name = path.slice(slash + 1);
+  const listRes = await gh(env, 'GET', `/repos/${REPO}/contents/${encodeURI(dir)}?ref=${BRANCH}`);
+  if (!listRes.ok) throw new Error(`delete lookup ${dir}: ${listRes.status}`);
+  const arr = await listRes.json();
+  const entry = Array.isArray(arr) && arr.find((f) => f.name === name);
+  if (!entry) throw new Error(`image not found: ${path}`);
+  const res = await gh(env, 'DELETE', `/repos/${REPO}/contents/${encodeURI(path)}`, { message, sha: entry.sha, branch: BRANCH });
   if (!res.ok) { const t = await res.text(); throw new Error(`delete ${path}: ${res.status} ${t.slice(0, 160)}`); }
   return res.json();
 }

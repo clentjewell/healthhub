@@ -1434,8 +1434,8 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .mlib-status.busy{color:#8a6d00}.mlib-status.err{color:#b3261e}
 .mlib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:16px;overflow-y:auto}
 .mlib-cell{position:relative;display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid #e2ebef;border-radius:10px;background:#fff;cursor:pointer;text-align:center}
-.mlib-del{position:absolute;top:6px;right:6px;z-index:1;width:28px;height:28px;padding:0;border:0;border-radius:7px;background:rgba(255,255,255,.9);box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer;font-size:14px;line-height:28px;opacity:0;transition:opacity .12s}
-.mlib-cell:hover .mlib-del,.mlib-cell:focus-within .mlib-del{opacity:1}
+.mlib-del{position:absolute;top:6px;right:6px;z-index:2;width:30px;height:30px;padding:0;border:0;border-radius:7px;background:rgba(255,255,255,.92);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;font-size:15px;line-height:30px;opacity:.85;transition:opacity .12s,background .12s}
+.mlib-cell:hover .mlib-del{opacity:1}
 .mlib-del:hover{background:#fdeceb}
 .mlib-cell:hover{border-color:#34719f;box-shadow:0 4px 14px rgba(52,113,159,.15)}
 .mlib-cell.sel{border-color:#1f7a80;box-shadow:0 0 0 2px #1f7a80 inset}
