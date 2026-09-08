@@ -165,14 +165,14 @@ try a couple of the old page URLs you know.
 
 ## Phase 6 — Turn on hardening & point the CMS at live
 
-☐ **6.1 HSTS — (Claude).** Once 5.1 confirms HTTPS is solid, I uncomment the
-`Strict-Transport-Security` line in `public/.htaccess` and push. (Do this only
-after HTTPS is confirmed — it locks the browser to HTTPS.)
+✅ **6.1 HSTS — done.** `Strict-Transport-Security "max-age=15768000"` is now
+active in `public/.htaccess` (deliberately without `includeSubDomains`, since
+this cPanel account is shared and other subdomains' HTTPS isn't guaranteed).
+Reaches the server on the next cPanel deploy.
 
-☐ **6.2 CMS live preview — (Claude).** I change `SITE` in
-`cms-auth/src/index.js` from the Cloudflare staging URL to the live domain and
-`wrangler deploy`, so the editor's live preview and "View live" open the real
-site.
+✅ **6.2 CMS live preview — done.** `SITE` in `cms-auth/src/index.js` now points
+at `https://healthhubtweedcoast.com.au`, so the editor's live preview and "View
+live" open the real site. Deployed to the CMS worker.
 
 ☐ **6.3** Log into the CMS, make a tiny edit, Save, and confirm it appears live
 within a couple of minutes (this proves the whole Save → deploy loop).

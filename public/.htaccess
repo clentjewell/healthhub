@@ -53,9 +53,12 @@ RedirectMatch 301 ^/event/seniors-yoga/?$ /event/yoga-meditation/
   Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
   Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://maps.google.com https://www.google.com; connect-src 'self'; form-action 'self'; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'"
 
-  # HSTS — turn on ONLY once HTTPS is confirmed working on the live domain, as
-  # it forces HTTPS for the max-age. Uncomment then, and consider preloading.
-  # Header always set Strict-Transport-Security "max-age=15768000; includeSubDomains"
+  # HSTS — on now that HTTPS is confirmed working on the live domain. Forces
+  # HTTPS for the max-age (~6 months). Deliberately WITHOUT includeSubDomains:
+  # this cPanel account is shared and other subdomains' HTTPS isn't guaranteed,
+  # so we lock only the apex/host that serves this site. Revisit (and consider
+  # preload) once every subdomain is known-good on HTTPS.
+  Header always set Strict-Transport-Security "max-age=15768000"
 </IfModule>
 
 # ── Static-site niceties for Apache ──────────────────────────────────────────

@@ -18,7 +18,7 @@ import { groupedKeys, labelFor, hintFor, previewPath } from './fields.js';
 
 // Where images live in the repo and how the CMS shows thumbnails (the live site).
 const IMG_PREFIX = 'public/images/';
-const SITE = 'https://healthhub-tweed-coast.clent.workers.dev';
+const SITE = 'https://healthhubtweedcoast.com.au';
 const IMG_EXT = /\.(webp|jpe?g|png|gif|avif|svg)$/i;
 const MAX_UPLOAD = 8 * 1024 * 1024; // 8 MB
 
