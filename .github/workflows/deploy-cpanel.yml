@@ -15,13 +15,15 @@
 # 2. To VALIDATE the secrets safely: Actions → "Deploy to cPanel" → Run workflow,
 #    leave "dry_run" ticked. It connects, logs in and checks the directory but
 #    uploads/deletes nothing.
-# 3. To turn on automatic deploys on every push to main (do this at cutover):
-#    Settings → Secrets and variables → Actions → Variables →
-#      CPANEL_DEPLOY_ENABLED = true
+# 3. Automatic deploys: ON by default. Once the FTP secrets exist, every push
+#    to main builds and uploads (this is the CMS Save → deploy loop). To PAUSE
+#    it, add repo variable (Settings → Secrets and variables → Actions →
+#    Variables) CPANEL_DEPLOY_ENABLED = false. Delete it (or set anything else)
+#    to resume. A manual "Run workflow" always deploys, pause or not.
 #
 # SAFETY
-# - Pushes to main do NOTHING until CPANEL_DEPLOY_ENABLED is "true", so CMS
-#   saves won't deploy to cPanel while the site still lives on Cloudflare.
+# - Deploys need the FTP secrets; without them every run is a no-op.
+# - To pause auto-deploy set repo variable CPANEL_DEPLOY_ENABLED=false.
 # - The deploy MIRRORS dist/: files removed from the build are removed on the
 #   server. Point CPANEL_FTP_DIR at a directory used ONLY by this site.
 # - FTPS (encrypted). If the host only offers plain FTP switch `protocol: ftp`;
@@ -54,11 +56,16 @@ jobs:
           if [ -n "${{ secrets.CPANEL_FTP_SERVER }}" ] && [ -n "${{ secrets.CPANEL_FTP_PASSWORD }}" ]; then
             secrets_ok=true
           fi
+          # The site is live on cPanel, so every push to main should publish
+          # (that's the CMS Save -> deploy loop). Deploy by default whenever the
+          # FTP secrets are present; the only way to PAUSE auto-deploy is to set
+          # the repo variable CPANEL_DEPLOY_ENABLED to the exact string "false".
+          # (A manual "Run workflow" always deploys, ignoring the pause.)
           run=false
           if [ "$secrets_ok" = true ]; then
             if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
               run=true
-            elif [ "${{ vars.CPANEL_DEPLOY_ENABLED }}" = "true" ]; then
+            elif [ "${{ vars.CPANEL_DEPLOY_ENABLED }}" != "false" ]; then
               run=true
             fi
           fi
@@ -69,7 +76,7 @@ jobs:
           echo "run=$run" >> "$GITHUB_OUTPUT"
           echo "dry=$dry" >> "$GITHUB_OUTPUT"
           if [ "$run" != true ]; then
-            echo "::notice::Skipping cPanel deploy. secrets set: $secrets_ok. Automatic deploys on push need repo variable CPANEL_DEPLOY_ENABLED=true; or run this workflow manually."
+            echo "::notice::Skipping cPanel deploy. secrets set: $secrets_ok. Auto-deploy is paused (repo variable CPANEL_DEPLOY_ENABLED=false), or the FTP secrets are missing. Set CPANEL_DEPLOY_ENABLED to anything other than false (or delete it) to resume; or run this workflow manually."
           else
             echo "::notice::Running cPanel deploy (dry-run: $dry)."
           fi
