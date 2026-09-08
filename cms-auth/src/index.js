@@ -12,7 +12,7 @@ import {
   parseUsers, hashPassword, verifyHash,
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
   loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
-  ghCommits, ghGetAtRef, ghRaw, ghRecentCommits, ghCommitMany,
+  ghCommits, ghGetAtRef, ghRaw, ghRecentCommits, ghCommitMany, ghDelete,
 } from './lib.js';
 import { APP_JS } from './app-js.js';
 import { groupedKeys, labelFor, hintFor, previewPath } from './fields.js';
@@ -102,6 +102,7 @@ async function route(request, env) {
   if (p === '/media/upload' && request.method === 'POST') return doUpload(request, env);
   if (p === '/media/upload-inline' && request.method === 'POST') return doUploadInline(request, env);
   if (p === '/media/file') return doMediaFile(url, env);
+  if (p === '/media/delete' && request.method === 'POST') return doMediaDelete(request, env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
   if (p === '/activity') return activityPage(env);
   if (p === '/reorder' && request.method === 'POST') return doReorder(request, env);
@@ -390,6 +391,29 @@ async function doMediaFile(url, env) {
   return new Response(res.body, {
     headers: { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': 'private, max-age=120' },
   });
+}
+
+/** Delete an image from the library (repo), used by the media modal's trash. */
+async function doMediaDelete(request, env) {
+  const json = (obj, status = 200) => new Response(JSON.stringify(obj),
+    { status, headers: { 'content-type': 'application/json' } });
+  try {
+    const form = await request.formData();
+    const rel = String(form.get('path') || '');
+    if (!/^\/images\/[^?]+\.(webp|jpe?g|png|gif|avif|svg)$/i.test(rel) || rel.includes('..')) {
+      return json({ ok: false, error: 'Bad path' }, 400);
+    }
+    const ghPath = 'public' + rel;
+    await ghDelete(env, ghPath, `media: delete ${ghPath} (via CMS)`);
+    // Drop any saved metadata for it.
+    try {
+      const { map, sha } = await readManifest(env);
+      if (map[ghPath]) { delete map[ghPath]; await writeManifest(env, map, sha, `media: remove metadata for ${ghPath}`); }
+    } catch { /* metadata is best-effort */ }
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
 }
 
 /** Inline upload used by the image field's "Upload" button. Returns JSON so the
@@ -1409,7 +1433,10 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .mlib-status{font-size:.82rem;color:#5c6b75}
 .mlib-status.busy{color:#8a6d00}.mlib-status.err{color:#b3261e}
 .mlib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:16px;overflow-y:auto}
-.mlib-cell{display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid #e2ebef;border-radius:10px;background:#fff;cursor:pointer;text-align:center}
+.mlib-cell{position:relative;display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid #e2ebef;border-radius:10px;background:#fff;cursor:pointer;text-align:center}
+.mlib-del{position:absolute;top:6px;right:6px;z-index:1;width:28px;height:28px;padding:0;border:0;border-radius:7px;background:rgba(255,255,255,.9);box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer;font-size:14px;line-height:28px;opacity:0;transition:opacity .12s}
+.mlib-cell:hover .mlib-del,.mlib-cell:focus-within .mlib-del{opacity:1}
+.mlib-del:hover{background:#fdeceb}
 .mlib-cell:hover{border-color:#34719f;box-shadow:0 4px 14px rgba(52,113,159,.15)}
 .mlib-cell.sel{border-color:#1f7a80;box-shadow:0 0 0 2px #1f7a80 inset}
 .mlib-cell img{width:100%;height:110px;object-fit:cover;border-radius:6px;background:#f0f5f6}

@@ -256,7 +256,8 @@ export const APP_JS = String.raw`
         if (q && hay.indexOf(q) === -1) return;
         shown++;
         var name = it.path.split('/').pop();
-        var cell = el('button', { type: 'button', class: 'mlib-cell' + (it.path === state.current ? ' sel' : ''), title: name });
+        // A div (not a button) so it can hold the delete button; click selects.
+        var cell = el('div', { class: 'mlib-cell' + (it.path === state.current ? ' sel' : ''), title: name, tabindex: '0', role: 'button' });
         var img = el('img', { loading: 'lazy', alt: it.alt || '' });
         // Just-uploaded images aren't on the live site yet — fall back to the
         // worker, which serves the bytes straight from the repo.
@@ -265,12 +266,39 @@ export const APP_JS = String.raw`
           img.src = '/media/file?path=' + encodeURIComponent(it.path);
         });
         img.src = state.base + it.path;
+        var del = el('button', { type: 'button', class: 'mlib-del', title: 'Delete image', 'aria-label': 'Delete ' + name }, ['🗑']);
+        del.addEventListener('click', function (e) { e.stopPropagation(); deleteItem(it, cell); });
+        cell.appendChild(del);
         cell.appendChild(img);
         cell.appendChild(el('span', { class: 'mlib-name' }, [name]));
         cell.addEventListener('click', function () { pick(it.path); });
+        cell.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(it.path); } });
         grid.appendChild(cell);
       });
       empty.hidden = shown > 0;
+    }
+
+    function deleteItem(it, cell) {
+      var nm = it.path.split('/').pop();
+      if (!window.confirm('Delete "' + nm + '" from the library?\n\nThis can’t be undone, and any page still using this image will lose it.')) return;
+      status.textContent = 'Deleting…'; status.className = 'mlib-status busy';
+      var fd = new FormData(); fd.append('path', it.path);
+      fetch('/media/delete', { method: 'POST', body: fd })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          if (res.ok && res.j && res.j.ok) {
+            try {
+              var node = document.getElementById('media-lib');
+              var arr = (JSON.parse(node.textContent) || []).filter(function (x) { return x.path !== it.path; });
+              node.textContent = JSON.stringify(arr);
+            } catch (e) {}
+            cell.remove();
+            status.textContent = 'Deleted'; status.className = 'mlib-status';
+          } else {
+            status.textContent = (res.j && res.j.error) || 'Delete failed.'; status.className = 'mlib-status err';
+          }
+        })
+        .catch(function () { status.textContent = 'Delete failed — check your connection.'; status.className = 'mlib-status err'; });
     }
 
     head.querySelector('.mlib-search').addEventListener('input', function (e) { render(e.target.value); });

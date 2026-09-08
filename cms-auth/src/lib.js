@@ -243,6 +243,16 @@ export async function ghPutBinary(env, path, bytes, message) {
   return res.json();
 }
 
+/** Delete a file from the repo (looks up its sha first). */
+export async function ghDelete(env, path, message) {
+  const meta = await gh(env, 'GET', `/repos/${REPO}/contents/${encodeURI(path)}?ref=${BRANCH}`);
+  if (!meta.ok) throw new Error(`delete lookup ${path}: ${meta.status}`);
+  const sha = (await meta.json()).sha;
+  const res = await gh(env, 'DELETE', `/repos/${REPO}/contents/${encodeURI(path)}`, { message, sha, branch: BRANCH });
+  if (!res.ok) { const t = await res.text(); throw new Error(`delete ${path}: ${res.status} ${t.slice(0, 160)}`); }
+  return res.json();
+}
+
 /** Recursively list files under a prefix (via the git tree API). */
 export async function ghTree(env, prefix) {
   const res = await gh(env, 'GET', `/repos/${REPO}/git/trees/${BRANCH}?recursive=1`);
