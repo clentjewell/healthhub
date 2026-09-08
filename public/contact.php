@@ -10,12 +10,16 @@
  * needs to be stored anywhere.
  *
  * ── SETUP (once, in cPanel) ──────────────────────────────────────────────────
- * 1. Create the "from" mailbox below in cPanel → Email Accounts, e.g.
- *    website@healthhubtweedcoast.com.au  (it only needs to exist; the script
- *    doesn't log in to it).
+ * 1. Create the "from" address below as a FORWARDER, not a mailbox: cPanel →
+ *    Forwarders → website@healthhubtweedcoast.com.au → forward to
+ *    health@pottsvilleacupuncture.com.au. This way it needs no inbox anyone
+ *    checks — the studio only ever uses health@ — yet if anyone emails it or a
+ *    bounce comes back, it lands in health@ and nothing is missed. (Normal
+ *    replies already go to the visitor via Reply-To, not to this address.)
  * 2. Check cPanel → Email Deliverability shows SPF and DKIM "Valid" for
  *    healthhubtweedcoast.com.au (cPanel sets these up automatically).
- * 3. Make sure $RECIPIENT below is where enquiries should land.
+ * 3. AT LAUNCH: change $RECIPIENT below from the test inbox to
+ *    health@pottsvilleacupuncture.com.au.
  *
  * NOTE: served as source text on a static host (e.g. Cloudflare); it only
  * executes on PHP hosting (cPanel). It holds no passwords, so that's harmless —
@@ -23,8 +27,8 @@
  */
 
 // ── Config ───────────────────────────────────────────────────────────────────
-$RECIPIENT  = 'health@pottsvilleacupuncture.com.au';        // where enquiries go
-$FROM_EMAIL = 'website@healthhubtweedcoast.com.au';         // MUST be a real mailbox ON this domain
+$RECIPIENT  = 'rao@jewellprojects.com';                     // TEST inbox — switch to health@pottsvilleacupuncture.com.au at launch
+$FROM_EMAIL = 'website@healthhubtweedcoast.com.au';         // a forwarder on this domain (see SETUP above)
 $FROM_NAME  = 'Health Hub Tweed Coast website';
 $SUBJECT    = 'New enquiry — Health Hub Tweed Coast website';
 $SUCCESS    = '/contact/?sent=1';   // matches the confirmation the page shows
