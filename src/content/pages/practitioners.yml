@@ -24,6 +24,11 @@ whoWeAre:
       it's overcoming a debilitating health condition, finding the inspiration
       to kick a habit, shifting destructive patterns, or simply relaxing and
       unwinding — the Health Hub is here for you.
+  # Optional photo shown beside the checklist (as on the old site). Add it in
+  # the CMS: Pages → Our Practitioners → Who We Are → Image → Open media library.
+  # Leave blank and the checklist simply centres on its own.
+  image: ""
+  imageAlt: A family smiling together
   pointsIntro: The Health Hub is where…
   points:
     - You are supported, respected and cared for on your healing journey.

@@ -414,6 +414,8 @@ const pages = defineCollection({
         paragraphs: z.array(z.string()).default([]),
         pointsIntro: optionalText,
         points: z.array(z.string()).default([]),
+        image: optionalText,
+        imageAlt: optionalText,
       })
       .optional(),
 
