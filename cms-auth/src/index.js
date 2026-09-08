@@ -1084,14 +1084,17 @@ async function doSave(request, env) {
   }
   // Keep the media library's alt text in step with alt entered on content —
   // both structured fields and <img> tags embedded in the Markdown body.
-  try { await syncAltFromData(env, savedData, String(form.get('__body') || '')); } catch { /* best-effort */ }
+  try { await syncAltFromData(env, savedData, String(form.get('__body') || ''), k); } catch { /* best-effort */ }
   return editForm(env, k, path, 'Saved. The site will update in about a minute.');
 }
 
 const isImgPath = (v) => typeof v === 'string' && /^\/images\/.+\.(webp|jpe?g|png|gif|avif|svg)$/i.test(v);
 
-/** Collect {path, alt} pairs from a content entry's fields and Markdown body. */
-function collectAltPairs(data, body) {
+/** Collect {path, alt} pairs from a content entry's fields and Markdown body.
+ *  `k` is the collection key, so a main image with no explicit alt field still
+ *  gets the alt the site renders for it (practitioner name, service/event
+ *  title) — matching the front-end, so every image can show its alt. */
+function collectAltPairs(data, body, k) {
   const pairs = [];
   (function walk(o) {
     if (Array.isArray(o)) return o.forEach(walk);
@@ -1105,6 +1108,15 @@ function collectAltPairs(data, body) {
     const src = (tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i) || [])[1];
     const alt = (tag.match(/\balt\s*=\s*["']([^"']*)["']/i) || [])[1];
     if (src && isImgPath(src) && alt && alt.trim()) pairs.push({ path: 'public' + src, alt: alt.trim() });
+  }
+  // Derived alt for a top-level image with no alt field (mirrors the templates).
+  if (data && typeof data === 'object' && isImgPath(data.image)) {
+    let derived = '';
+    if (k === 'practitioners' && data.name) derived = `Portrait of ${String(data.name).trim()}`;
+    else if ((k === 'services' || k === 'events') && data.title) derived = String(data.title).trim();
+    if (derived && !pairs.some((p) => p.path === 'public' + data.image)) {
+      pairs.push({ path: 'public' + data.image, alt: derived });
+    }
   }
   return pairs;
 }
@@ -1122,23 +1134,23 @@ async function applyAltPairs(env, pairs) {
   return changed;
 }
 
-async function syncAltFromData(env, data, body) {
-  await applyAltPairs(env, collectAltPairs(data, body));
+async function syncAltFromData(env, data, body, k) {
+  await applyAltPairs(env, collectAltPairs(data, body, k));
 }
 
 /** One-off backfill: scan every content file and copy its image alt text into
  *  the media library, so existing pages' alts show without re-saving each one. */
 async function doRescanAlt(env) {
   const pairs = [];
-  for (const c of Object.values(COLLECTIONS)) {
+  for (const [k, c] of Object.entries(COLLECTIONS)) {
     if (c.kind !== 'markdown' && c.kind !== 'yaml') continue;
     let files = [];
     try { files = await ghList(env, c.dir, c.ext); } catch { continue; }
     for (const f of files) {
       try {
         const { text } = await ghGet(env, f.path);
-        if (c.kind === 'markdown') { const { data, body } = parseMarkdown(text); pairs.push(...collectAltPairs(data, body)); }
-        else pairs.push(...collectAltPairs(parseYaml(text), ''));
+        if (c.kind === 'markdown') { const { data, body } = parseMarkdown(text); pairs.push(...collectAltPairs(data, body, k)); }
+        else pairs.push(...collectAltPairs(parseYaml(text), '', k));
       } catch { /* skip unreadable file */ }
     }
   }
