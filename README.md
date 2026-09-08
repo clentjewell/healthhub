@@ -49,6 +49,10 @@ preserved. Setup:
    `CPANEL_DEPLOY_ENABLED = true`. Until then, pushes to `main` (CMS saves)
    do **not** deploy to cPanel — so nothing goes live there prematurely.
 
+> **Cutover day:** follow the step-by-step [`docs/GO-LIVE.md`](docs/GO-LIVE.md)
+> runbook (email setup, staging test, the WordPress → Astro swap, verification,
+> HSTS, and rollback).
+
 - **Redirects and headers** live in `public/.htaccess` (Apache) — the
   equivalent of `public/_headers` + `public/_redirects` (Cloudflare). Keep the
   Apache and Cloudflare files in sync when you change one.
