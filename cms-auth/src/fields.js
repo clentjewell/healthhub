@@ -146,7 +146,11 @@ export function previewPath(collection, filename) {
     default: return `/`;
   }
 }
+// Keys are the page file's slug (its filename without .yml). The practitioners
+// index lives in practitioners.yml, so its key is "practitioners" — NOT
+// "our-practitioners" (the URL). A mismatch here makes previewPath fall back to
+// "/", so the editor previews the home page instead of the page being edited.
 const PAGE_URLS = {
   home: '/', blog: '/blog/', contact: '/contact/', faq: '/faq/',
-  'our-practitioners': '/our-practitioners/', events: '/events/', booking: '/make-a-booking/',
+  practitioners: '/our-practitioners/', events: '/events/', booking: '/make-a-booking/',
 };
