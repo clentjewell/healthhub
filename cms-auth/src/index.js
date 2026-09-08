@@ -301,6 +301,11 @@ async function mediaPage(env, focusPath) {
           <div class="actions"><button class="btn" type="submit">Save details</button>
             <a class="ghost" href="/media">Back</a></div>
         </form>
+        <form method="POST" action="/media/delete" class="mdelete" data-confirm="Delete this image permanently? Any page still using it will lose it.">
+          <input type="hidden" name="path" value="/${esc(rel)}">
+          <input type="hidden" name="redirect" value="/media">
+          <button class="ghost danger" type="submit">Delete image</button>
+        </form>
       </div>`);
   }
 
@@ -318,21 +323,23 @@ async function mediaPage(env, focusPath) {
 
   return shell('Media library', `
     <div class="head"><h1>Media library</h1><a class="ghost" href="/">← All sections</a></div>
-    <form class="upload" method="POST" action="/media/upload" enctype="multipart/form-data">
-      <h2 class="uh">Upload a new image</h2>
-      <div class="urow">
-        <label class="fl"><span class="fk">Image file</span><input class="in" type="file" name="file" accept="image/*" required></label>
-        <label class="fl"><span class="fk">Folder</span><select class="in" name="folder">${folderOpts}</select></label>
-      </div>
-      <div class="urow">
-        <label class="fl"><span class="fk">Alt text</span><input class="in" name="alt" placeholder="What the image shows"></label>
-        <label class="fl"><span class="fk">Title</span><input class="in" name="title"></label>
-      </div>
-      <label class="fl"><span class="fk">Description</span><textarea class="ta" name="description" rows="2"></textarea></label>
-      <div class="actions"><button class="btn" type="submit">Upload</button>
-        <span class="hint">Max 8 MB. Best to resize large photos before uploading.</span></div>
-    </form>
-    <p class="sub">${images.length} images. Click one to edit its details or copy its path.</p>
+    <p class="sub">${images.length} image${images.length === 1 ? '' : 's'}. Click one to edit its details, copy its path, or delete it.</p>
+    <details class="upload-d">
+      <summary>＋ Upload a new image</summary>
+      <form class="upload" method="POST" action="/media/upload" enctype="multipart/form-data">
+        <div class="urow">
+          <label class="fl"><span class="fk">Image file</span><input class="in" type="file" name="file" accept="image/*" required></label>
+          <label class="fl"><span class="fk">Folder</span><select class="in" name="folder">${folderOpts}</select></label>
+        </div>
+        <div class="urow">
+          <label class="fl"><span class="fk">Alt text</span><input class="in" name="alt" placeholder="What the image shows"></label>
+          <label class="fl"><span class="fk">Title</span><input class="in" name="title"></label>
+        </div>
+        <label class="fl"><span class="fk">Description</span><textarea class="ta" name="description" rows="2"></textarea></label>
+        <div class="actions"><button class="btn" type="submit">Upload</button>
+          <span class="hint">Max 8 MB. Best to resize large photos before uploading.</span></div>
+      </form>
+    </details>
     <div class="mgrid">${cards}</div>`);
 }
 
@@ -410,6 +417,9 @@ async function doMediaDelete(request, env) {
       const { map, sha } = await readManifest(env);
       if (map[ghPath]) { delete map[ghPath]; await writeManifest(env, map, sha, `media: remove metadata for ${ghPath}`); }
     } catch { /* metadata is best-effort */ }
+    // The media-library page posts a form (wants a redirect); the modal fetches (wants JSON).
+    const back = String(form.get('redirect') || '');
+    if (back.startsWith('/')) return redirect(back);
     return json({ ok: true });
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
@@ -1391,6 +1401,11 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .rm-item:hover{background:#fdecec}
 @media(max-width:640px){.rrow,.srow3{grid-template-columns:1fr}}
 .upload{background:#fff;border:1px solid #dbe5e8;border-radius:12px;padding:18px 20px;margin:8px 0 22px}
+.upload-d{max-width:760px;margin:0 0 18px;border:1px solid #dbe5e8;border-radius:12px;background:#fff}
+.upload-d>summary{padding:14px 18px;cursor:pointer;font-weight:600;color:#22496c;list-style:none}
+.upload-d>summary::-webkit-details-marker{display:none}
+.upload-d .upload{border:0;border-radius:0;margin:0;padding:0 18px 18px}
+.mdelete{margin-top:18px;padding-top:14px;border-top:1px solid #eef1f3}
 .uh{font-size:1rem;margin:0 0 8px}
 .urow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.urow{grid-template-columns:1fr}}
