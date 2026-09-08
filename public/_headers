@@ -5,10 +5,10 @@
 # blocks would send two CSP headers and browsers enforce their intersection, so
 # everything the site needs lives in this single site-wide policy.
 #
-# The CMS runs on its own worker now (the old Sveltia bundle from unpkg and its
-# raw.githubusercontent images are gone), so the site itself only needs 'self',
-# Google Maps (embed), and FormSubmit (contact form). frame-ancestors still
-# allows the CMS worker to iframe the site for the editor's live preview.
+# The contact form posts to the site's own /contact.php now (no FormSubmit), and
+# the CMS runs on its own worker (the old Sveltia bundle from unpkg is gone), so
+# the site itself only needs 'self' plus Google Maps (embed). frame-ancestors
+# still allows the CMS worker to iframe the site for the editor's live preview.
 #
 # Kept in sync with public/.htaccess (the cPanel/Apache equivalent).
 #
@@ -23,4 +23,4 @@
   # (for the content editor's live preview).
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://maps.google.com https://www.google.com; connect-src 'self' https://formsubmit.co; form-action 'self' https://formsubmit.co; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://maps.google.com https://www.google.com; connect-src 'self'; form-action 'self'; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'

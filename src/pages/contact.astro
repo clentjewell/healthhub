@@ -29,18 +29,15 @@ const socials = [
           action={cfg.contactFormEndpoint || '#'}
           data-endpoint-set={cfg.contactFormEndpoint ? 'true' : 'false'}
         >
-          {/* FormSubmit control fields. Harmless extras if the endpoint is ever
-              something else — they just post as unused fields. `_next` is
-              filled in by the script below so it follows whatever domain the
-              site is on; without JS, FormSubmit's own thank-you page shows. */}
-          <input type="hidden" name="_subject" value="New enquiry — Health Hub Tweed Coast website" />
-          <input type="hidden" name="_template" value="table" />
-          <input type="hidden" name="_captcha" value="false" />
-          <input type="hidden" name="_next" value="" />
-          {/* Honeypot: humans never see it; bots that fill it are discarded. */}
+          {/* Honeypot: humans never see it; bots that fill it are discarded
+              by the handler (contact.php). */}
           <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp-field" />
           <p class="form-sent" hidden>
             Thanks — your message has been sent. We'll get back to you soon.
+          </p>
+          <p class="form-error" hidden>
+            Sorry, something went wrong sending your message. Please try again, or
+            contact us directly using the phone or email on this page.
           </p>
           <div class="field">
             <label for="name">Name</label>
@@ -125,13 +122,15 @@ const socials = [
 </BaseLayout>
 
 <script>
-  // Send FormSubmit back to this page with ?sent=1, whichever domain we're on,
-  // and show the confirmation when we arrive back with it.
-  const next = document.querySelector<HTMLInputElement>('input[name="_next"]');
-  if (next) next.value = `${location.origin}/contact/?sent=1`;
-
-  if (new URLSearchParams(location.search).has('sent')) {
+  // contact.php redirects back here with ?sent=1 on success or ?error=1 on
+  // failure; reveal the matching message.
+  const params = new URLSearchParams(location.search);
+  if (params.has('sent')) {
     const note = document.querySelector<HTMLElement>('.form-sent');
+    if (note) note.hidden = false;
+    note?.scrollIntoView({ block: 'center' });
+  } else if (params.has('error')) {
+    const note = document.querySelector<HTMLElement>('.form-error');
     if (note) note.hidden = false;
     note?.scrollIntoView({ block: 'center' });
   }
@@ -190,6 +189,15 @@ const socials = [
     border: 1px solid var(--color-accent);
     border-radius: var(--radius-sm);
     background: var(--color-surface-tint);
+    font-size: 15px;
+  }
+  .form-error {
+    margin: 0 0 18px;
+    padding: 12px 16px;
+    border: 1px solid #d9534f;
+    border-radius: var(--radius-sm);
+    background: #fdecec;
+    color: #7a1f1f;
     font-size: 15px;
   }
 

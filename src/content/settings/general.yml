@@ -75,4 +75,4 @@ footerNote: Made on the Tweed Coast.
 # rao@ is the test inbox (client, 24 Aug 2026); once testing is done, swap to
 # https://formsubmit.co/health@pottsvilleacupuncture.com.au and have the client
 # click the new activation email.
-contactFormEndpoint: 'https://formsubmit.co/rao@jewellprojects.com'
+contactFormEndpoint: '/contact.php'
