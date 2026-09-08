@@ -499,11 +499,54 @@ export const APP_JS = String.raw`
     });
   }
 
+  /* ── Drag-to-reorder a collection list ────────────────────────────────── */
+  function initReorder() {
+    var list = document.querySelector('.dlist');
+    if (!list) return;
+    var saveBtn = document.getElementById('save-order');
+    var orderVal = document.getElementById('order-val');
+    var form = document.getElementById('reorder');
+    var dragEl = null;
+
+    function afterElement(y) {
+      var els = Array.prototype.slice.call(list.querySelectorAll('.drow:not(.dragging)'));
+      var closest = null, closestOffset = -Infinity;
+      els.forEach(function (el) {
+        var box = el.getBoundingClientRect();
+        var offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closestOffset) { closestOffset = offset; closest = el; }
+      });
+      return closest;
+    }
+    list.addEventListener('dragstart', function (e) {
+      var row = e.target.closest('.drow'); if (!row) return;
+      dragEl = row; row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', row.getAttribute('data-path') || ''); } catch (_) {}
+    });
+    list.addEventListener('dragend', function () {
+      if (dragEl) dragEl.classList.remove('dragging'); dragEl = null;
+    });
+    list.addEventListener('dragover', function (e) {
+      if (!dragEl) return;
+      e.preventDefault();
+      var after = afterElement(e.clientY);
+      if (after == null) list.appendChild(dragEl); else list.insertBefore(dragEl, after);
+      if (saveBtn) saveBtn.disabled = false;
+    });
+    if (form && orderVal) form.addEventListener('submit', function () {
+      var paths = Array.prototype.map.call(list.querySelectorAll('.drow'), function (r) { return r.getAttribute('data-path'); });
+      orderVal.value = JSON.stringify(paths);
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+    });
+  }
+
   /* ── Wire up on load ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initImagePickers();
     initLivePreview();
     initRepeatables();
+    initReorder();
 
     var root = document.getElementById('structured');
     if (!root) return;

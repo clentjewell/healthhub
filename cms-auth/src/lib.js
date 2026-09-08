@@ -157,6 +157,35 @@ export async function ghPut(env, path, text, sha, message) {
   return res.json();
 }
 
+/** Commit several text files at once (one commit → one deploy). files:
+ *  [{ path, text }]. Uses the Git Data API (tree + commit + ref update). */
+export async function ghCommitMany(env, files, message) {
+  if (!files.length) return;
+  const refRes = await gh(env, 'GET', `/repos/${REPO}/git/ref/heads/${BRANCH}`);
+  if (!refRes.ok) throw new Error(`ref: ${refRes.status}`);
+  const baseCommit = (await refRes.json()).object.sha;
+  const commitRes = await gh(env, 'GET', `/repos/${REPO}/git/commits/${baseCommit}`);
+  if (!commitRes.ok) throw new Error(`base commit: ${commitRes.status}`);
+  const baseTree = (await commitRes.json()).tree.sha;
+
+  const treeRes = await gh(env, 'POST', `/repos/${REPO}/git/trees`, {
+    base_tree: baseTree,
+    tree: files.map((f) => ({ path: f.path, mode: '100644', type: 'blob', content: f.text })),
+  });
+  if (!treeRes.ok) throw new Error(`tree: ${treeRes.status} ${(await treeRes.text()).slice(0, 160)}`);
+  const newTree = (await treeRes.json()).sha;
+
+  const newCommitRes = await gh(env, 'POST', `/repos/${REPO}/git/commits`, {
+    message, tree: newTree, parents: [baseCommit],
+  });
+  if (!newCommitRes.ok) throw new Error(`commit: ${newCommitRes.status}`);
+  const newCommit = (await newCommitRes.json()).sha;
+
+  const updRes = await gh(env, 'PATCH', `/repos/${REPO}/git/refs/heads/${BRANCH}`, { sha: newCommit });
+  if (!updRes.ok) throw new Error(`ref update: ${updRes.status} ${(await updRes.text()).slice(0, 160)}`);
+  return newCommit;
+}
+
 /** Past commits that touched a file — for version history. */
 export async function ghCommits(env, path, limit = 25) {
   const res = await gh(env, 'GET',
@@ -164,6 +193,17 @@ export async function ghCommits(env, path, limit = 25) {
   if (!res.ok) throw new Error(`commits ${path}: ${res.status}`);
   const arr = await res.json();
   return arr.map((c) => ({ sha: c.sha, date: c.commit.author.date, message: c.commit.message }));
+}
+
+/** Recent commits across the whole repo, for the "Recent changes" feed. */
+export async function ghRecentCommits(env, limit = 30) {
+  const res = await gh(env, 'GET', `/repos/${REPO}/commits?sha=${BRANCH}&per_page=${limit}`);
+  if (!res.ok) throw new Error(`commits: ${res.status}`);
+  const arr = await res.json();
+  return arr.map((c) => ({
+    sha: c.sha, date: c.commit.author.date,
+    message: c.commit.message, author: c.commit.author.name,
+  }));
 }
 
 /** A file's content as it was at a specific commit. */

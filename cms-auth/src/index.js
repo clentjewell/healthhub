@@ -11,7 +11,7 @@ import {
   COLLECTIONS, verifyLogin, createSession, readSession, sessionCookie,
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
   loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
-  ghCommits, ghGetAtRef, ghRaw,
+  ghCommits, ghGetAtRef, ghRaw, ghRecentCommits, ghCommitMany,
 } from './lib.js';
 import { APP_JS } from './app-js.js';
 import { groupedKeys, labelFor, hintFor, previewPath } from './fields.js';
@@ -88,6 +88,8 @@ async function route(request, env) {
   if (p === '/media/upload-inline' && request.method === 'POST') return doUploadInline(request, env);
   if (p === '/media/file') return doMediaFile(url, env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
+  if (p === '/activity') return activityPage(env);
+  if (p === '/reorder' && request.method === 'POST') return doReorder(request, env);
   if (p === '/history') return historyPage(env, url.searchParams.get('k'), url.searchParams.get('path'));
   if (p === '/restore' && request.method === 'POST') return doRestore(request, env);
   return redirect('/');
@@ -133,7 +135,55 @@ function dashboard() {
     <p class="sub">Pick a section. Changes go live a minute or so after you save.</p>
     <div class="tiles">${cards}
       <a class="tile" href="/media"><span class="tile-t">Media library</span>
-        <span class="tile-a">Images &amp; uploads →</span></a></div>`);
+        <span class="tile-a">Images &amp; uploads →</span></a>
+      <a class="tile" href="/activity"><span class="tile-t">Recent changes</span>
+        <span class="tile-a">Who edited what →</span></a></div>`);
+}
+
+/* ── Recent changes (activity log) ───────────────────────────────────────── */
+
+/** Turn a CMS commit message into a friendly one-liner. */
+function friendlyChange(msg) {
+  const first = String(msg || '').split('\n')[0];
+  let m;
+  if ((m = first.match(/^content: (?:edit|create) (?:src\/content\/)?([^/]+)\/([^ ]+?)(?:\.(?:md|yml))?(?: \(via CMS\))?$/i))) {
+    const coll = m[1].replace(/-/g, ' '), item = m[2].replace(/-/g, ' ');
+    const verb = /create/i.test(first) ? 'Added' : 'Edited';
+    return `${verb} ${coll} — ${item}`;
+  }
+  if ((m = first.match(/^media: add public\/images\/(.+?)(?: \(via CMS\))?$/i))) return `Uploaded image — ${m[1]}`;
+  if (/^media: (update|metadata)/i.test(first)) return 'Updated an image’s details';
+  return first.replace(/ \(via CMS\)$/, '');
+}
+
+function timeAgo(iso) {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 90) return 'just now';
+  const m = Math.round(s / 60); if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60); if (h < 24) return `${h} hour${h === 1 ? '' : 's'} ago`;
+  const d = Math.round(h / 24); if (d < 30) return `${d} day${d === 1 ? '' : 's'} ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+async function activityPage(env) {
+  let rows = '';
+  try {
+    const commits = await ghRecentCommits(env, 40);
+    // Only show content/media changes (skip workflow/config commits).
+    const changes = commits.filter((c) => /^(content|media):/i.test(c.message) || /\(via CMS\)/i.test(c.message)).slice(0, 25);
+    rows = changes.length
+      ? changes.map((c) => `<div class="arow">
+          <span class="atext">${esc(friendlyChange(c.message))}</span>
+          <span class="ameta">${esc(timeAgo(c.date))}</span>
+        </div>`).join('')
+      : '<p class="sub">No recent content changes yet.</p>';
+  } catch (e) {
+    rows = `<p class="err">Couldn’t load recent changes: ${esc(e.message)}</p>`;
+  }
+  return shell('Recent changes', `
+    <div class="head"><h1>Recent changes</h1><a class="ghost" href="/">← All sections</a></div>
+    <p class="sub">The latest edits made through the website manager.</p>
+    <div class="alist">${rows}</div>`);
 }
 
 /* ── Media library ───────────────────────────────────────────────────────── */
@@ -324,28 +374,89 @@ async function doRestore(request, env) {
   return editForm(env, k, path, 'Restored an earlier version. The site will update in about a minute.');
 }
 
+const ORDERABLE = new Set(['practitioners', 'events', 'blog', 'services']);
+
 async function listCollection(env, k) {
   const c = COLLECTIONS[k];
   if (!c) return redirect('/');
+  const orderable = ORDERABLE.has(k);
   const files = await ghList(env, c.dir, c.ext);
-  const rows = await Promise.all(files.map(async (f) => {
+  let entries = await Promise.all(files.map(async (f) => {
     let title = c === COLLECTIONS.pages ? pageTitle(f.name) : f.name;
-    if (c.titleField) {
+    let order = 99;
+    if (c.titleField || orderable) {
       try {
         const { text } = await ghGet(env, f.path);
         const data = c.kind === 'markdown' ? parseMarkdown(text).data : parseYaml(text);
-        if (data[c.titleField]) title = String(data[c.titleField]);
+        if (c.titleField && data[c.titleField]) title = String(data[c.titleField]);
+        if (orderable && data.order != null) order = Number(data.order);
       } catch { /* fall back to filename */ }
     }
-    return `<a class="row" href="/edit?k=${k}&path=${encodeURIComponent(f.path)}">
-      <span>${esc(title)}</span><span class="row-a">Edit →</span></a>`;
+    return { path: f.path, title, order };
   }));
+  if (orderable) entries.sort((a, b) => a.order - b.order || a.path.localeCompare(b.path));
+
+  if (orderable) {
+    const rows = entries.map((e) => `<li class="drow" draggable="true" data-path="${esc(e.path)}">
+      <span class="dgrip" aria-hidden="true">⋮⋮</span>
+      <span class="dtitle">${esc(e.title)}</span>
+      <a class="row-a" href="/edit?k=${k}&path=${encodeURIComponent(e.path)}">Edit →</a></li>`).join('');
+    return shell(c.label, `
+      <div class="head"><h1>${esc(c.label)}</h1>
+        <span class="headlinks">
+          ${CREATABLE[k] ? `<a class="btn" href="/new?k=${k}">+ Add new</a>` : ''}
+          <a class="ghost" href="/">← All sections</a></span></div>
+      <p class="sub">Drag the rows to reorder how they appear on the site, then Save order.</p>
+      <form id="reorder" method="POST" action="/reorder" data-k="${esc(k)}">
+        <input type="hidden" name="k" value="${esc(k)}">
+        <input type="hidden" name="order" id="order-val" value="">
+        <ul class="dlist">${rows}</ul>
+        <div class="actions">
+          <button class="btn" type="submit" id="save-order" disabled>Save order</button>
+          <span id="order-status" class="save-status"></span>
+        </div>
+      </form>
+      <script src="/app.js"></script>`);
+  }
+
+  const rows = entries.map((e) => `<a class="row" href="/edit?k=${k}&path=${encodeURIComponent(e.path)}">
+    <span>${esc(e.title)}</span><span class="row-a">Edit →</span></a>`).join('');
   return shell(c.label, `
     <div class="head"><h1>${esc(c.label)}</h1>
       <span class="headlinks">
         ${CREATABLE[k] ? `<a class="btn" href="/new?k=${k}">+ Add new</a>` : ''}
         <a class="ghost" href="/">← All sections</a></span></div>
-    <div class="rows">${rows.join('')}</div>`);
+    <div class="rows">${rows}</div>`);
+}
+
+/** Save a new order: rewrite each file's `order` (1..N) in one commit. */
+async function doReorder(request, env) {
+  const form = await request.formData();
+  const k = String(form.get('k'));
+  const c = COLLECTIONS[k];
+  if (!c || !ORDERABLE.has(k)) return redirect('/');
+  let paths;
+  try { paths = JSON.parse(String(form.get('order') || '[]')); } catch { paths = []; }
+  if (!Array.isArray(paths) || !paths.length) return redirect(`/c?k=${k}`);
+
+  const files = [];
+  for (let i = 0; i < paths.length; i++) {
+    const path = String(paths[i]);
+    if (!path.startsWith(c.dir + '/')) continue;
+    const { text } = await ghGet(env, path);
+    let next;
+    if (c.kind === 'markdown') {
+      const { data, body } = parseMarkdown(text);
+      data.order = i + 1;
+      next = buildMarkdown(data, body);
+    } else {
+      const data = parseYaml(text); data.order = i + 1;
+      next = buildYaml(data);
+    }
+    if (next !== text) files.push({ path, text: next });
+  }
+  if (files.length) await ghCommitMany(env, files, `content: reorder ${k} (via CMS)`);
+  return listCollection(env, k);
 }
 
 /* ── Create a new entry ──────────────────────────────────────────────────── */
@@ -960,5 +1071,15 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .mlib-cell img{width:100%;height:110px;object-fit:cover;border-radius:6px;background:#f0f5f6}
 .mlib-name{font-size:.72rem;color:#5c6b75;word-break:break-word;line-height:1.25}
 .mlib-empty{padding:0 16px 16px;color:#5c6b75}
+.alist{max-width:760px;margin-top:8px}
+.arow{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:12px 14px;border:1px solid #e2ebef;border-radius:10px;margin-bottom:8px;background:#fff}
+.atext{color:#2a3742}
+.ameta{color:#5c6b75;font-size:.82rem;white-space:nowrap}
+.dlist{list-style:none;margin:0 0 16px;padding:0;max-width:720px}
+.drow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #dbe5e8;border-radius:10px;margin-bottom:8px;background:#fff;cursor:grab}
+.drow:active{cursor:grabbing}
+.drow.dragging{opacity:.5;border-style:dashed}
+.dgrip{color:#9db2bd;font-size:1.1rem;letter-spacing:-2px;user-select:none}
+.dtitle{flex:1;color:#2a3742}
 @media(max-width:560px){.mlib-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.mlib-cell img{height:84px}}
 `;
