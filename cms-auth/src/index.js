@@ -313,17 +313,10 @@ async function mediaPage(env, focusPath, notice) {
   const cards = images.map((p) => {
     const rel = p.replace(/^public\//, '');
     const m = manifest.map[p] || {};
-    return `<div class="mcard">
-      <form class="mcard-del" method="POST" action="/media/delete" data-confirm="Delete “${esc(p.slice(IMG_PREFIX.length))}” permanently? Any page still using it will lose it.">
-        <input type="hidden" name="path" value="/${esc(rel)}">
-        <input type="hidden" name="redirect" value="/media">
-        <button type="submit" title="Delete image" aria-label="Delete image">✕</button>
-      </form>
-      <a class="mcard-link" href="/media?path=${encodeURIComponent(p)}">
-        <span class="mthumb"><img loading="lazy" src="${SITE}/${esc(rel)}" alt=""></span>
-        <span class="mname">${esc(p.slice(IMG_PREFIX.length))}</span>
-        ${m.alt ? `<span class="mmeta">alt ✓</span>` : `<span class="mmeta warn">no alt yet</span>`}</a>
-    </div>`;
+    return `<a class="mcard mcard-link" href="/media?path=${encodeURIComponent(p)}">
+      <span class="mthumb"><img loading="lazy" src="${SITE}/${esc(rel)}" alt=""></span>
+      <span class="mname">${esc(p.slice(IMG_PREFIX.length))}</span>
+      ${m.alt ? `<span class="mmeta">alt ✓</span>` : `<span class="mmeta warn">no alt yet</span>`}</a>`;
   }).join('');
 
   const folderOpts = ['(top level)', ...folders].map((f) =>
@@ -335,7 +328,7 @@ async function mediaPage(env, focusPath, notice) {
         <a class="ghost" href="/media/rescan-alt">↻ Refresh alt from pages</a>
         <a class="ghost" href="/">← All sections</a></span></div>
     ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
-    <p class="sub">${images.length} image${images.length === 1 ? '' : 's'}. Click one to edit its details, copy its path, or delete it. Hover an image for its delete button.</p>
+    <p class="sub">${images.length} image${images.length === 1 ? '' : 's'}. Click one to edit its details, copy its path, or delete it.</p>
     <details class="upload-d">
       <summary>＋ Upload a new image</summary>
       <form class="upload" method="POST" action="/media/upload" enctype="multipart/form-data">
