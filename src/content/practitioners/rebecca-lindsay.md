@@ -1,7 +1,7 @@
 ---
 name: Rebecca Lindsay
 role: Embodiment Coach & Psychotherapist
-image: ''
+image: /images/rebecca.webp
 phone: 0411 417 337
 service: embodied-movement-dance
 facebook: https://www.facebook.com/rebecca.lindsay.7547
