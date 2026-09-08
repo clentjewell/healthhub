@@ -1,0 +1,28 @@
+# .htaccess — redirects for cPanel / Apache hosting.
+#
+# This mirrors public/_redirects (the Cloudflare Workers format). Apache reads
+# this file; Cloudflare ignores it, and vice-versa, so both can sit in the repo
+# safely. If you add a redirect in one, add the matching rule in the other.
+#
+# RedirectMatch (mod_alias, on by default on cPanel) is used with anchored
+# patterns so each rule matches that one path only — with or without a trailing
+# slash — and never a path that merely starts with it. 301 = permanent (keeps
+# search ranking); 302 = temporary.
+
+# The content editor (CMS) lives on its own Cloudflare Worker.
+RedirectMatch 302 ^/admin/?$ https://healthhub-cms-auth.clent.workers.dev/
+
+# Shannon O'Hara left the Hub (Kate Doedee took over her classes); her profile
+# is gone, so send old links to the practitioners index rather than a 404.
+RedirectMatch 301 ^/our-practitioner/shannon-ohara/?$ /our-practitioners/
+
+# The ADHD Workshop page was removed before its details were confirmed; the
+# workshop still shows on the timetable, so send old links there.
+RedirectMatch 301 ^/event/adhd-workshop/?$ /event/health-hub-studio-time-table/
+
+# Mis-slugged on WordPress — this was always Katie Verkerk's Function & Flow class.
+RedirectMatch 301 ^/event/naturopathic-health-seminars-with-katie-verkerk/?$ /event/function-flow/
+
+# Seniors Yoga was folded into Alicia Grace's Yoga & Meditation page (her single
+# class page), so its standalone page was retired.
+RedirectMatch 301 ^/event/seniors-yoga/?$ /event/yoga-meditation/

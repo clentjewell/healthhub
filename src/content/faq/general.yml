@@ -38,4 +38,9 @@ items:
   - id: location-hours
     q: Where are you located, and what are your hours?
     a: '{{address}} — the studio is open {{hours}}. Some classes and consultations run later than that, so check the weekly timetable or with the relevant practitioner for exact times.'
-disclaimer: CMS FAQ TEST — verify.
+disclaimer: >-
+  Information on this page is general in nature and does not replace
+  personalised advice from a qualified health practitioner. Our practitioners do
+  not diagnose, treat, cure or prevent any specific medical condition beyond
+  what is permitted under AHPRA and TGA guidelines. Please consult your GP or
+  specialist for any medical concerns.
