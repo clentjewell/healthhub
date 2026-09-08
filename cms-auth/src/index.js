@@ -106,6 +106,7 @@ async function route(request, env) {
   if (p === '/media/rescan-alt') return doRescanAlt(env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
   if (p === '/activity') return activityPage(env);
+  if (p === '/links') return linksPage(env);
   if (p === '/reorder' && request.method === 'POST') return doReorder(request, env);
   if (p === '/history') return historyPage(env, url.searchParams.get('k'), url.searchParams.get('path'));
   if (p === '/restore' && request.method === 'POST') return doRestore(request, env);
@@ -203,29 +204,78 @@ function forbidden(msg) {
 /* ── Pages ───────────────────────────────────────────────────────────────── */
 
 async function dashboard(env, me) {
-  const cards = Object.entries(COLLECTIONS).map(([k, c]) =>
-    `<a class="tile" href="/c?k=${k}"><span class="tile-t">${esc(c.label)}</span>
-      <span class="tile-a">Open →</span></a>`).join('');
-  let unread = 0;
-  try { unread = (await listEnquiries(env)).filter((e) => !e.read).length; } catch { /* ignore */ }
-  const inboxBadge = unread ? `<span class="tile-badge">${unread}</span>` : '';
-  const adminTile = me && me.role === 'admin'
-    ? `<a class="tile" href="/users"><span class="tile-t">Staff logins</span>
-        <span class="tile-a">Add or remove people →</span></a>` : '';
-  return shell('Website Manager', `
-    <div class="head"><h1>What would you like to edit?</h1>
-      <span class="headlinks">${me ? `<span class="whoami">${esc(me.email)}</span>` : ''}
-        <a class="ghost" href="/account">My account</a>
-        <a class="ghost" href="/logout">Sign out</a></span></div>
-    <p class="sub">Pick a section. Changes go live a minute or so after you save.</p>
-    <div class="tiles">${cards}
-      <a class="tile" href="/media"><span class="tile-t">Media library</span>
-        <span class="tile-a">Images &amp; uploads →</span></a>
-      <a class="tile" href="/enquiries"><span class="tile-t">Enquiries ${inboxBadge}</span>
-        <span class="tile-a">Contact messages →</span></a>
-      <a class="tile" href="/activity"><span class="tile-t">Recent changes</span>
-        <span class="tile-a">Who edited what →</span></a>
-      ${adminTile}</div>`);
+  const L = COLLECTIONS;
+  const [pracs, events, blog, services, pages, imgs, enquiries, commits] = await Promise.all([
+    ghList(env, L.practitioners.dir, L.practitioners.ext).catch(() => []),
+    ghList(env, L.events.dir, L.events.ext).catch(() => []),
+    ghList(env, L.blog.dir, L.blog.ext).catch(() => []),
+    ghList(env, L.services.dir, L.services.ext).catch(() => []),
+    ghList(env, L.pages.dir, L.pages.ext).catch(() => []),
+    ghTree(env, IMG_PREFIX).then((p) => p.filter((x) => IMG_EXT.test(x))).catch(() => []),
+    listEnquiries(env).catch(() => []),
+    ghRecentCommits(env, 20).catch(() => []),
+  ]);
+  const unread = enquiries.filter((e) => !e.read).length;
+  const recent = commits
+    .filter((c) => /^(content|media):/i.test(c.message) || /\(via CMS\)/i.test(c.message))
+    .slice(0, 6);
+
+  const glance = [
+    ['blog', 'Blog posts', blog.length], ['practitioners', 'Practitioners', pracs.length],
+    ['events', 'Classes & events', events.length], ['services', 'Services', services.length],
+    ['pages', 'Pages', pages.length],
+  ].map(([k, label, n]) => `<a class="g-item" href="/c?k=${k}"><span class="g-n">${n}</span><span class="g-l">${esc(label)}</span></a>`).join('')
+    + `<a class="g-item" href="/media"><span class="g-n">${imgs.length}</span><span class="g-l">Images</span></a>`;
+
+  const enqBody = enquiries.length
+    ? enquiries.slice(0, 4).map((e) => `<a class="d-row${e.read ? '' : ' unread'}" href="/enquiries?view=${encodeURIComponent(e.key)}">
+        <span class="d-row-t">${esc(e.name || 'Someone')}</span>
+        <span class="d-row-s">${esc(e.subject || '')}</span></a>`).join('')
+    : '<p class="d-empty">No messages yet. Contact-form enquiries appear here.</p>';
+
+  const recentBody = recent.length
+    ? recent.map((c) => `<div class="d-row"><span class="d-row-t">${esc(friendlyChange(c.message))}</span>
+        <span class="d-row-s">${esc(timeAgo(c.date))}</span></div>`).join('')
+    : '<p class="d-empty">No recent changes.</p>';
+
+  return shell('Dashboard', `
+    <div class="head"><h1>Dashboard</h1>
+      <span class="headlinks whoami">${me ? esc(me.name && me.name !== me.email ? me.name : me.email) : ''}</span></div>
+    <p class="sub">Welcome back. Here’s a snapshot of the website.</p>
+
+    <div class="dcards">
+      <section class="dcard glance-card">
+        <h2 class="dcard-h">At a glance</h2>
+        <div class="glance">${glance}</div>
+      </section>
+
+      <section class="dcard">
+        <h2 class="dcard-h">Enquiries ${unread ? `<span class="dcard-badge">${unread} new</span>` : ''}</h2>
+        <div class="d-list">${enqBody}</div>
+        <a class="dcard-more" href="/enquiries">Open inbox →</a>
+      </section>
+
+      <section class="dcard">
+        <h2 class="dcard-h">Recent changes</h2>
+        <div class="d-list">${recentBody}</div>
+        <a class="dcard-more" href="/activity">See all →</a>
+      </section>
+
+      <section class="dcard">
+        <h2 class="dcard-h">Link check</h2>
+        <p class="d-empty">Scan the site for broken internal links and missing images.</p>
+        <a class="dcard-more" href="/links">Run link check →</a>
+      </section>
+
+      <section class="dcard">
+        <h2 class="dcard-h">Quick add</h2>
+        <div class="qadd">
+          <a class="btn" href="/new?k=blog">＋ Blog post</a>
+          <a class="btn" href="/new?k=practitioners">＋ Practitioner</a>
+          <a class="btn" href="/new?k=events">＋ Class / event</a>
+        </div>
+      </section>
+    </div>`, 'dashboard');
 }
 
 /* ── Recent changes (activity log) ───────────────────────────────────────── */
@@ -269,9 +319,70 @@ async function activityPage(env) {
     rows = `<p class="err">Couldn’t load recent changes: ${esc(e.message)}</p>`;
   }
   return shell('Recent changes', `
-    <div class="head"><h1>Recent changes</h1><a class="ghost" href="/">← All sections</a></div>
+    <div class="head"><h1>Recent changes</h1></div>
     <p class="sub">The latest edits made through the website manager.</p>
-    <div class="alist">${rows}</div>`);
+    <div class="alist">${rows}</div>`, 'activity');
+}
+
+/* ── Link check (broken internal links & missing images) ─────────────────── */
+
+async function linksPage(env) {
+  // Redirected old URLs that resolve via .htaccess/_redirects — not broken.
+  const redirects = new Set([
+    '/our-practitioner/shannon-ohara/', '/event/seniors-yoga/', '/event/adhd-workshop/',
+    '/event/naturopathic-health-seminars-with-katie-verkerk/', '/admin/', '/admin',
+  ]);
+  const pageSet = new Set(['/', '/our-practitioners/', '/events/', '/blog/', '/faq/', '/contact/', '/make-a-booking/']);
+
+  const [pracs, events, blog, tree] = await Promise.all([
+    ghList(env, COLLECTIONS.practitioners.dir, COLLECTIONS.practitioners.ext).catch(() => []),
+    ghList(env, COLLECTIONS.events.dir, COLLECTIONS.events.ext).catch(() => []),
+    ghList(env, COLLECTIONS.blog.dir, COLLECTIONS.blog.ext).catch(() => []),
+    ghTree(env, IMG_PREFIX).catch(() => []),
+  ]);
+  for (const f of pracs) pageSet.add(`/our-practitioner/${f.name.replace(/\.md$/, '')}/`);
+  for (const f of events) pageSet.add(`/event/${f.name.replace(/\.md$/, '')}/`);
+  for (const f of blog) pageSet.add(`/blog/${f.name.replace(/\.md$/, '')}/`);
+  const imgSet = new Set(tree.filter((p) => IMG_EXT.test(p)).map((p) => '/' + p.replace(/^public\//, '')));
+
+  const bare = (u) => u.split('#')[0].split('?')[0];
+  const asPage = (u) => { u = bare(u); if (u && !/\.[a-z0-9]{2,5}$/i.test(u) && !u.endsWith('/')) u += '/'; return u; };
+
+  const findings = [];
+  for (const c of Object.values(COLLECTIONS)) {
+    if (c.kind !== 'markdown' && c.kind !== 'yaml') continue;
+    let files = []; try { files = await ghList(env, c.dir, c.ext); } catch { continue; }
+    for (const f of files) {
+      let text; try { text = (await ghGet(env, f.path)).text; } catch { continue; }
+      const urls = new Set();
+      for (const m of text.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']/gi)) urls.add(m[1]);
+      for (const m of text.matchAll(/\]\(([^)\s]+)\)/g)) urls.add(m[1]);
+      for (const m of text.matchAll(/(?:^|\n)\s*image:\s*["']?(\/[^\s"']+)/gi)) urls.add(m[1]);
+      for (const u of urls) {
+        if (!u || !u.startsWith('/') || u.startsWith('//')) continue;
+        if (/^\/images\//i.test(u)) {
+          if (!imgSet.has(bare(u))) findings.push({ file: f.name, url: u, type: 'Missing image' });
+        } else {
+          const n = asPage(u);
+          if (!pageSet.has(n) && !redirects.has(n) && !redirects.has(bare(u))) {
+            findings.push({ file: f.name, url: u, type: 'Broken link' });
+          }
+        }
+      }
+    }
+  }
+
+  const body = findings.length
+    ? `<p class="sub">${findings.length} issue${findings.length === 1 ? '' : 's'} found. Edit the page that contains each one and fix or remove the link.</p>
+       <div class="lk-list">${findings.map((x) => `<div class="lk-row">
+         <span class="lk-type ${x.type === 'Missing image' ? 'img' : ''}">${esc(x.type)}</span>
+         <span class="lk-url">${esc(x.url)}</span>
+         <span class="lk-file">in ${esc(x.file)}</span></div>`).join('')}</div>`
+    : '<p class="ok">✓ No broken internal links or missing images found.</p>';
+
+  return shell('Link check', `
+    <div class="head"><h1>Link check</h1><a class="ghost" href="/links">↻ Run again</a></div>
+    ${body}`, 'links');
 }
 
 /* ── Media library ───────────────────────────────────────────────────────── */
@@ -307,7 +418,7 @@ async function mediaPage(env, focusPath, notice) {
           <input type="hidden" name="redirect" value="/media">
           <button class="btn-danger" type="submit">🗑 Delete this image</button>
         </form>
-      </div>`);
+      </div>`, 'media');
   }
 
   const cards = images.map((p) => {
@@ -345,7 +456,7 @@ async function mediaPage(env, focusPath, notice) {
           <span class="hint">Max 8 MB. Best to resize large photos before uploading.</span></div>
       </form>
     </details>
-    <div class="mgrid">${cards}</div>`);
+    <div class="mgrid">${cards}</div>`, 'media');
 }
 
 /** Shared upload core. Validates the file, picks a unique path (auto-suffixing
@@ -480,7 +591,7 @@ async function accountPage(env, session, notice, isErr) {
       <label class="fl"><span class="fk">New password</span><input class="in" type="password" name="next" minlength="8" required></label>
       <p class="hint">At least 8 characters.</p>
       <div class="actions"><button class="btn" type="submit">Change password</button></div>
-    </form>`}`);
+    </form>`}`, 'account');
 }
 
 async function doChangePassword(request, env, session) {
@@ -536,7 +647,7 @@ async function usersPage(env, session, notice, isErr) {
       <label class="fl"><span class="fk">Temporary password</span><input class="in" name="password" minlength="8" required></label>
       <p class="hint">Give them this password; they change it under “My account”.</p>
       <div class="actions"><button class="btn" type="submit">Add staff login</button></div>
-    </form>`);
+    </form>`, 'users');
 }
 
 async function resetPasswordPage(env, session, email, notice, isErr) {
@@ -554,7 +665,7 @@ async function resetPasswordPage(env, session, email, notice, isErr) {
       <p class="hint">At least 8 characters.</p>
       <div class="actions"><button class="btn" type="submit">Set new password</button>
         <a class="ghost" href="/users">Cancel</a></div>
-    </form>`);
+    </form>`, 'users');
 }
 
 async function doUserCreate(request, env, session) {
@@ -694,7 +805,7 @@ async function enquiriesPage(env, viewKey) {
             <input type="hidden" name="key" value="${esc(viewKey)}">
             <button class="ghost" type="submit">Delete</button></form>
         </div>
-      </div>`);
+      </div>`, 'enquiries');
   }
 
   const rows = items.length ? items.map((e) => {
@@ -707,7 +818,7 @@ async function enquiriesPage(env, viewKey) {
   return shell('Enquiries', `
     <div class="head"><h1>Enquiries</h1><a class="ghost" href="/">← All sections</a></div>
     <p class="sub">Messages sent through the website contact form. (They’re also emailed to the studio.)</p>
-    <div class="enq-list">${rows}</div>`);
+    <div class="enq-list">${rows}</div>`, 'enquiries');
 }
 
 async function doEnquiryRead(request, env) {
@@ -797,7 +908,7 @@ async function listCollection(env, k) {
           <button class="btn" type="submit" id="save-order" disabled>Save order</button>
           <span id="order-status" class="save-status"></span>
         </div>
-      </form>`);
+      </form>`, k);
   }
 
   const rows = entries.map((e) => `<a class="row" href="/edit?k=${k}&path=${encodeURIComponent(e.path)}">
@@ -807,7 +918,7 @@ async function listCollection(env, k) {
       <span class="headlinks">
         ${CREATABLE[k] ? `<a class="btn" href="/new?k=${k}">+ Add new</a>` : ''}
         <a class="ghost" href="/">← All sections</a></span></div>
-    <div class="rows">${rows}</div>`);
+    <div class="rows">${rows}</div>`, k);
 }
 
 /** Save a new order: rewrite each file's `order` (1..N) in one commit. */
@@ -1330,8 +1441,41 @@ function topbarHtml() {
     <a class="brand" href="/"><img src="${SITE}/images/logo.png" alt="Health Hub" height="34"><span>Website Manager</span></a>
     <a class="ghost" href="/logout">Sign out</a></div>`;
 }
-function shell(title, inner) {
-  return page(title, `${topbarHtml()}<div class="wrap">${inner}</div><script src="/app.js"></script>`);
+
+function navItem(href, key, label, active) {
+  return `<a class="nav-item${active === key ? ' on' : ''}" href="${href}">${esc(label)}</a>`;
+}
+
+/** WordPress-style left sidebar shown on every managed page. */
+function sidebarHtml(active) {
+  return `<aside class="sidebar">
+    <a class="s-brand" href="/"><img src="${SITE}/images/logo.png" alt="Health Hub" height="28"><span>Website Manager</span></a>
+    <nav class="nav">
+      ${navItem('/', 'dashboard', 'Dashboard', active)}
+      <div class="nav-h">Content</div>
+      ${navItem('/c?k=pages', 'pages', 'Pages', active)}
+      ${navItem('/c?k=blog', 'blog', 'Blog posts', active)}
+      ${navItem('/c?k=practitioners', 'practitioners', 'Practitioners', active)}
+      ${navItem('/c?k=events', 'events', 'Classes & events', active)}
+      ${navItem('/c?k=services', 'services', 'Services', active)}
+      ${navItem('/c?k=timetable', 'timetable', 'Timetable', active)}
+      ${navItem('/c?k=faq', 'faq', 'FAQ', active)}
+      ${navItem('/c?k=settings', 'settings', 'Site settings', active)}
+      <div class="nav-h">Media &amp; messages</div>
+      ${navItem('/media', 'media', 'Media library', active)}
+      ${navItem('/enquiries', 'enquiries', 'Enquiries', active)}
+      <div class="nav-h">Site</div>
+      ${navItem('/activity', 'activity', 'Recent changes', active)}
+      ${navItem('/links', 'links', 'Link check', active)}
+      ${navItem('/users', 'users', 'Staff logins', active)}
+      ${navItem('/account', 'account', 'My account', active)}
+      <a class="nav-item nav-out" href="/logout">Sign out</a>
+    </nav>
+  </aside>`;
+}
+
+function shell(title, inner, active) {
+  return page(title, `<div class="admin">${sidebarHtml(active)}<div class="main"><div class="wrap">${inner}</div></div></div><script src="/app.js"></script>`);
 }
 
 function page(title, inner, status = 200) {
@@ -1396,7 +1540,30 @@ const CSS = `
 [hidden]{display:none!important}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef4f5;color:#22303a}
 .card{background:#fff;width:min(92vw,380px);margin:12vh auto;padding:30px 28px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
-.wrap{max-width:860px;margin:0 auto;padding:24px 20px 80px}
+.wrap{max-width:960px;margin:0 auto;padding:26px 26px 80px}
+/* Admin layout: left sidebar + main column */
+.admin{display:flex;min-height:100vh;align-items:stretch}
+.main{flex:1;min-width:0}
+.sidebar{width:236px;flex:none;background:#22303a;color:#cdd8de;padding:14px 0 24px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.s-brand{display:flex;align-items:center;gap:9px;padding:6px 18px 12px;color:#fff;text-decoration:none;border-bottom:1px solid #33454f;margin-bottom:8px}
+.s-brand span{font-weight:700;font-size:.9rem}
+.nav{display:flex;flex-direction:column}
+.nav-h{font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:#7f95a3;padding:14px 18px 4px}
+.nav-item{padding:9px 18px;color:#cdd8de;text-decoration:none;font-size:.92rem;border-left:3px solid transparent}
+.nav-item:hover{background:#2c3d49;color:#fff}
+.nav-item.on{background:#2c3d49;color:#fff;border-left-color:#45c2c6;font-weight:600}
+.nav-out{margin-top:14px;color:#9db2bd;border-top:1px solid #33454f;padding-top:14px}
+@media(max-width:820px){
+  .admin{flex-direction:column}
+  .sidebar{width:auto;height:auto;position:static;padding:8px 0}
+  .s-brand{border-bottom:0;margin:0;padding:8px 16px}
+  .nav{flex-flow:row wrap;gap:2px;padding:0 8px 6px}
+  .nav-h{display:none}
+  .nav-item{border-left:0;border-radius:7px;padding:7px 11px;font-size:.85rem}
+  .nav-item.on{border-left:0}
+  .nav-out{margin:0;border-top:0;padding:7px 11px}
+  .wrap{padding:18px 16px 60px}
+}
 .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 22px;background:#fff;border-bottom:1px solid #dce6eb}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
 .brand img{display:block}
@@ -1578,4 +1745,32 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .uh{font-size:1.1rem;color:#22496c;margin:18px 0 10px}
 .ghost.danger{color:#b3261e}
 @media(max-width:560px){.mlib-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.mlib-cell img{height:84px}}
+/* Dashboard cards */
+.dcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;align-items:start}
+.dcard{background:#fff;border:1px solid #dce6eb;border-radius:14px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.glance-card{grid-column:1/-1}
+.dcard-h{font-size:.95rem;color:#22496c;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+.dcard-badge{background:#b3261e;color:#fff;border-radius:20px;font-size:.72rem;padding:2px 9px;font-weight:700}
+.dcard-more{display:inline-block;margin-top:12px;color:#34719f;text-decoration:none;font-size:.88rem;font-weight:600}
+.glance{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.g-item{display:flex;flex-direction:column;gap:2px;padding:14px;border:1px solid #e6eef1;border-radius:11px;text-decoration:none;background:#f8fbfc}
+.g-item:hover{border-color:#34719f;background:#eef6f8}
+.g-n{font-size:1.7rem;font-weight:700;color:#1f7a80;line-height:1}
+.g-l{font-size:.82rem;color:#5c6b75}
+.d-list{display:flex;flex-direction:column}
+.d-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 0;border-top:1px solid #eef2f4;text-decoration:none;color:#2a3742}
+.d-row:first-child{border-top:0}
+.d-row.unread .d-row-t{font-weight:700;color:#22496c}
+.d-row-t{font-size:.9rem}
+.d-row-s{font-size:.78rem;color:#8494a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.d-empty{color:#8494a0;font-size:.88rem;margin:2px 0}
+.qadd{display:flex;flex-wrap:wrap;gap:10px}
+.qadd .btn{font-size:.9rem;padding:9px 14px}
+/* Link check */
+.lk-list{display:flex;flex-direction:column;gap:8px;max-width:820px;margin-top:8px}
+.lk-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 14px;border:1px solid #f0d3b0;background:#fffaf2;border-radius:10px}
+.lk-type{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a15c00;background:#fdeccf;border-radius:6px;padding:2px 8px}
+.lk-type.img{color:#8f1e17;background:#fdeceb}
+.lk-url{font-family:ui-monospace,Menlo,monospace;font-size:.85rem;color:#2a3742;word-break:break-all}
+.lk-file{font-size:.8rem;color:#8494a0}
 `;

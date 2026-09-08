@@ -46,7 +46,6 @@ const services = defineCollection({
     shortTitle: z.string().optional(),
     summary: z.string(),
     order: z.number().default(99),
-    icon: z.string().optional(),
     image: z.string().optional(),
     /** Practitioner (id) who offers this service — services are 1:1 with a
      *  provider. Booking details come from that practitioner, not the service. */

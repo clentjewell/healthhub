@@ -85,10 +85,10 @@ export const FIELD_META = {
   services: {
     groups: [
       { title: 'Service', fields: ['title', 'shortTitle', 'summary'] },
-      { title: 'Image & icon', fields: ['image', 'icon'] },
+      { title: 'Image', fields: ['image'] },
       { title: 'Settings', fields: ['order', 'provider'] },
     ],
-    labels: { title: 'Name', shortTitle: 'Short name', summary: 'Summary', image: 'Image', icon: 'Icon', order: 'Order', provider: 'Practitioner who offers this (slug)' },
+    labels: { title: 'Name', shortTitle: 'Short name', summary: 'Summary', image: 'Image', order: 'Order', provider: 'Practitioner who offers this (slug)' },
     hints: {
       shortTitle: 'Used in menus/cards; falls back to the name.',
       order: 'Lower numbers appear first.',
