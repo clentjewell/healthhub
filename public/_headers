@@ -1,14 +1,16 @@
 # HTTP response headers for the Cloudflare Workers static-assets deployment.
 # Same mechanism as public/_redirects.
 #
-# ONE Content-Security-Policy only. Cloudflare's _headers is additive — a
-# second block for /admin/* would send a *second* CSP header, and browsers
-# enforce the intersection of all CSP headers, which would block the CMS's
-# unpkg script that the second policy was trying to allow. So the CMS's needs
-# (unpkg for the Sveltia bundle; github/raw.githubusercontent for its API and
-# repo images) live in this single site-wide policy. That allowlists those
-# hosts on every page, not just /admin — a negligible loosening next to the
-# 'unsafe-inline' Astro's own inline scripts already require.
+# ONE Content-Security-Policy only. Cloudflare's _headers is additive — two
+# blocks would send two CSP headers and browsers enforce their intersection, so
+# everything the site needs lives in this single site-wide policy.
+#
+# The CMS runs on its own worker now (the old Sveltia bundle from unpkg and its
+# raw.githubusercontent images are gone), so the site itself only needs 'self',
+# Google Maps (embed), and FormSubmit (contact form). frame-ancestors still
+# allows the CMS worker to iframe the site for the editor's live preview.
+#
+# Kept in sync with public/.htaccess (the cPanel/Apache equivalent).
 #
 # NOT set here on purpose: Strict-Transport-Security (HSTS). Enable that on the
 # real domain at cutover (Cloudflare dashboard → SSL/TLS → Edge Certificates →
@@ -21,4 +23,4 @@
   # (for the content editor's live preview).
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://raw.githubusercontent.com; font-src 'self' data: https://unpkg.com; frame-src https://maps.google.com https://www.google.com; connect-src 'self' https://formsubmit.co; form-action 'self' https://formsubmit.co; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://maps.google.com https://www.google.com; connect-src 'self' https://formsubmit.co; form-action 'self' https://formsubmit.co; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'

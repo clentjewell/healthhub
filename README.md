@@ -35,6 +35,25 @@ Static output, no adapter required.
 > **Preview branch only.** Do **not** point production DNS at this until launch
 > (Phase 6 is launch prep; DNS cutover is a manual step, not automated here).
 
+## Deploy — cPanel (Apache)
+
+The site is a static build, so it also runs on cPanel. `.github/workflows/deploy-cpanel.yml`
+builds it and uploads `dist/` over FTPS on every push to `main`, so the CMS
+"Save → live" flow is preserved. Add these repo **Actions secrets** first:
+`CPANEL_FTP_SERVER`, `CPANEL_FTP_USERNAME`, `CPANEL_FTP_PASSWORD`,
+`CPANEL_FTP_DIR` (e.g. `/public_html/`).
+
+- **Redirects and headers** live in `public/.htaccess` (Apache) — the
+  equivalent of `public/_headers` + `public/_redirects` (Cloudflare). Keep the
+  Apache and Cloudflare files in sync when you change one.
+- **Cutover steps** when DNS points the real domain at cPanel:
+  1. In `.htaccess`, uncomment the `Strict-Transport-Security` (HSTS) line once
+     HTTPS is confirmed working.
+  2. Point the CMS at the live domain: set `SITE` in `cms-auth/src/index.js` to
+     `https://healthhubtweedcoast.com.au` and `wrangler deploy`, so the editor's
+     live preview and "View live" open the real site. (The CMS itself stays on
+     its own Cloudflare Worker; it edits GitHub, which triggers the deploy above.)
+
 ## Project structure
 
 ```

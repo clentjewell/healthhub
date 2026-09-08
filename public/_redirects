@@ -6,12 +6,10 @@
 /admin   https://healthhub-cms-auth.clent.workers.dev/  302
 /admin/  https://healthhub-cms-auth.clent.workers.dev/  302
 
-# Shannon O'Hara left the Hub in September 2026; Kate Doedee took over her
-# classes. Her profile is gone, so send anyone holding the old link to the team
-# rather than a 404 — /our-practitioner/ (singular) is not a real route, so the
-# index is the closest useful page.
-/our-practitioner/shannon-ohara/  /our-practitioners/  301
-/our-practitioner/shannon-ohara   /our-practitioners/  301
+# Shannon O'Hara left the Hub in September 2026 and Kate Doedee took over her
+# classes, so send her old profile link straight to Kate's profile.
+/our-practitioner/shannon-ohara/  /our-practitioner/kate-doedee/  301
+/our-practitioner/shannon-ohara   /our-practitioner/kate-doedee/  301
 
 # The ADHD Workshop page was removed before its details were ever confirmed;
 # the workshop still shows on the timetable, so send old links there.
