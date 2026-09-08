@@ -145,9 +145,15 @@ export const APP_JS = String.raw`
       // and auto-fill a blank alt from the media library's saved alt text.
       function apply(v, opts) {
         v = (v || '').trim();
+        opts = opts || {};
         field.value = v;
-        if (pathInp && (!opts || opts.setPath !== false)) pathInp.value = v;
-        if (prev) { prev.src = v ? base + v : ''; prev.style.display = v ? '' : 'none'; }
+        if (pathInp && opts.setPath !== false) pathInp.value = v;
+        // opts.previewSrc lets a just-picked file show instantly (a local object
+        // URL) even though its live URL won't exist until the site redeploys.
+        if (prev) {
+          prev.src = opts.previewSrc || (v ? base + v : '');
+          prev.style.display = (v || opts.previewSrc) ? '' : 'none';
+        }
         if (uploadBtn) uploadBtn.textContent = v ? 'Change image' : 'Upload image';
         if (clearBtn) clearBtn.hidden = !v;
         var form = field.closest('form');
@@ -162,6 +168,10 @@ export const APP_JS = String.raw`
         fileInp.addEventListener('change', function () {
           var f = fileInp.files && fileInp.files[0];
           if (!f) return;
+          // Instant local preview of the exact file the user picked.
+          var localUrl = '';
+          try { localUrl = URL.createObjectURL(f); } catch (e) {}
+          if (localUrl && prev) { prev.src = localUrl; prev.style.display = ''; }
           if (status) { status.textContent = 'Uploading…'; status.className = 'img-status busy'; }
           if (uploadBtn) uploadBtn.disabled = true;
           var fd = new FormData();
@@ -170,8 +180,8 @@ export const APP_JS = String.raw`
             .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
             .then(function (res) {
               if (res.ok && res.j && res.j.ok) {
-                apply(res.j.path);
-                if (status) { status.textContent = 'Uploaded ✓'; status.className = 'img-status ok'; }
+                apply(res.j.path, { previewSrc: localUrl });
+                if (status) { status.textContent = 'Uploaded ✓ — Save to publish'; status.className = 'img-status ok'; }
               } else {
                 if (status) { status.textContent = (res.j && res.j.error) || 'Upload failed.'; status.className = 'img-status err'; }
               }
