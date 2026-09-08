@@ -104,3 +104,9 @@ jobs:
           local-dir: ./dist/
           server-dir: ${{ secrets.CPANEL_FTP_DIR }}
           dry-run: ${{ steps.cfg.outputs.dry == 'true' }}
+          # SAFETY: never wipe the target first. This cPanel public_html also
+          # contains the Pottsville site folder and WordPress leftovers; the
+          # deploy must only manage its own files (it tracks them in
+          # .ftp-deploy-sync-state.json and never deletes anything else). Do NOT
+          # set this to true.
+          dangerous-clean-slate: false
