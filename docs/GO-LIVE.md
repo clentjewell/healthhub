@@ -7,6 +7,34 @@ window (early morning). Budget ~1 hour; the actual switch is a few minutes.
 
 ---
 
+## ⚠️ This cPanel account is SHARED — read first
+
+The account home contains **more than one site**:
+
+- `public_html/` (globe icon) — the **Health Hub** document root. **This is the
+  only folder this project deploys to.**
+- a separate **Pottsville** website folder — **must never be touched by this
+  project's deploy.**
+- other system folders (`.well-known`, `cgi-bin`, …) — leave alone.
+
+Two safety facts that keep Pottsville and everything else safe:
+
+1. **The deploy only ever deletes files it uploaded itself.** The FTP deploy
+   tracks the Health Hub files in `.ftp-deploy-sync-state.json`; it never
+   deletes anything not in that list (Pottsville, WordPress leftovers,
+   `.well-known`, etc.). We must **never** enable its "clean-slate"/wipe option.
+2. **The FTP deploy account is rooted at the Health Hub `public_html`.** So the
+   deploy can't even reach the Pottsville folder (it's a sibling, above the
+   deploy account's home).
+
+**Deploy-directory gotcha (already hit once):** the FTP account logs straight
+into `public_html`, so the `CPANEL_FTP_DIR` secret must be **`/`** (its own
+root), **not** `/public_html/`. Using `/public_html/` created a nested
+`public_html/public_html/` and the files landed there instead of the live
+docroot. Keep `CPANEL_FTP_DIR = /`.
+
+---
+
 ## How it fits together (before you start)
 
 - **Now:** `www.healthhubtweedcoast.com.au` DNS → **cPanel**, serving the old
@@ -59,7 +87,9 @@ to the visitor automatically.)
 ☐ **2.1** Repo → Settings → Secrets and variables → Actions → **Secrets** —
 confirm all four exist: `CPANEL_FTP_SERVER`, `CPANEL_FTP_USERNAME`,
 `CPANEL_FTP_PASSWORD`, `CPANEL_FTP_DIR`.
-(Verified working via a dry-run. `CPANEL_FTP_DIR` is currently `/public_html/`.)
+(`CPANEL_FTP_DIR` must be **`/`** — the FTP account logs straight into the
+Health Hub `public_html`. Setting it to `/public_html/` nests the site in a
+`public_html/public_html/` subfolder — see the shared-account warning above.)
 
 ---
 
@@ -69,7 +99,8 @@ Deploy the new site into a **subfolder** and check it before touching the live
 site.
 
 ☐ **3.1** Temporarily change the `CPANEL_FTP_DIR` secret to
-`/public_html/hh-preview/`.
+`/hh-preview/` (a subfolder of the Health Hub `public_html`, since the FTP
+account roots there).
 
 ☐ **3.2** Repo → **Actions** → *Deploy to cPanel* → **Run workflow** → untick
 `dry_run` → Run. Wait for the green tick.
@@ -81,8 +112,8 @@ _Note:_ some links point at the site root (`/…`) and will resolve against the
 live WordPress site while testing in a subfolder — that's expected; they'll be
 correct once the site is at the root.
 
-☐ **3.4** When happy, set `CPANEL_FTP_DIR` back to `/public_html/`, and in
-cPanel delete the `/public_html/hh-preview/` folder.
+☐ **3.4** When happy, set `CPANEL_FTP_DIR` back to `/`, and in cPanel delete the
+`public_html/hh-preview/` folder.
 
 ---
 
@@ -175,7 +206,7 @@ The site is back on WordPress within minutes. Then tell me what went wrong.
 | Thing | Value |
 | --- | --- |
 | Live domain | `www.healthhubtweedcoast.com.au` (pending www/non-www decision) |
-| cPanel deploy dir | `/public_html/` (secret `CPANEL_FTP_DIR`) |
+| cPanel deploy dir | secret `CPANEL_FTP_DIR` = `/` (FTP account roots at the Health Hub public_html; never `/public_html/` — it nests) |
 | Enable auto-deploy | repo variable `CPANEL_DEPLOY_ENABLED = true` |
 | Contact form to | rao@ test inbox → `health@pottsvilleacupuncture.com.au` at launch |
 | Contact form from | `website@healthhubtweedcoast.com.au` (forwarder → health@) |
