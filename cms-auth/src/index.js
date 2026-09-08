@@ -81,7 +81,7 @@ async function route(request, env) {
   if (p === '/c' && url.searchParams.get('k')) return listCollection(env, url.searchParams.get('k'));
   if (p === '/new' && url.searchParams.get('k')) return newEntryForm(url.searchParams.get('k'));
   if (p === '/create' && request.method === 'POST') return doCreate(request, env);
-  if (p === '/edit') return editForm(env, url.searchParams.get('k'), url.searchParams.get('path'));
+  if (p === '/edit') return editForm(env, url.searchParams.get('k'), url.searchParams.get('path'), null, url.searchParams.get('new') === '1');
   if (p === '/save' && request.method === 'POST') return doSave(request, env);
   if (p === '/media') return mediaPage(env, url.searchParams.get('path'));
   if (p === '/media/upload' && request.method === 'POST') return doUpload(request, env);
@@ -379,7 +379,7 @@ async function doCreate(request, env) {
   } catch (e) {
     return newEntryForm(k, `Could not create: ${e.message}`);
   }
-  return redirect(`/edit?k=${k}&path=${encodeURIComponent(path)}`);
+  return redirect(`/edit?k=${k}&path=${encodeURIComponent(path)}&new=1`);
 }
 
 /** Link targets for the timetable's "Link" dropdown, so an editor picks a
@@ -403,10 +403,15 @@ async function linkOptions(env) {
   return [...events, ...pracs].filter(Boolean);
 }
 
-async function editForm(env, k, path, notice) {
+async function editForm(env, k, path, notice, fresh) {
   const c = COLLECTIONS[k];
   if (!c || !path) return redirect('/');
   const { text, sha } = await ghGet(env, path);
+  // A just-created entry has no page on the live site yet, so the preview can't
+  // show it (the site serves the home page for the unknown URL). Say so plainly.
+  if (fresh && !notice) {
+    notice = 'Created. This page isn’t on the website yet, so the preview shows the home page for now. Fill in the details, click “Save & publish”, wait about a minute, then press ↻ Refresh in the preview to see it.';
+  }
 
   // Structured editors (timetable, faq): app.js renders repeatable rows from the
   // embedded JSON and writes the edited value back into #__json on submit.
@@ -486,6 +491,11 @@ async function editForm(env, k, path, notice) {
       <div class="pane-preview">
         <div class="pv-toolbar"><span class="pv-badge">Live preview</span>
           <button type="button" class="ghost" id="pv-reload">↻ Refresh</button></div>
+        ${fresh ? `<div class="pv-note">
+          <strong>Not on the website yet</strong>
+          <span>This new ${esc(CREATABLE[k]?.noun || 'entry')} hasn’t been published, so the preview below shows the home page. Click <b>Save &amp; publish</b>, wait about a minute, then press <b>↻ Refresh</b> to see it here.</span>
+          <button type="button" class="ghost" onclick="this.parentNode.remove()">Got it</button>
+        </div>` : ''}
         <iframe id="pv" src="${esc(previewSrc)}" title="Live preview" referrerpolicy="no-referrer"></iframe>
       </div>
     </div>
@@ -793,6 +803,10 @@ h1{font-size:1.4rem;margin:0}
 .pv-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #dce6eb;background:#fff}
 .pv-badge{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#1f7a80}
 .pane-preview iframe{flex:1;width:100%;border:0}
+.pv-note{position:absolute;top:52px;left:16px;right:16px;z-index:2;background:#fffaf0;border:1px solid #f2c94c;border-radius:8px;padding:14px 16px;box-shadow:0 6px 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:6px}
+.pv-note strong{color:#8a6d00;font-size:14px}
+.pv-note span{font-size:13px;color:#4a4a4a;line-height:1.5}
+.pv-note button{align-self:flex-start;margin-top:4px}
 @media(max-width:900px){.pane-preview{height:70vh}}
 .ta.body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
 .actions{display:flex;align-items:center;gap:16px;margin-top:26px}
