@@ -78,4 +78,20 @@ $headers[] = 'MIME-Version: 1.0';
 // The 5th arg sets the envelope sender to our domain, which helps SPF pass.
 $sent = @mail($RECIPIENT, $SUBJECT, $body, implode("\r\n", $headers), '-f' . $FROM_EMAIL);
 
+// Best-effort: also record the enquiry in the CMS inbox (healthhub-cms-auth
+// worker). Wrapped so a slow/failed call never affects the email or the
+// visitor's confirmation. No secret needed — the endpoint is guarded by a
+// honeypot + per-IP rate limit and only accepts these plain fields.
+$enq = http_build_query([
+  'name' => $name, 'email' => $email, 'phone' => $phone, 'message' => $message,
+]);
+$ctx = stream_context_create(['http' => [
+  'method'        => 'POST',
+  'header'        => "Content-Type: application/x-www-form-urlencoded\r\n",
+  'content'       => $enq,
+  'timeout'       => 3,
+  'ignore_errors' => true,
+]]);
+@file_get_contents('https://healthhub-cms-auth.clent.workers.dev/enquiry', false, $ctx);
+
 bounce($sent ? $SUCCESS : $FAILURE);

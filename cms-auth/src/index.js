@@ -70,6 +70,9 @@ async function route(request, env) {
   if (p === '/logout') {
     return redirect('/login', { 'Set-Cookie': sessionCookie('', 0) });
   }
+  // Public: the site's contact form (server-side, via contact.php) posts here so
+  // enquiries also land in the CMS inbox. No session — guarded by honeypot + rate limit.
+  if (p === '/enquiry' && request.method === 'POST') return doEnquiryIntake(request, env);
 
   // Everything below needs a session.
   if (!session) {
@@ -77,7 +80,10 @@ async function route(request, env) {
     return redirect('/login');
   }
 
-  if (p === '/' || p === '/login') return dashboard();
+  if (p === '/' || p === '/login') return dashboard(env);
+  if (p === '/enquiries') return enquiriesPage(env, url.searchParams.get('view'));
+  if (p === '/enquiries/read' && request.method === 'POST') return doEnquiryRead(request, env);
+  if (p === '/enquiries/delete' && request.method === 'POST') return doEnquiryDelete(request, env);
   if (p === '/c' && url.searchParams.get('k')) return listCollection(env, url.searchParams.get('k'));
   if (p === '/new' && url.searchParams.get('k')) return newEntryForm(url.searchParams.get('k'));
   if (p === '/create' && request.method === 'POST') return doCreate(request, env);
@@ -126,16 +132,21 @@ async function bumpFail(env, ip) {
 
 /* ── Pages ───────────────────────────────────────────────────────────────── */
 
-function dashboard() {
+async function dashboard(env) {
   const cards = Object.entries(COLLECTIONS).map(([k, c]) =>
     `<a class="tile" href="/c?k=${k}"><span class="tile-t">${esc(c.label)}</span>
       <span class="tile-a">Open →</span></a>`).join('');
+  let unread = 0;
+  try { unread = (await listEnquiries(env)).filter((e) => !e.read).length; } catch { /* ignore */ }
+  const inboxBadge = unread ? `<span class="tile-badge">${unread}</span>` : '';
   return shell('Website Manager', `
     <div class="head"><h1>What would you like to edit?</h1></div>
     <p class="sub">Pick a section. Changes go live a minute or so after you save.</p>
     <div class="tiles">${cards}
       <a class="tile" href="/media"><span class="tile-t">Media library</span>
         <span class="tile-a">Images &amp; uploads →</span></a>
+      <a class="tile" href="/enquiries"><span class="tile-t">Enquiries ${inboxBadge}</span>
+        <span class="tile-a">Contact messages →</span></a>
       <a class="tile" href="/activity"><span class="tile-t">Recent changes</span>
         <span class="tile-a">Who edited what →</span></a></div>`);
 }
@@ -338,6 +349,117 @@ async function doMediaSave(request, env) {
 function errorPage(msg) {
   return shell('Notice', `<div class="head"><h1>Notice</h1><a class="ghost" href="/media">← Media library</a></div>
     <p class="err">${msg}</p>`);
+}
+
+/* ── Enquiries inbox (contact-form messages) ─────────────────────────────── */
+
+const ENQ_PREFIX = 'enq:';
+
+async function saveEnquiry(env, data) {
+  if (!env.RL) return;
+  const key = `${ENQ_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const rec = {
+    name: String(data.name || '').slice(0, 200),
+    email: String(data.email || '').slice(0, 200),
+    phone: String(data.phone || '').slice(0, 60),
+    subject: String(data.subject || '').slice(0, 200),
+    message: String(data.message || '').slice(0, 5000),
+    date: new Date().toISOString(), read: false,
+  };
+  await env.RL.put(key, JSON.stringify(rec), {
+    expirationTtl: 60 * 60 * 24 * 365, // keep for a year
+    metadata: { name: rec.name, subject: rec.subject, date: rec.date, read: false },
+  });
+}
+
+async function listEnquiries(env) {
+  if (!env.RL) return [];
+  const list = await env.RL.list({ prefix: ENQ_PREFIX });
+  return list.keys.map((k) => {
+    const m = k.metadata || {};
+    return { key: k.name, name: m.name || '', subject: m.subject || '', date: m.date || '', read: !!m.read };
+  }).sort((a, b) => (a.date < b.date ? 1 : -1)); // newest first
+}
+
+/** Public intake — called server-side by the site's contact.php. */
+async function doEnquiryIntake(request, env) {
+  if (!env.RL) return new Response(null, { status: 204 });
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  const rlKey = `enqrl:${ip}`;
+  const n = parseInt((await env.RL.get(rlKey)) || '0', 10);
+  if (n >= 30) return new Response(null, { status: 204 }); // silently drop floods
+  await env.RL.put(rlKey, String(n + 1), { expirationTtl: 3600 });
+
+  const form = await request.formData();
+  if (String(form.get('_honey') || '').trim()) return new Response(null, { status: 204 }); // bot
+  const message = String(form.get('message') || '');
+  // No subject field on the form — use a short snippet of the message for the list.
+  const subject = String(form.get('subject') || '').trim()
+    || message.replace(/\s+/g, ' ').trim().slice(0, 70);
+  await saveEnquiry(env, {
+    name: form.get('name'), email: form.get('email'), phone: form.get('phone'),
+    subject, message,
+  });
+  return new Response(null, { status: 204 });
+}
+
+async function enquiriesPage(env, viewKey) {
+  const items = await listEnquiries(env);
+
+  if (viewKey) {
+    const raw = env.RL ? await env.RL.get(viewKey) : null;
+    if (!raw) return redirect('/enquiries');
+    const e = JSON.parse(raw);
+    // Mark read on open.
+    if (!e.read) {
+      e.read = true;
+      await env.RL.put(viewKey, JSON.stringify(e), {
+        expirationTtl: 60 * 60 * 24 * 365,
+        metadata: { name: e.name, subject: e.subject, date: e.date, read: true },
+      });
+    }
+    const when = new Date(e.date).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
+    const mailto = e.email ? `mailto:${encodeURIComponent(e.email)}?subject=${encodeURIComponent('Re: ' + (e.subject || 'your enquiry'))}` : '';
+    return shell('Enquiry', `
+      <div class="head"><h1>Enquiry</h1><a class="ghost" href="/enquiries">← All enquiries</a></div>
+      <div class="enq-view">
+        <p class="enq-meta">${esc(when)}</p>
+        <p><strong>From:</strong> ${esc(e.name || '—')}${e.email ? ` &lt;${esc(e.email)}&gt;` : ''}</p>
+        ${e.phone ? `<p><strong>Phone:</strong> ${esc(e.phone)}</p>` : ''}
+        ${e.subject ? `<p><strong>Subject:</strong> ${esc(e.subject)}</p>` : ''}
+        <div class="enq-body">${esc(e.message || '').replace(/\n/g, '<br>')}</div>
+        <div class="actions">
+          ${mailto ? `<a class="btn" href="${esc(mailto)}">Reply by email</a>` : ''}
+          <form method="POST" action="/enquiries/delete" onsubmit="return confirm('Delete this enquiry?')">
+            <input type="hidden" name="key" value="${esc(viewKey)}">
+            <button class="ghost" type="submit">Delete</button></form>
+        </div>
+      </div>`);
+  }
+
+  const rows = items.length ? items.map((e) => {
+    const when = e.date ? new Date(e.date).toLocaleDateString('en-AU', { dateStyle: 'medium' }) : '';
+    return `<a class="enq-row${e.read ? '' : ' unread'}" href="/enquiries?view=${encodeURIComponent(e.key)}">
+      <span class="enq-name">${esc(e.name || 'Someone')}</span>
+      <span class="enq-sub">${esc(e.subject || '(no subject)')}</span>
+      <span class="enq-when">${esc(when)}</span></a>`;
+  }).join('') : '<p class="sub">No enquiries yet. Messages from the website contact form will appear here.</p>';
+  return shell('Enquiries', `
+    <div class="head"><h1>Enquiries</h1><a class="ghost" href="/">← All sections</a></div>
+    <p class="sub">Messages sent through the website contact form. (They’re also emailed to the studio.)</p>
+    <div class="enq-list">${rows}</div>`);
+}
+
+async function doEnquiryRead(request, env) {
+  const form = await request.formData();
+  return redirect(`/enquiries?view=${encodeURIComponent(String(form.get('key') || ''))}`);
+}
+
+async function doEnquiryDelete(request, env) {
+  const form = await request.formData();
+  const key = String(form.get('key') || '');
+  if (env.RL && key.startsWith(ENQ_PREFIX)) await env.RL.delete(key);
+  return redirect('/enquiries');
 }
 
 /* ── Version history ─────────────────────────────────────────────────────── */
@@ -1081,5 +1203,18 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .drow.dragging{opacity:.5;border-style:dashed}
 .dgrip{color:#9db2bd;font-size:1.1rem;letter-spacing:-2px;user-select:none}
 .dtitle{flex:1;color:#2a3742}
+.tile-badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;background:#b3261e;color:#fff;border-radius:20px;font-size:.75rem;line-height:20px;text-align:center;vertical-align:middle}
+.enq-list{max-width:760px;margin-top:8px}
+.enq-row{display:grid;grid-template-columns:1fr 2fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid #e2ebef;border-radius:10px;margin-bottom:8px;background:#fff;text-decoration:none;color:#2a3742}
+.enq-row:hover{border-color:#34719f}
+.enq-row.unread{background:#f2f8f9;border-color:#bfe0e3}
+.enq-row.unread .enq-name{font-weight:700}
+.enq-name{color:#22496c}
+.enq-sub{color:#5c6b75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.enq-when{color:#8494a0;font-size:.82rem;white-space:nowrap}
+.enq-view{max-width:680px;background:#fff;border:1px solid #e2ebef;border-radius:12px;padding:18px 20px}
+.enq-meta{color:#8494a0;font-size:.82rem;margin:0 0 10px}
+.enq-body{margin:14px 0;padding:14px;background:#f7fafb;border-radius:8px;line-height:1.55;white-space:normal}
+@media(max-width:560px){.enq-row{grid-template-columns:1fr auto}.enq-sub{grid-column:1/-1}}
 @media(max-width:560px){.mlib-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.mlib-cell img{height:84px}}
 `;
