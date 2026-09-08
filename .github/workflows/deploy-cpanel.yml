@@ -3,39 +3,42 @@
 # WHY THIS EXISTS
 # On Cloudflare the site rebuilds itself whenever content lands on `main`
 # (including every CMS "Save"). cPanel/Apache can't build an Astro project, so
-# this workflow reproduces that flow: on every push to `main` it builds the site
-# and uploads the finished `dist/` to the cPanel document root. Net result is
-# unchanged for editors — Save in the CMS → commit to `main` → site live in a
-# couple of minutes.
+# this workflow reproduces that flow: build the site and upload the finished
+# `dist/` to the cPanel document root.
 #
-# ONE-TIME SETUP (repo → Settings → Secrets and variables → Actions):
-#   CPANEL_FTP_SERVER    the FTP host, e.g. ftp.healthhubtweedcoast.com.au
-#   CPANEL_FTP_USERNAME  the cPanel/FTP account username
-#   CPANEL_FTP_PASSWORD  its password  (use an FTP account scoped to the docroot)
-#   CPANEL_FTP_DIR       the target directory, e.g. /public_html/  (or a subdir)
+# ONE-TIME SETUP
+# 1. Repo → Settings → Secrets and variables → Actions → Secrets:
+#      CPANEL_FTP_SERVER    FTP host, e.g. ftp.healthhubtweedcoast.com.au
+#      CPANEL_FTP_USERNAME  cPanel/FTP account username
+#      CPANEL_FTP_PASSWORD  its password (use an FTP account scoped to the docroot)
+#      CPANEL_FTP_DIR       target directory, e.g. /public_html/  (or a subdir)
+# 2. To VALIDATE the secrets safely: Actions → "Deploy to cPanel" → Run workflow,
+#    leave "dry_run" ticked. It connects, logs in and checks the directory but
+#    uploads/deletes nothing.
+# 3. To turn on automatic deploys on every push to main (do this at cutover):
+#    Settings → Secrets and variables → Actions → Variables →
+#      CPANEL_DEPLOY_ENABLED = true
 #
-# Until those secrets exist the workflow runs, prints a notice, and succeeds
-# WITHOUT doing anything — so it never spams failures while the site is still on
-# Cloudflare. Add the secrets when you're ready to cut over to cPanel.
-#
-# NOTES
-# - Uses FTPS (encrypted). If the host only offers plain FTP, change `protocol`
-#   to `ftp` — but prefer FTPS, and SFTP if cPanel exposes SSH.
-# - The deploy is a mirror: files removed from the build are removed on the
-#   server. Point CPANEL_FTP_DIR at a directory used ONLY by this site, or it
-#   may delete unrelated files. It keeps a small `.ftp-deploy-sync-state.json`
-#   in that directory to make later deploys fast (delta-only).
-# - `.htaccess` (redirects + security headers) is a dotfile inside dist/ and is
-#   uploaded like any other file.
+# SAFETY
+# - Pushes to main do NOTHING until CPANEL_DEPLOY_ENABLED is "true", so CMS
+#   saves won't deploy to cPanel while the site still lives on Cloudflare.
+# - The deploy MIRRORS dist/: files removed from the build are removed on the
+#   server. Point CPANEL_FTP_DIR at a directory used ONLY by this site.
+# - FTPS (encrypted). If the host only offers plain FTP switch `protocol: ftp`;
+#   prefer SFTP if cPanel exposes SSH.
 
 name: Deploy to cPanel
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Validate the FTP connection only (no files uploaded or deleted)"
+        type: boolean
+        default: true
 
-# Never let two deploys overlap; a newer push supersedes an in-flight one.
 concurrency:
   group: deploy-cpanel
   cancel-in-progress: true
@@ -44,37 +47,54 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check cPanel is configured
+      - name: Decide whether to run
         id: cfg
         run: |
+          secrets_ok=false
           if [ -n "${{ secrets.CPANEL_FTP_SERVER }}" ] && [ -n "${{ secrets.CPANEL_FTP_PASSWORD }}" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            secrets_ok=true
+          fi
+          run=false
+          if [ "$secrets_ok" = true ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              run=true
+            elif [ "${{ vars.CPANEL_DEPLOY_ENABLED }}" = "true" ]; then
+              run=true
+            fi
+          fi
+          dry=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            dry=true
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "dry=$dry" >> "$GITHUB_OUTPUT"
+          if [ "$run" != true ]; then
+            echo "::notice::Skipping cPanel deploy. secrets set: $secrets_ok. Automatic deploys on push need repo variable CPANEL_DEPLOY_ENABLED=true; or run this workflow manually."
           else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::cPanel FTP secrets not set — skipping deploy. Add CPANEL_FTP_* secrets to enable."
+            echo "::notice::Running cPanel deploy (dry-run: $dry)."
           fi
 
       - name: Check out the repository
-        if: steps.cfg.outputs.enabled == 'true'
+        if: steps.cfg.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Set up Node
-        if: steps.cfg.outputs.enabled == 'true'
+        if: steps.cfg.outputs.run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
-        if: steps.cfg.outputs.enabled == 'true'
+        if: steps.cfg.outputs.run == 'true'
         run: npm ci
 
       - name: Build the site
-        if: steps.cfg.outputs.enabled == 'true'
+        if: steps.cfg.outputs.run == 'true'
         run: npm run build
 
       - name: Publish dist/ to cPanel over FTPS
-        if: steps.cfg.outputs.enabled == 'true'
+        if: steps.cfg.outputs.run == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.CPANEL_FTP_SERVER }}
@@ -83,3 +103,4 @@ jobs:
           protocol: ftps
           local-dir: ./dist/
           server-dir: ${{ secrets.CPANEL_FTP_DIR }}
+          dry-run: ${{ steps.cfg.outputs.dry == 'true' }}

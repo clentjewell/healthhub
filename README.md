@@ -38,10 +38,16 @@ Static output, no adapter required.
 ## Deploy — cPanel (Apache)
 
 The site is a static build, so it also runs on cPanel. `.github/workflows/deploy-cpanel.yml`
-builds it and uploads `dist/` over FTPS on every push to `main`, so the CMS
-"Save → live" flow is preserved. Add these repo **Actions secrets** first:
-`CPANEL_FTP_SERVER`, `CPANEL_FTP_USERNAME`, `CPANEL_FTP_PASSWORD`,
-`CPANEL_FTP_DIR` (e.g. `/public_html/`).
+builds it and uploads `dist/` over FTPS, so the CMS "Save → live" flow is
+preserved. Setup:
+
+1. Add repo **Actions secrets**: `CPANEL_FTP_SERVER`, `CPANEL_FTP_USERNAME`,
+   `CPANEL_FTP_PASSWORD`, `CPANEL_FTP_DIR` (e.g. `/public_html/`).
+2. **Validate them** (safe): Actions → *Deploy to cPanel* → *Run workflow* with
+   **dry_run** ticked — it logs in and checks the directory but uploads nothing.
+3. **Enable auto-deploy at cutover**: add repo **Actions variable**
+   `CPANEL_DEPLOY_ENABLED = true`. Until then, pushes to `main` (CMS saves)
+   do **not** deploy to cPanel — so nothing goes live there prematurely.
 
 - **Redirects and headers** live in `public/.htaccess` (Apache) — the
   equivalent of `public/_headers` + `public/_redirects` (Cloudflare). Keep the
