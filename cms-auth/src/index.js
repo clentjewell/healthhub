@@ -11,7 +11,7 @@ import {
   COLLECTIONS, verifyLogin, createSession, readSession, sessionCookie,
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
   loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
-  ghCommits, ghGetAtRef,
+  ghCommits, ghGetAtRef, ghRaw,
 } from './lib.js';
 import { APP_JS } from './app-js.js';
 import { groupedKeys, labelFor, hintFor, previewPath } from './fields.js';
@@ -86,6 +86,7 @@ async function route(request, env) {
   if (p === '/media') return mediaPage(env, url.searchParams.get('path'));
   if (p === '/media/upload' && request.method === 'POST') return doUpload(request, env);
   if (p === '/media/upload-inline' && request.method === 'POST') return doUploadInline(request, env);
+  if (p === '/media/file') return doMediaFile(url, env);
   if (p === '/media/save' && request.method === 'POST') return doMediaSave(request, env);
   if (p === '/history') return historyPage(env, url.searchParams.get('k'), url.searchParams.get('path'));
   if (p === '/restore' && request.method === 'POST') return doRestore(request, env);
@@ -235,6 +236,24 @@ async function doUpload(request, env) {
     await writeManifest(env, map, sha, `media: metadata for ${path}`);
   }
   return redirect(`/media?path=${encodeURIComponent(path)}`);
+}
+
+const MIME = { webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', avif: 'image/avif', svg: 'image/svg+xml' };
+
+/** Serve an image's bytes straight from the repo, so the media library can show
+ *  a thumbnail for an image uploaded seconds ago that the site hasn't built yet.
+ *  Accepts a public URL path like /images/foo.webp (maps to public/images/…). */
+async function doMediaFile(url, env) {
+  const rel = url.searchParams.get('path') || '';
+  if (!/^\/images\/[^?]+\.(webp|jpe?g|png|gif|avif|svg)$/i.test(rel) || rel.includes('..')) {
+    return new Response('Bad path', { status: 400 });
+  }
+  const res = await ghRaw(env, 'public' + rel);
+  if (!res.ok) return new Response('Not found', { status: res.status === 404 ? 404 : 502 });
+  const ext = rel.split('.').pop().toLowerCase();
+  return new Response(res.body, {
+    headers: { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': 'private, max-age=120' },
+  });
 }
 
 /** Inline upload used by the image field's "Upload" button. Returns JSON so the
@@ -491,6 +510,10 @@ async function editForm(env, k, path, notice, fresh) {
   const name = path.split('/').pop();
   const datalist = `<datalist id="imglist">${imgs.map((p) => `<option value="${esc(p)}">`).join('')}</datalist>`;
   const altJson = `<script type="application/json" id="alt-map">${JSON.stringify(altMap).replace(/</g, '\\u003c')}</script>`;
+  // Full media list (newest first) for the "Choose from library" modal grid.
+  const libJson = `<script type="application/json" id="media-lib">${JSON.stringify(
+    imgs.slice().reverse().map((p) => ({ path: p, alt: altMap[p] || '' }))
+  ).replace(/</g, '\\u003c')}</script>`;
   const live = SITE + previewPath(k, name);
   const previewSrc = live + (live.includes('?') ? '&' : '?') + 'cms-preview=1';
   return page(`Edit — ${name}`, `
@@ -506,7 +529,7 @@ async function editForm(env, k, path, notice, fresh) {
     </div>
     ${notice ? `<p class="ok wrap-msg">${esc(notice)}</p>` : ''}
     <span id="img-base" data-base="${SITE}" hidden></span>
-    ${datalist}${altJson}
+    ${datalist}${altJson}${libJson}
     <div class="twopane" data-preview-origin="${SITE}">
       <div class="pane-fields">
         <form id="editform" method="POST" action="/save">
@@ -654,15 +677,16 @@ function renderOneField(collection, key, val, labelOverride) {
       <img class="img-prev" src="${s ? SITE + esc(s) : ''}" alt="" style="${s ? '' : 'display:none'}">
       <div class="imgbtns">
         <button type="button" class="btn-sm img-upload">${s ? 'Change image' : 'Upload image'}</button>
+        <button type="button" class="btn-ghost-sm img-library">Choose from library</button>
         <button type="button" class="ghost img-clear"${s ? '' : ' hidden'}>Remove</button>
         <span class="img-status" role="status"></span>
       </div>
       <input type="file" class="img-file" accept="image/*" hidden>
       <input class="in img-field" type="hidden" name="f__${esc(key)}" value="${esc(s)}">
       <details class="img-adv">
-        <summary>Advanced — type a path or use the full library</summary>
+        <summary>Advanced — type a path</summary>
         <input class="in img-path" type="text" list="imglist" value="${esc(s)}" placeholder="/images/…">
-        <a class="ghost" href="/media" target="_blank" rel="noopener">Open media library ↗</a>
+        <a class="ghost" href="/media" target="_blank" rel="noopener">Open full media manager ↗</a>
       </details>
       ${hintHtml}</div>${hidden}`;
   }
@@ -919,4 +943,22 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .img-adv summary{font-size:.8rem;color:#5c6b75;cursor:pointer}
 .img-adv .img-path{margin:8px 0 4px}
 .imglink{display:inline-block;margin-top:2px;font-size:.82rem}
+.btn-ghost-sm{background:#fff;color:#34719f;border:1px solid #cddbe3;border-radius:8px;padding:8px 14px;font-size:.9rem;font-weight:600;cursor:pointer}
+.btn-ghost-sm:hover{background:#eef4f5}
+/* Media library modal */
+.mlib-overlay{position:fixed;inset:0;background:rgba(20,35,45,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.mlib{background:#fff;border-radius:14px;width:min(920px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.mlib-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #e2ebef;flex-wrap:wrap}
+.mlib-head strong{font-size:1.05rem;color:#22496c}
+.mlib-search{flex:1;min-width:160px}
+.mlib-status{font-size:.82rem;color:#5c6b75}
+.mlib-status.busy{color:#8a6d00}.mlib-status.err{color:#b3261e}
+.mlib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:16px;overflow-y:auto}
+.mlib-cell{display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid #e2ebef;border-radius:10px;background:#fff;cursor:pointer;text-align:center}
+.mlib-cell:hover{border-color:#34719f;box-shadow:0 4px 14px rgba(52,113,159,.15)}
+.mlib-cell.sel{border-color:#1f7a80;box-shadow:0 0 0 2px #1f7a80 inset}
+.mlib-cell img{width:100%;height:110px;object-fit:cover;border-radius:6px;background:#f0f5f6}
+.mlib-name{font-size:.72rem;color:#5c6b75;word-break:break-word;line-height:1.25}
+.mlib-empty{padding:0 16px 16px;color:#5c6b75}
+@media(max-width:560px){.mlib-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.mlib-cell img{height:84px}}
 `;

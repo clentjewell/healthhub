@@ -141,6 +141,13 @@ export const APP_JS = String.raw`
       var status = wrap.querySelector('.img-status');
       if (!field) return;
 
+      // If a chosen image isn't deployed yet, show it from the repo via the worker.
+      if (prev) prev.addEventListener('error', function () {
+        var v = field.value.trim();
+        if (!v || prev.dataset.fb) return; prev.dataset.fb = '1';
+        prev.src = '/media/file?path=' + encodeURIComponent(v);
+      });
+
       // Apply a value everywhere: preview, buttons, advanced field, live preview,
       // and auto-fill a blank alt from the media library's saved alt text.
       function apply(v, opts) {
@@ -151,6 +158,7 @@ export const APP_JS = String.raw`
         // opts.previewSrc lets a just-picked file show instantly (a local object
         // URL) even though its live URL won't exist until the site redeploys.
         if (prev) {
+          prev.dataset.fb = ''; // let the new value try its live URL before falling back
           prev.src = opts.previewSrc || (v ? base + v : '');
           prev.style.display = (v || opts.previewSrc) ? '' : 'none';
         }
@@ -197,7 +205,122 @@ export const APP_JS = String.raw`
         pathInp.addEventListener('input', function () { apply(pathInp.value, { setPath: false }); });
         pathInp.addEventListener('change', function () { apply(pathInp.value, { setPath: false }); });
       }
+      var libBtn = wrap.querySelector('.img-library');
+      if (libBtn) libBtn.addEventListener('click', function () {
+        openMediaLibrary(base, field.value, function (path) {
+          apply(path);
+          if (status) { status.textContent = 'Selected — Save to publish'; status.className = 'img-status ok'; }
+        });
+      });
     });
+  }
+
+  /* ── Media library modal: pick an existing image or upload a new one ─────── */
+  var mediaLib = null; // built once, reused
+
+  function loadMediaItems() {
+    try { return JSON.parse(document.getElementById('media-lib').textContent) || []; }
+    catch (e) { return []; }
+  }
+
+  function buildMediaLib() {
+    var overlay = el('div', { class: 'mlib-overlay', role: 'dialog', 'aria-modal': 'true', hidden: '' });
+    var box = el('div', { class: 'mlib' });
+    var head = el('div', { class: 'mlib-head' }, [
+      el('strong', {}, ['Media library']),
+      el('input', { class: 'in mlib-search', type: 'search', placeholder: 'Search images…' }),
+      el('button', { type: 'button', class: 'btn-sm mlib-upload' }, ['Upload new']),
+      el('button', { type: 'button', class: 'ghost mlib-close', 'aria-label': 'Close' }, ['✕']),
+    ]);
+    var grid = el('div', { class: 'mlib-grid' });
+    var empty = el('p', { class: 'mlib-empty', hidden: '' }, ['No images match.']);
+    var status = el('span', { class: 'mlib-status' });
+    var fileInp = el('input', { type: 'file', class: 'mlib-file', accept: 'image/*', hidden: '' });
+    head.appendChild(status);
+    box.appendChild(head); box.appendChild(grid); box.appendChild(empty); box.appendChild(fileInp);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    var state = { base: '', onPick: null, current: '' };
+
+    function close() { overlay.hidden = true; }
+    function pick(path) { if (state.onPick) state.onPick(path); close(); }
+
+    function render(filter) {
+      grid.textContent = '';
+      var items = loadMediaItems();
+      var q = (filter || '').toLowerCase();
+      var shown = 0;
+      items.forEach(function (it) {
+        var hay = (it.path + ' ' + (it.alt || '')).toLowerCase();
+        if (q && hay.indexOf(q) === -1) return;
+        shown++;
+        var name = it.path.split('/').pop();
+        var cell = el('button', { type: 'button', class: 'mlib-cell' + (it.path === state.current ? ' sel' : ''), title: name });
+        var img = el('img', { loading: 'lazy', alt: it.alt || '' });
+        // Just-uploaded images aren't on the live site yet — fall back to the
+        // worker, which serves the bytes straight from the repo.
+        img.addEventListener('error', function () {
+          if (img.dataset.fb) return; img.dataset.fb = '1';
+          img.src = '/media/file?path=' + encodeURIComponent(it.path);
+        });
+        img.src = state.base + it.path;
+        cell.appendChild(img);
+        cell.appendChild(el('span', { class: 'mlib-name' }, [name]));
+        cell.addEventListener('click', function () { pick(it.path); });
+        grid.appendChild(cell);
+      });
+      empty.hidden = shown > 0;
+    }
+
+    head.querySelector('.mlib-search').addEventListener('input', function (e) { render(e.target.value); });
+    head.querySelector('.mlib-close').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) close(); });
+
+    var uploadBtn = head.querySelector('.mlib-upload');
+    uploadBtn.addEventListener('click', function () { fileInp.click(); });
+    fileInp.addEventListener('change', function () {
+      var f = fileInp.files && fileInp.files[0];
+      if (!f) return;
+      status.textContent = 'Uploading…'; status.className = 'mlib-status busy';
+      uploadBtn.disabled = true;
+      var fd = new FormData(); fd.append('file', f);
+      fetch('/media/upload-inline', { method: 'POST', body: fd })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          if (res.ok && res.j && res.j.ok) {
+            // Add to the in-page list so it shows without a reload, then select it.
+            try {
+              var node = document.getElementById('media-lib');
+              var arr = JSON.parse(node.textContent) || [];
+              arr.unshift({ path: res.j.path, alt: '' });
+              node.textContent = JSON.stringify(arr);
+            } catch (e) {}
+            status.textContent = ''; status.className = 'mlib-status';
+            pick(res.j.path);
+          } else {
+            status.textContent = (res.j && res.j.error) || 'Upload failed.'; status.className = 'mlib-status err';
+          }
+        })
+        .catch(function () { status.textContent = 'Upload failed — check your connection.'; status.className = 'mlib-status err'; })
+        .then(function () { uploadBtn.disabled = false; fileInp.value = ''; });
+    });
+
+    return {
+      open: function (base, current, onPick) {
+        state.base = base; state.current = current || ''; state.onPick = onPick;
+        head.querySelector('.mlib-search').value = '';
+        status.textContent = ''; status.className = 'mlib-status';
+        render('');
+        overlay.hidden = false;
+      },
+    };
+  }
+
+  function openMediaLibrary(base, current, onPick) {
+    if (!mediaLib) mediaLib = buildMediaLib();
+    mediaLib.open(base, current, onPick);
   }
 
   /* ── Live preview: push field edits into the preview iframe ────────────── */

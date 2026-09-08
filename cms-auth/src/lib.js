@@ -134,6 +134,18 @@ export async function ghGet(env, path) {
   return { text: b64ToUtf8(data.content.replace(/\n/g, '')), sha: data.sha };
 }
 
+/** Raw file bytes from the repo (for serving media that isn't deployed yet). */
+export async function ghRaw(env, path) {
+  return fetch(`https://api.github.com/repos/${REPO}/contents/${encodeURI(path)}?ref=${BRANCH}`, {
+    headers: {
+      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github.raw',
+      'User-Agent': 'healthhub-cms',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  });
+}
+
 export async function ghPut(env, path, text, sha, message) {
   const res = await gh(env, 'PUT', `/repos/${REPO}/contents/${path}`, {
     message, content: utf8ToB64(text), sha, branch: BRANCH,
