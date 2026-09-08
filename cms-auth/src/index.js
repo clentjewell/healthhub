@@ -9,6 +9,7 @@
  */
 import {
   COLLECTIONS, verifyLogin, createSession, readSession, sessionCookie,
+  parseUsers, hashPassword, verifyHash,
   ghList, ghGet, ghPut, parseMarkdown, buildMarkdown, parseYaml, buildYaml,
   loadYamlSnippet, ghTree, ghGetOrNull, ghPutBinary, readManifest, writeManifest,
   ghCommits, ghGetAtRef, ghRaw, ghRecentCommits, ghCommitMany,
@@ -80,7 +81,15 @@ async function route(request, env) {
     return redirect('/login');
   }
 
-  if (p === '/' || p === '/login') return dashboard(env);
+  if (p === '/' || p === '/login') return dashboard(env, await currentUser(env, session));
+  if (p === '/account') return accountPage(env, session);
+  if (p === '/account/password' && request.method === 'POST') return doChangePassword(request, env, session);
+  if (p === '/users') return usersPage(env, session);
+  if (p === '/users/create' && request.method === 'POST') return doUserCreate(request, env, session);
+  if (p === '/users/reset' && request.method === 'GET') return resetPasswordPage(env, session, url.searchParams.get('email'));
+  if (p === '/users/reset' && request.method === 'POST') return doUserReset(request, env, session);
+  if (p === '/users/role' && request.method === 'POST') return doUserRole(request, env, session);
+  if (p === '/users/delete' && request.method === 'POST') return doUserDelete(request, env, session);
   if (p === '/enquiries') return enquiriesPage(env, url.searchParams.get('view'));
   if (p === '/enquiries/read' && request.method === 'POST') return doEnquiryRead(request, env);
   if (p === '/enquiries/delete' && request.method === 'POST') return doEnquiryDelete(request, env);
@@ -113,7 +122,7 @@ async function doLogin(request, env) {
 
   const form = await request.formData();
   const email = String(form.get('email') || '');
-  const ok = await verifyLogin(env, email, String(form.get('password') || ''));
+  const ok = await authenticate(env, email, String(form.get('password') || ''));
   if (!ok) { await bumpFail(env, ip); return loginPage('Incorrect email or password.'); }
 
   const value = await createSession(env, email.trim().toLowerCase());
@@ -130,17 +139,82 @@ async function bumpFail(env, ip) {
   await env.RL.put(`fail:${ip}`, String(n), { expirationTtl: RL_WINDOW });
 }
 
+/* ── Staff accounts (multi-user) ─────────────────────────────────────────────
+ * The AUTH_USERS secret holds the original shared login; anyone in it is a
+ * bootstrap ADMIN, so there's always a way in even if KV is empty. Extra staff
+ * accounts live in KV (user:<email>) and are managed from within the CMS. */
+
+const USER_PREFIX = 'user:';
+const validEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || ''));
+
+async function getKvUser(env, email) {
+  if (!env.RL) return null;
+  const raw = await env.RL.get(USER_PREFIX + email);
+  return raw ? JSON.parse(raw) : null;
+}
+async function putKvUser(env, u) {
+  await env.RL.put(USER_PREFIX + u.email, JSON.stringify(u), { metadata: { name: u.name, role: u.role } });
+}
+async function listKvUsers(env) {
+  if (!env.RL) return [];
+  const list = await env.RL.list({ prefix: USER_PREFIX });
+  return list.keys.map((k) => ({
+    email: k.name.slice(USER_PREFIX.length),
+    name: (k.metadata || {}).name || '', role: (k.metadata || {}).role || 'editor',
+  })).sort((a, b) => a.email.localeCompare(b.email));
+}
+async function deleteKvUser(env, email) { if (env.RL) await env.RL.delete(USER_PREFIX + email); }
+
+/** Everyone who can sign in: bootstrap admins (secret) + KV staff, de-duped. */
+async function allUsers(env) {
+  const kv = await listKvUsers(env);
+  const seen = new Set(kv.map((u) => u.email));
+  const boot = [...parseUsers(env.AUTH_USERS).keys()]
+    .filter((e) => !seen.has(e))
+    .map((email) => ({ email, name: 'Owner login', role: 'admin', bootstrap: true }));
+  return boot.concat(kv);
+}
+
+/** Resolve identity + role: KV first, then bootstrap admin from the secret. */
+async function resolveUser(env, email) {
+  email = String(email || '').trim().toLowerCase();
+  const kv = await getKvUser(env, email);
+  if (kv) return { email, name: kv.name || email, role: kv.role || 'editor' };
+  if (parseUsers(env.AUTH_USERS).has(email)) return { email, name: 'Owner login', role: 'admin', bootstrap: true };
+  return null;
+}
+async function currentUser(env, session) { return session ? resolveUser(env, session.email) : null; }
+
+/** Authenticate a login: KV user's hash, else the bootstrap secret. */
+async function authenticate(env, email, password) {
+  email = String(email || '').trim().toLowerCase();
+  const kv = await getKvUser(env, email);
+  if (kv) return verifyHash(password, kv.hash);
+  return verifyLogin(env, email, password);
+}
+
+function forbidden(msg) {
+  return shell('Not allowed', `<div class="head"><h1>Not allowed</h1><a class="ghost" href="/">← Back</a></div>
+    <p class="err">${esc(msg || 'You don’t have permission to do that.')}</p>`);
+}
+
 /* ── Pages ───────────────────────────────────────────────────────────────── */
 
-async function dashboard(env) {
+async function dashboard(env, me) {
   const cards = Object.entries(COLLECTIONS).map(([k, c]) =>
     `<a class="tile" href="/c?k=${k}"><span class="tile-t">${esc(c.label)}</span>
       <span class="tile-a">Open →</span></a>`).join('');
   let unread = 0;
   try { unread = (await listEnquiries(env)).filter((e) => !e.read).length; } catch { /* ignore */ }
   const inboxBadge = unread ? `<span class="tile-badge">${unread}</span>` : '';
+  const adminTile = me && me.role === 'admin'
+    ? `<a class="tile" href="/users"><span class="tile-t">Staff logins</span>
+        <span class="tile-a">Add or remove people →</span></a>` : '';
   return shell('Website Manager', `
-    <div class="head"><h1>What would you like to edit?</h1></div>
+    <div class="head"><h1>What would you like to edit?</h1>
+      <span class="headlinks">${me ? `<span class="whoami">${esc(me.email)}</span>` : ''}
+        <a class="ghost" href="/account">My account</a>
+        <a class="ghost" href="/logout">Sign out</a></span></div>
     <p class="sub">Pick a section. Changes go live a minute or so after you save.</p>
     <div class="tiles">${cards}
       <a class="tile" href="/media"><span class="tile-t">Media library</span>
@@ -148,7 +222,8 @@ async function dashboard(env) {
       <a class="tile" href="/enquiries"><span class="tile-t">Enquiries ${inboxBadge}</span>
         <span class="tile-a">Contact messages →</span></a>
       <a class="tile" href="/activity"><span class="tile-t">Recent changes</span>
-        <span class="tile-a">Who edited what →</span></a></div>`);
+        <span class="tile-a">Who edited what →</span></a>
+      ${adminTile}</div>`);
 }
 
 /* ── Recent changes (activity log) ───────────────────────────────────────── */
@@ -351,6 +426,152 @@ function errorPage(msg) {
     <p class="err">${msg}</p>`);
 }
 
+/* ── My account (change own password) ────────────────────────────────────── */
+
+async function accountPage(env, session, notice, isErr) {
+  const me = await currentUser(env, session);
+  if (!me) return redirect('/login');
+  return shell('My account', `
+    <div class="head"><h1>My account</h1><a class="ghost" href="/">← All sections</a></div>
+    ${notice ? `<p class="${isErr ? 'err' : 'ok'}">${esc(notice)}</p>` : ''}
+    <p class="sub">Signed in as <strong>${esc(me.email)}</strong>${me.role === 'admin' ? ' (admin)' : ''}.</p>
+    ${me.bootstrap ? '<p class="sub">This is the owner login; its password is managed by your developer.</p>' : `
+    <form method="POST" action="/account/password" class="narrow-form">
+      <label class="fl"><span class="fk">Current password</span><input class="in" type="password" name="current" required></label>
+      <label class="fl"><span class="fk">New password</span><input class="in" type="password" name="next" minlength="8" required></label>
+      <p class="hint">At least 8 characters.</p>
+      <div class="actions"><button class="btn" type="submit">Change password</button></div>
+    </form>`}`);
+}
+
+async function doChangePassword(request, env, session) {
+  const me = await currentUser(env, session);
+  if (!me) return redirect('/login');
+  if (me.bootstrap) return accountPage(env, session, 'The owner login’s password is managed by your developer.', true);
+  const form = await request.formData();
+  const next = String(form.get('next') || '');
+  if (next.length < 8) return accountPage(env, session, 'New password must be at least 8 characters.', true);
+  if (!(await authenticate(env, me.email, String(form.get('current') || '')))) {
+    return accountPage(env, session, 'Your current password wasn’t correct.', true);
+  }
+  const u = await getKvUser(env, me.email);
+  u.hash = await hashPassword(next);
+  await putKvUser(env, u);
+  return accountPage(env, session, 'Password changed.');
+}
+
+/* ── Staff logins (admin only) ───────────────────────────────────────────── */
+
+async function hasAnotherAdmin(env, exceptEmail) {
+  return (await allUsers(env)).some((u) => u.role === 'admin' && u.email !== exceptEmail);
+}
+async function requireAdmin(env, session) {
+  const me = await currentUser(env, session);
+  return me && me.role === 'admin' ? me : null;
+}
+
+async function usersPage(env, session, notice, isErr) {
+  if (!(await requireAdmin(env, session))) return forbidden('Only an admin can manage staff logins.');
+  const users = await allUsers(env);
+  const rows = users.map((u) => `<div class="urow">
+    <span class="uinfo"><strong>${esc(u.name || u.email)}</strong>
+      <span class="umeta">${esc(u.email)} · ${esc(u.role)}${u.bootstrap ? ' · owner login' : ''}</span></span>
+    ${u.bootstrap ? '<span class="umeta">managed by developer</span>' : `<span class="uacts">
+      <a class="ghost" href="/users/reset?email=${encodeURIComponent(u.email)}">Reset password</a>
+      <form method="POST" action="/users/role"><input type="hidden" name="email" value="${esc(u.email)}"><input type="hidden" name="role" value="${u.role === 'admin' ? 'editor' : 'admin'}"><button class="ghost" type="submit">Make ${u.role === 'admin' ? 'editor' : 'admin'}</button></form>
+      <form method="POST" action="/users/delete" data-confirm="Remove ${esc(u.email)}?"><input type="hidden" name="email" value="${esc(u.email)}"><button class="ghost danger" type="submit">Remove</button></form>
+    </span>`}
+  </div>`).join('');
+  return shell('Staff logins', `
+    <div class="head"><h1>Staff logins</h1><a class="ghost" href="/">← All sections</a></div>
+    ${notice ? `<p class="${isErr ? 'err' : 'ok'}">${esc(notice)}</p>` : ''}
+    <p class="sub"><strong>Editors</strong> can change content; <strong>admins</strong> can also manage these logins.</p>
+    <div class="ulist">${rows}</div>
+    <h2 class="uh">Add a staff login</h2>
+    <form method="POST" action="/users/create" class="narrow-form">
+      <label class="fl"><span class="fk">Name</span><input class="in" name="name" required></label>
+      <label class="fl"><span class="fk">Email</span><input class="in" type="email" name="email" required></label>
+      <label class="fl"><span class="fk">Role</span><select class="in" name="role">
+        <option value="editor">Editor — edit content</option>
+        <option value="admin">Admin — also manage logins</option></select></label>
+      <label class="fl"><span class="fk">Temporary password</span><input class="in" name="password" minlength="8" required></label>
+      <p class="hint">Give them this password; they change it under “My account”.</p>
+      <div class="actions"><button class="btn" type="submit">Add staff login</button></div>
+    </form>`);
+}
+
+async function resetPasswordPage(env, session, email, notice, isErr) {
+  if (!(await requireAdmin(env, session))) return forbidden();
+  email = String(email || '').trim().toLowerCase();
+  const u = await getKvUser(env, email);
+  if (!u) return usersPage(env, session, 'No such staff login.', true);
+  return shell('Reset password', `
+    <div class="head"><h1>Reset password</h1><a class="ghost" href="/users">← Staff logins</a></div>
+    ${notice ? `<p class="${isErr ? 'err' : 'ok'}">${esc(notice)}</p>` : ''}
+    <p class="sub">Set a new password for <strong>${esc(email)}</strong>, then give it to them. They can change it later under “My account”.</p>
+    <form method="POST" action="/users/reset" class="narrow-form">
+      <input type="hidden" name="email" value="${esc(email)}">
+      <label class="fl"><span class="fk">New password</span><input class="in" name="password" minlength="8" required autofocus></label>
+      <p class="hint">At least 8 characters.</p>
+      <div class="actions"><button class="btn" type="submit">Set new password</button>
+        <a class="ghost" href="/users">Cancel</a></div>
+    </form>`);
+}
+
+async function doUserCreate(request, env, session) {
+  if (!(await requireAdmin(env, session))) return forbidden();
+  const form = await request.formData();
+  const email = String(form.get('email') || '').trim().toLowerCase();
+  const name = String(form.get('name') || '').trim().slice(0, 80);
+  const role = String(form.get('role') || 'editor') === 'admin' ? 'admin' : 'editor';
+  const password = String(form.get('password') || '');
+  if (!validEmail(email)) return usersPage(env, session, 'Please enter a valid email address.', true);
+  if (password.length < 8) return usersPage(env, session, 'Password must be at least 8 characters.', true);
+  if (await getKvUser(env, email) || parseUsers(env.AUTH_USERS).has(email)) return usersPage(env, session, 'That email already has a login.', true);
+  await putKvUser(env, { email, name, role, hash: await hashPassword(password) });
+  return usersPage(env, session, `Added ${email}.`);
+}
+
+async function doUserReset(request, env, session) {
+  if (!(await requireAdmin(env, session))) return forbidden();
+  const form = await request.formData();
+  const email = String(form.get('email') || '').trim().toLowerCase();
+  const password = String(form.get('password') || '');
+  const u = await getKvUser(env, email);
+  if (!u) return usersPage(env, session, 'No such staff login.', true);
+  if (password.length < 8) return resetPasswordPage(env, session, email, 'Password must be at least 8 characters.', true);
+  u.hash = await hashPassword(password);
+  await putKvUser(env, u);
+  return usersPage(env, session, `Password reset for ${email}.`);
+}
+
+async function doUserRole(request, env, session) {
+  if (!(await requireAdmin(env, session))) return forbidden();
+  const form = await request.formData();
+  const email = String(form.get('email') || '').trim().toLowerCase();
+  const role = String(form.get('role') || '') === 'admin' ? 'admin' : 'editor';
+  const u = await getKvUser(env, email);
+  if (!u) return usersPage(env, session, 'No such staff login.', true);
+  if (u.role === 'admin' && role === 'editor' && !(await hasAnotherAdmin(env, email))) {
+    return usersPage(env, session, 'You can’t demote the last admin.', true);
+  }
+  u.role = role; await putKvUser(env, u);
+  return usersPage(env, session, `${email} is now ${role}.`);
+}
+
+async function doUserDelete(request, env, session) {
+  if (!(await requireAdmin(env, session))) return forbidden();
+  const form = await request.formData();
+  const email = String(form.get('email') || '').trim().toLowerCase();
+  const u = await getKvUser(env, email);
+  if (!u) return usersPage(env, session, 'No such staff login.', true);
+  if (u.role === 'admin' && !(await hasAnotherAdmin(env, email))) {
+    return usersPage(env, session, 'You can’t remove the last admin.', true);
+  }
+  await deleteKvUser(env, email);
+  return usersPage(env, session, `Removed ${email}.`);
+}
+
 /* ── Enquiries inbox (contact-form messages) ─────────────────────────────── */
 
 const ENQ_PREFIX = 'enq:';
@@ -430,7 +651,7 @@ async function enquiriesPage(env, viewKey) {
         <div class="enq-body">${esc(e.message || '').replace(/\n/g, '<br>')}</div>
         <div class="actions">
           ${mailto ? `<a class="btn" href="${esc(mailto)}">Reply by email</a>` : ''}
-          <form method="POST" action="/enquiries/delete" onsubmit="return confirm('Delete this enquiry?')">
+          <form method="POST" action="/enquiries/delete" data-confirm="Delete this enquiry?">
             <input type="hidden" name="key" value="${esc(viewKey)}">
             <button class="ghost" type="submit">Delete</button></form>
         </div>
@@ -474,7 +695,7 @@ async function historyPage(env, k, path, notice) {
     const who = cm.message.includes('via CMS') ? 'edited here' : 'change';
     return `<div class="vrow">
       <span><strong>${esc(when)}</strong><span class="vmeta">${i === 0 ? 'current version' : esc(who)}</span></span>
-      ${i === 0 ? '<span class="vmeta">—</span>' : `<form method="POST" action="/restore" onsubmit="return confirm('Restore this version? Your current version is saved first, so you can undo.')">
+      ${i === 0 ? '<span class="vmeta">—</span>' : `<form method="POST" action="/restore" data-confirm="Restore this version? Your current version is saved first, so you can undo.">
         <input type="hidden" name="k" value="${esc(k)}"><input type="hidden" name="path" value="${esc(path)}">
         <input type="hidden" name="sha" value="${esc(cm.sha)}">
         <button class="btn small" type="submit">Restore this</button></form>`}</div>`;
@@ -537,8 +758,7 @@ async function listCollection(env, k) {
           <button class="btn" type="submit" id="save-order" disabled>Save order</button>
           <span id="order-status" class="save-status"></span>
         </div>
-      </form>
-      <script src="/app.js"></script>`);
+      </form>`);
   }
 
   const rows = entries.map((e) => `<a class="row" href="/edit?k=${k}&path=${encodeURIComponent(e.path)}">
@@ -996,7 +1216,7 @@ function topbarHtml() {
     <a class="ghost" href="/logout">Sign out</a></div>`;
 }
 function shell(title, inner) {
-  return page(title, `${topbarHtml()}<div class="wrap">${inner}</div>`);
+  return page(title, `${topbarHtml()}<div class="wrap">${inner}</div><script src="/app.js"></script>`);
 }
 
 function page(title, inner, status = 200) {
@@ -1216,5 +1436,15 @@ fieldset.day>legend{font-size:1.05rem;color:#34719f}
 .enq-meta{color:#8494a0;font-size:.82rem;margin:0 0 10px}
 .enq-body{margin:14px 0;padding:14px;background:#f7fafb;border-radius:8px;line-height:1.55;white-space:normal}
 @media(max-width:560px){.enq-row{grid-template-columns:1fr auto}.enq-sub{grid-column:1/-1}}
+.whoami{color:#5c6b75;font-size:.85rem;margin-right:6px}
+.ulist{max-width:760px;margin:8px 0 24px}
+.urow{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 14px;border:1px solid #e2ebef;border-radius:10px;margin-bottom:8px;background:#fff}
+.uinfo{display:flex;flex-direction:column}
+.uinfo strong{color:#22496c}
+.umeta{color:#8494a0;font-size:.82rem}
+.uacts{display:flex;gap:8px;flex-wrap:wrap}
+.uacts form{display:inline}
+.uh{font-size:1.1rem;color:#22496c;margin:18px 0 10px}
+.ghost.danger{color:#b3261e}
 @media(max-width:560px){.mlib-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.mlib-cell img{height:84px}}
 `;

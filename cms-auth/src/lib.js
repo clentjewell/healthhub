@@ -48,6 +48,17 @@ export async function verifyLogin(env, email, password) {
   return stored ? ok : false;
 }
 
+/** Create a pbkdf2$sha256$… hash string for a new/reset password. */
+export async function hashPassword(password, iterations = 200000) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const km = await crypto.subtle.importKey('raw', enc(password), { name: 'PBKDF2' }, false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, km, 256);
+  return `pbkdf2$sha256$${iterations}$${bytesToB64(salt)}$${bytesToB64(new Uint8Array(bits))}`;
+}
+
+/** Verify a password against a stored pbkdf2 hash string. */
+export function verifyHash(password, stored) { return verifyPbkdf2(password, stored); }
+
 async function verifyPbkdf2(password, stored) {
   const p = String(stored).split('$');
   if (p.length !== 5 || p[0] !== 'pbkdf2' || p[1] !== 'sha256') return false;

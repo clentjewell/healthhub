@@ -541,12 +541,22 @@ export const APP_JS = String.raw`
     });
   }
 
+  /* ── Confirm dialogs (CSP-safe: no inline handlers) ───────────────────── */
+  function initConfirms() {
+    document.querySelectorAll('form[data-confirm]').forEach(function (f) {
+      f.addEventListener('submit', function (e) {
+        if (!window.confirm(f.getAttribute('data-confirm'))) e.preventDefault();
+      });
+    });
+  }
+
   /* ── Wire up on load ──────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initImagePickers();
     initLivePreview();
     initRepeatables();
     initReorder();
+    initConfirms();
 
     var root = document.getElementById('structured');
     if (!root) return;
