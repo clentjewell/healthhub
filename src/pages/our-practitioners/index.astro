@@ -63,6 +63,24 @@ const schema = [
     </div>
   </section>
 
+  {page.whoWeAre && (
+    <section class="section who">
+      <div class="container who-inner">
+        {page.whoWeAre.eyebrow && <p class="eyebrow">{page.whoWeAre.eyebrow}</p>}
+        {page.whoWeAre.heading && <h2 class="who-h">{page.whoWeAre.heading}</h2>}
+        {(page.whoWeAre.paragraphs ?? []).map((p) => <p class="who-p">{p}</p>)}
+        {(page.whoWeAre.points ?? []).length > 0 && (
+          <>
+            {page.whoWeAre.pointsIntro && <p class="who-p who-points-intro">{page.whoWeAre.pointsIntro}</p>}
+            <ul class="who-list">
+              {page.whoWeAre.points.map((pt) => <li>{pt}</li>)}
+            </ul>
+          </>
+        )}
+      </div>
+    </section>
+  )}
+
   <CtaBand />
 </BaseLayout>
 
@@ -75,4 +93,51 @@ const schema = [
   @media (max-width: 1040px) { .grid-practitioners { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 760px) { .grid-practitioners { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 460px) { .grid-practitioners { grid-template-columns: 1fr; } }
+
+  .who {
+    background: var(--color-surface-tint);
+    padding-top: var(--space-section-sm);
+    padding-bottom: var(--space-section-sm);
+  }
+  .who-inner { max-width: var(--container-narrow); }
+  .who-h {
+    color: var(--color-heading);
+    font-size: var(--fs-h2);
+    line-height: var(--lh-heading);
+    margin: 0.35em 0 0.6em;
+  }
+  .who-p {
+    color: var(--color-text);
+    font-size: var(--fs-lede);
+    line-height: var(--lh-body);
+    margin: 0 0 1em;
+  }
+  .who-points-intro { font-weight: 600; margin-top: 1.4em; margin-bottom: 0.8em; }
+  .who-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 32px;
+  }
+  .who-list li {
+    position: relative;
+    padding-left: 30px;
+    line-height: var(--lh-body);
+    color: var(--color-text);
+  }
+  .who-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.15em;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center / 14px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center / 14px no-repeat;
+  }
+  @media (max-width: 620px) { .who-list { grid-template-columns: 1fr; } }
 </style>

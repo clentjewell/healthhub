@@ -406,6 +406,17 @@ const pages = defineCollection({
     // Classes & Events
     emptyEventsText: optionalText,
 
+    // Practitioners index — optional "Who We Are" intro block
+    whoWeAre: z
+      .object({
+        eyebrow: optionalText,
+        heading: optionalText,
+        paragraphs: z.array(z.string()).default([]),
+        pointsIntro: optionalText,
+        points: z.array(z.string()).default([]),
+      })
+      .optional(),
+
     // Home
     hero: z
       .object({

@@ -27,7 +27,7 @@
  */
 
 // ── Config ───────────────────────────────────────────────────────────────────
-$RECIPIENT  = 'rao@jewellprojects.com';                     // TEST inbox — switch to health@pottsvilleacupuncture.com.au at launch
+$RECIPIENT  = 'health@pottsvilleacupuncture.com.au';        // LIVE — enquiries go to the studio inbox
 $FROM_EMAIL = 'website@healthhubtweedcoast.com.au';         // a forwarder on this domain (see SETUP above)
 $FROM_NAME  = 'Health Hub Tweed Coast website';
 $SUBJECT    = 'New enquiry — Health Hub Tweed Coast website';
