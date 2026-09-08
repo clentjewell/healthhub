@@ -757,7 +757,10 @@ function page(title, inner, status = 200) {
       'Cache-Control': 'no-store',
       'Content-Security-Policy':
         "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; " +
-        "img-src 'self' data: https://healthhub-tweed-coast.clent.workers.dev https://www.healthhubtweedcoast.com.au https://healthhubtweedcoast.com.au; " +
+        // connect-src 'self' lets the image field upload via fetch(); blob: lets
+        // a just-picked file preview instantly from a local object URL.
+        "connect-src 'self'; " +
+        "img-src 'self' data: blob: https://healthhub-tweed-coast.clent.workers.dev https://www.healthhubtweedcoast.com.au https://healthhubtweedcoast.com.au; " +
         `frame-src ${SITE} https://www.healthhubtweedcoast.com.au; ` +
         "form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
     },
