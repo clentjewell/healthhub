@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
 
 // Static output → Cloudflare Pages.
 // The production domain is the single canonical `site` value used for
@@ -18,11 +17,9 @@ export default defineConfig({
   //   /event/{slug}/                 detail (WP event, singular base)
   //   /make-a-booking/               /make-a-booking/
   //   /contact/                      /contact/
-  integrations: [
-    // xslURL renders the sitemap as a clean, branded HTML table in the browser
-    // (RankMath-style) instead of raw XML. The stylesheet lives in public/.
-    sitemap({ xslURL: '/sitemap.xsl' }),
-  ],
+  // Sitemaps are hand-built, split by content type, in src/pages/*-sitemap.xml.ts
+  // (with a branded XSL view from public/sitemap.xsl). No @astrojs/sitemap.
+  integrations: [],
   image: {
     // Built-in astro:assets pipeline (sharp) → WebP + responsive sizes.
     // Remote images are scoped to the live site we migrate from (Phase 3).
