@@ -110,6 +110,13 @@ export const FIELD_META = {
       metaDescription: 'About 150 characters. Shows under the title in Google results.',
     },
   },
+
+  settings: {
+    labels: { mapEmbed: 'Map embed code (Google “Embed a map”)' },
+    hints: {
+      mapEmbed: 'For the rich map card with rating & directions: Google Maps → find the studio → Share → “Embed a map” → copy → paste the whole <iframe…> here. Leave blank for the simple map.',
+    },
+  },
 };
 
 /** Ordered [key, groupTitle] for a collection's data, honouring the config and

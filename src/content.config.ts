@@ -343,6 +343,12 @@ const settings = defineCollection({
     mapUrl: z.string(),
     mapQuery: z.string(),
     /**
+     * Optional: paste the whole "Embed a map" <iframe> (or just its src) from
+     * the studio's Google Business listing to show the rich place card (name,
+     * rating, directions). When empty, a keyless place embed is used instead.
+     */
+    mapEmbed: optionalText,
+    /**
      * Exact coordinates of the studio, taken from its Google Maps listing.
      * These feed the LocalBusiness `geo` and pin the embedded map on the
      * building rather than letting Google guess from the street name.

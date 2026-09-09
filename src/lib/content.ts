@@ -27,12 +27,23 @@ export function formatAddress(s: Awaited<ReturnType<typeof getSettings>>) {
   return `${s.street}, ${s.locality} ${s.region} ${s.postcode}`;
 }
 
-/** Keyless Google Maps embed for the settings address. */
+/** Map embed src for the studio.
+ *  1. If `mapEmbed` is set (the "Embed a map" code from the Google Business
+ *     listing), use it — that's what shows the rich place card with rating and
+ *     directions. Accepts either the whole <iframe …> or just its src URL.
+ *  2. Otherwise fall back to a keyless place embed by business name + address,
+ *     so it still resolves to the listing (name + directions) rather than a
+ *     bare coordinate pin. */
 export function mapEmbedSrc(s: Awaited<ReturnType<typeof getSettings>>) {
-  // Prefer the exact coordinates when we have them: a text query lets Google
-  // pick, and for this address it lands on the road rather than the building.
-  const q = s.lat != null && s.lng != null ? `${s.lat},${s.lng}` : s.mapQuery;
-  return `https://maps.google.com/maps?q=${encodeURIComponent(
-    q,
-  )}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+  const custom = (s.mapEmbed ?? '').trim();
+  if (custom) {
+    const m = custom.match(/src\s*=\s*["']([^"']+)["']/i);
+    return m ? m[1] : custom;
+  }
+  const name = `${s.brandName ?? ''} ${s.brandTagline ?? ''}`.trim();
+  const q = [name, s.street, `${s.locality} ${s.region} ${s.postcode}`]
+    .map((p) => (p ?? '').trim())
+    .filter(Boolean)
+    .join(', ') || (s.lat != null && s.lng != null ? `${s.lat},${s.lng}` : s.mapQuery);
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
 }

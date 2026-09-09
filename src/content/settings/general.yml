@@ -24,6 +24,11 @@ email: health@pottsvilleacupuncture.com.au
 # text search, so "Get directions" lands on the business, not a results list.
 mapUrl: https://maps.google.com/?cid=16890111486367809711
 mapQuery: 87-89 Tweed Coast Road, Hastings Point NSW 2489
+# Paste the "Embed a map" code from the Google Business listing here to show the
+# rich map card (name, star rating, directions). Google Maps → find the studio →
+# Share → "Embed a map" → copy → paste the whole <iframe…> or just its src.
+# Leave blank to use the simple place map.
+mapEmbed: ""
 # Exact coordinates from the Google Maps listing — used for the LocalBusiness
 # geo and to pin the embedded map on the building.
 lat: -28.3688969
