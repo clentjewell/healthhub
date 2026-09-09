@@ -77,12 +77,15 @@ const schema = [serviceCatalogueNode(services.map((s) => ({
         {hero.lede && <p class="lede hero-lede">{hero.lede}</p>}
         <div class="hero-actions">
           {hero.primaryLabel && (
-            <a href={hero.primaryHref ?? cfg.bookingHref} class="btn btn-primary">{hero.primaryLabel}</a>
+            <a href={hero.primaryHref ?? cfg.bookingHref} class="btn btn-primary btn-lg">{hero.primaryLabel}</a>
           )}
-          {hero.secondaryLabel && (
-            <a href={hero.secondaryHref ?? '/events'} class="btn btn-hero-ghost">{hero.secondaryLabel}</a>
+          {cfg.phone && (
+            <a href={`tel:${cfg.phone.replace(/\s/g, '')}`} class="btn btn-hero-ghost">Call to book — {cfg.phone}</a>
           )}
         </div>
+        {hero.secondaryLabel && (
+          <a href={hero.secondaryHref ?? '/events'} class="hero-textlink">{hero.secondaryLabel} →</a>
+        )}
       </div>
     </div>
   </section>
@@ -217,8 +220,19 @@ const schema = [serviceCatalogueNode(services.map((s) => ({
   .hero-eyebrow { color: color-mix(in srgb, var(--color-accent) 55%, white); }
   .hero-lede { color: rgba(255, 255, 255, 0.92); margin-top: 20px; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+  .btn-lg { font-size: 1.08rem; padding: 15px 30px; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22); }
   .btn-hero-ghost { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.6); }
   .btn-hero-ghost:hover { border-color: #fff; background: rgba(255, 255, 255, 0.12); color: #fff; }
+  .hero-textlink {
+    display: inline-block;
+    margin-top: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .hero-textlink:hover { color: #fff; }
   @media (prefers-reduced-motion: reduce) {
     .hero-slide { animation: none; transform: none; }
     .hero-slide.s1 { opacity: 1; }
