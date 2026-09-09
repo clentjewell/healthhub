@@ -241,13 +241,6 @@ const schema = [serviceCatalogueNode(services.map((s) => ({
   .welcome { padding-block: clamp(72px, 10vw, 128px); }
   .welcome-copy { text-align: center; max-width: 58ch; margin-inline: auto; font-size: var(--fs-lede); }
   /* A small gold mark from the logo's centre dot, used as a quiet section rule. */
-  .welcome .narrow::after {
-    content: '';
-    display: block;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--hub-gold, #f2b01e);
-    margin: 44px auto 0;
-  }
   .band-tint { background: var(--color-surface-tint); }
   /* `max-width: none` overrides the global `p` clamp, otherwise the button
      centres inside a 68ch box rather than the full container. */

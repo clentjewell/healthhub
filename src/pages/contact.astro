@@ -74,9 +74,6 @@ const socials = [
           <h3>Ready to book?</h3>
           <p>Each practitioner takes their own bookings — see them all in one place.</p>
           <a href={cfg.bookingHref} class="btn btn-primary">{cfg.bookingLabel}</a>
-          {cfg.phone && (
-            <p class="book-or">or call <a href={`tel:${cfg.phone.replace(/\s/g, '')}`}>{cfg.phone}</a></p>
-          )}
         </div>
         <div class="detail">
           <h3>Visit</h3>
@@ -178,7 +175,6 @@ const socials = [
   }
   .detail-book p { margin: 6px 0 14px; color: var(--color-text); }
   .detail-book .btn { display: inline-block; }
-  .detail-book .book-or { margin: 12px 0 0; font-size: 0.9rem; color: var(--color-text-muted); }
   /* Icon buttons, matching the footer and the practitioner profiles. */
   .contact-social { display: flex; gap: 10px; list-style: none; padding: 0; margin: 4px 0 0; }
   .contact-social a {
