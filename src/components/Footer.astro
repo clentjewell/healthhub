@@ -71,7 +71,7 @@ const socials = [
 
   <div class="container footer-base">
     <p>&copy; {year} {s.brandName} {s.brandTagline}. {fullAddress}.</p>
-    {s.footerNote && <p class="footer-fine">{s.footerNote}</p>}
+    <p class="footer-fine">Developed by <a href="https://jewellprojects.com/" target="_blank" rel="noopener">Jewell</a></p>
   </div>
 </footer>
 
@@ -178,6 +178,12 @@ const socials = [
     margin: 0;
     max-width: none;
   }
+  .footer-fine a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .footer-fine a:hover { opacity: 0.85; }
 
   @media (max-width: 880px) {
     .footer-grid {
