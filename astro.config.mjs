@@ -19,7 +19,9 @@ export default defineConfig({
   //   /make-a-booking/               /make-a-booking/
   //   /contact/                      /contact/
   integrations: [
-    sitemap(),
+    // xslURL renders the sitemap as a clean, branded HTML table in the browser
+    // (RankMath-style) instead of raw XML. The stylesheet lives in public/.
+    sitemap({ xslURL: '/sitemap.xsl' }),
   ],
   image: {
     // Built-in astro:assets pipeline (sharp) → WebP + responsive sizes.
