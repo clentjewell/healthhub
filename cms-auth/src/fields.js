@@ -124,7 +124,8 @@ export const FIELD_META = {
 export function groupedKeys(collection, data) {
   const meta = FIELD_META[collection];
   const keys = Object.keys(data);
-  if (!meta) return [{ title: null, keys }];
+  // No grouping defined (or only labels/hints) → one ungrouped list.
+  if (!meta || !meta.groups) return [{ title: null, keys }];
   const used = new Set();
   const groups = meta.groups.map((g) => {
     const gk = g.fields.filter((f) => keys.includes(f));
