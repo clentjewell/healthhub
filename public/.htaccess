@@ -1,73 +1,68 @@
-# .htaccess — redirects for cPanel / Apache hosting.
+# .htaccess — redirects & headers for cPanel / Apache hosting.
 #
-# This mirrors public/_redirects (the Cloudflare Workers format). Apache reads
-# this file; Cloudflare ignores it, and vice-versa, so both can sit in the repo
-# safely. If you add a redirect in one, add the matching rule in the other.
+# SHARED cPanel ACCOUNT — READ THIS. This file lives in the Health Hub document
+# root (public_html). The Pottsville site (pottsvilleacupuncture.com.au) is a
+# folder INSIDE this public_html, so Apache applies THIS parent .htaccess to
+# Pottsville requests too. To stop Health Hub's rules leaking onto Pottsville
+# (e.g. /admin was redirecting to the Health Hub CMS), every Health Hub-specific
+# rule below is scoped to the Health Hub host. Anything left global is benign
+# for both sites.
 #
-# RedirectMatch (mod_alias, on by default on cPanel) is used with anchored
-# patterns so each rule matches that one path only — with or without a trailing
-# slash — and never a path that merely starts with it. 301 = permanent (keeps
-# search ranking); 302 = temporary.
+# This mirrors public/_redirects (Cloudflare format), which is inert on cPanel.
 
-# Serve the new site's index.html as the directory index. Listed before
-# index.php so that during a zero-downtime cutover (deploying over the old
-# WordPress files) the new home page wins immediately over any leftover
-# WordPress index.php.
+# Global (benign for both sites): serve index.html as the directory index.
 DirectoryIndex index.html index.php
 
-# Canonical host: send www → non-www (preserving the path + query), so the site
-# has one address for SEO. The non-www form matches src/data/site.ts.
+# ── Redirects — each scoped to the Health Hub host so they never fire for the
+#    nested Pottsville site. (mod_rewrite with a per-rule host condition.) ──────
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Canonical host: www → non-www (preserve path + query).
   RewriteCond %{HTTP_HOST} ^www\.healthhubtweedcoast\.com\.au$ [NC]
   RewriteRule ^ https://healthhubtweedcoast.com.au%{REQUEST_URI} [R=301,L]
+
+  # The content editor (CMS) lives on its own Cloudflare Worker.
+  RewriteCond %{HTTP_HOST} (^|\.)healthhubtweedcoast\.com\.au$ [NC]
+  RewriteRule ^admin/?$ https://healthhub-cms-auth.clent.workers.dev/ [R=302,L]
+
+  # Shannon O'Hara left the Hub; Kate Doedee took over her classes.
+  RewriteCond %{HTTP_HOST} (^|\.)healthhubtweedcoast\.com\.au$ [NC]
+  RewriteRule ^our-practitioner/shannon-ohara/?$ /our-practitioner/kate-doedee/ [R=301,L]
+
+  # ADHD Workshop page removed before details confirmed; still on the timetable.
+  RewriteCond %{HTTP_HOST} (^|\.)healthhubtweedcoast\.com\.au$ [NC]
+  RewriteRule ^event/adhd-workshop/?$ /event/health-hub-studio-time-table/ [R=301,L]
+
+  # Mis-slugged on WordPress — always Katie Verkerk's Function & Flow class.
+  RewriteCond %{HTTP_HOST} (^|\.)healthhubtweedcoast\.com\.au$ [NC]
+  RewriteRule ^event/naturopathic-health-seminars-with-katie-verkerk/?$ /event/function-flow/ [R=301,L]
+
+  # Seniors Yoga folded into Alicia Grace's Yoga & Meditation page.
+  RewriteCond %{HTTP_HOST} (^|\.)healthhubtweedcoast\.com\.au$ [NC]
+  RewriteRule ^event/seniors-yoga/?$ /event/yoga-meditation/ [R=301,L]
 </IfModule>
 
-# The content editor (CMS) lives on its own Cloudflare Worker.
-RedirectMatch 302 ^/admin/?$ https://healthhub-cms-auth.clent.workers.dev/
+# ── Security response headers — Health Hub host only, so Pottsville keeps its
+#    own headers/CSP. (Header inside <If> is well supported on Apache 2.4.) ─────
+<If "%{HTTP_HOST} =~ /(^|\.)healthhubtweedcoast\.com\.au$/">
+  <IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    # Framing is controlled by the CSP frame-ancestors below (site + CMS worker).
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://maps.google.com https://www.google.com; connect-src 'self'; form-action 'self'; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'"
+    # HSTS — forces HTTPS for ~6 months. No includeSubDomains (shared account).
+    Header always set Strict-Transport-Security "max-age=15768000"
+  </IfModule>
+</If>
 
-# Shannon O'Hara left the Hub and Kate Doedee took over her classes, so send
-# her old profile link straight to Kate's profile.
-RedirectMatch 301 ^/our-practitioner/shannon-ohara/?$ /our-practitioner/kate-doedee/
-
-# The ADHD Workshop page was removed before its details were confirmed; the
-# workshop still shows on the timetable, so send old links there.
-RedirectMatch 301 ^/event/adhd-workshop/?$ /event/health-hub-studio-time-table/
-
-# Mis-slugged on WordPress — this was always Katie Verkerk's Function & Flow class.
-RedirectMatch 301 ^/event/naturopathic-health-seminars-with-katie-verkerk/?$ /event/function-flow/
-
-# Seniors Yoga was folded into Alicia Grace's Yoga & Meditation page (her single
-# class page), so its standalone page was retired.
-RedirectMatch 301 ^/event/seniors-yoga/?$ /event/yoga-meditation/
-
-
-# ── Security response headers ────────────────────────────────────────────────
-# The Apache equivalent of public/_headers (Cloudflare). Keep the two in sync.
-<IfModule mod_headers.c>
-  Header always set X-Content-Type-Options "nosniff"
-  # No X-Frame-Options: it can't express an allow-list. Framing is controlled by
-  # the CSP frame-ancestors below, which permits only the site and the CMS
-  # worker (for the content editor's live preview).
-  Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://maps.google.com https://www.google.com; connect-src 'self'; form-action 'self'; frame-ancestors 'self' https://healthhub-cms-auth.clent.workers.dev; base-uri 'self'; object-src 'none'"
-
-  # HSTS — on now that HTTPS is confirmed working on the live domain. Forces
-  # HTTPS for the max-age (~6 months). Deliberately WITHOUT includeSubDomains:
-  # this cPanel account is shared and other subdomains' HTTPS isn't guaranteed,
-  # so we lock only the apex/host that serves this site. Revisit (and consider
-  # preload) once every subdomain is known-good on HTTPS.
-  Header always set Strict-Transport-Security "max-age=15768000"
-</IfModule>
-
-# ── Static-site niceties for Apache ──────────────────────────────────────────
-# Serve pretty 404s (Astro builds /404.html).
+# ── Static-site niceties ─────────────────────────────────────────────────────
+# Pretty 404s. Global, but harmless for Pottsville (it has its own /404.html).
 ErrorDocument 404 /404.html
 
-# Long-cache ONLY the fingerprinted build assets (their filenames change when
-# the content does). Images and fonts are deliberately left to Apache defaults
-# so a photo swapped in the CMS (same filename) isn't stuck in cache.
+# Long-cache ONLY the fingerprinted Astro build assets. The /_astro/ path only
+# exists on Health Hub, so this is inert for Pottsville.
 <IfModule mod_headers.c>
   <If "%{REQUEST_URI} =~ m#^/_astro/#">
     Header set Cache-Control "public, max-age=31536000, immutable"
