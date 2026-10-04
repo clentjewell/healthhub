@@ -4,13 +4,13 @@ order: 1
 category: "community"
 schedule: "All classes, all week"
 summary: "The full weekly studio timetable — every class running at the Hub, at a glance."
-# October 2026 "What's On" graphic — a header + colour-coded week grid, built
-# to match the client's flyer layout from the October update docs. A timetable
-# graphic sits directly above the live table on this page, so it must always
-# show the same schedule as timetable/weekly.yml — an earlier graphic was
-# removed for contradicting it. Rebuild this image whenever weekly.yml changes.
-# Checked session-for-session against weekly.yml (Oct 2026).
-image: "/images/events/health-hub-studio-time-table.webp"
+# October 2026 "What's On" flyer — the client's own header banner (taken from
+# Whats_On_Health_Hub_October_2026.docx) above the colour-coded week grid. A
+# timetable graphic sits directly above the live table on this page, so it must
+# always show the same schedule as timetable/weekly.yml — an earlier graphic
+# was removed for contradicting it. Rebuild this image whenever weekly.yml
+# changes. Checked session-for-session against weekly.yml (Oct 2026).
+image: "/images/events/whats-on-october-2026.webp"
 location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 showTimetable: true
