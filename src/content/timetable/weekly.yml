@@ -1,5 +1,5 @@
 # The weekly studio timetable — editable in the CMS under "Timetable".
-# Source: "What's On Health Hub September 2026" (client, Aug 2026). Sessions are
+# Source: "What's On Health Hub October 2026" (client, Oct 2026). Sessions are
 # listed in start-time order within each day; each one links to the class or
 # practitioner page.
 note: >-
@@ -14,6 +14,9 @@ days:
       - name: Acupuncture Consultations
         time: 8:30am–7:30pm
         href: /our-practitioner/dr-malcolm-mckay/
+      - name: Circuit
+        time: 4:30–5:15pm
+        href: /event/function-flow/
   - day: Tuesday
     sessions:
       - name: Acupuncture Consultations
@@ -22,21 +25,23 @@ days:
       - name: Seniors Yoga
         time: 9:30–10:30am
         href: /event/yoga-meditation/
+      # Tuesday-evening Yoga & Meditation moved from Alicia Grace to Kate
+      # Doedee (client, Oct 2026) — listed on Kate's event page.
       - name: Yoga & Meditation
         time: 6:00–7:15pm
-        href: /event/yoga-meditation/
+        href: /event/hatha-yin-yoga/
   - day: Wednesday
     sessions:
       - name: Chair Pilates & Body Balance
-        time: 8:15–8:45am
+        time: 8:30–9:00am
         href: /event/pilates-and-body-balance/
       - name: Balance & Mat Pilates
-        time: 8:45–9:30am
+        time: 9:00–9:45am
         href: /event/pilates-and-body-balance/
-      - name: Functional Workout
+      - name: Bring the Bubs
         time: 10:15–11:00am
         href: /event/function-flow/
-      - name: Functional Workout
+      - name: Functional Training
         time: 4:30–5:15pm
         href: /event/function-flow/
       # Alicia's Wednesday Yin (client moved Shannon's old night classes to
@@ -56,11 +61,6 @@ days:
       - name: Embodied Movement & Dance
         time: 11:00am–12:00pm
         href: /event/embodied-movement-dance/
-      # One-off, and the only dated entry on the table. No link on purpose:
-      # the client pulled the workshop's page (details never arrived), but the
-      # session is still on the printed flyer shown above this table.
-      - name: ADHD Workshop
-        time: 17 September
   - day: Friday
     sessions:
       - name: Acupuncture Consultations

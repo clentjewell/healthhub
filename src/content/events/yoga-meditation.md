@@ -17,10 +17,6 @@ sessions:
     start: "09:30"
     end: "10:30"
     label: Seniors Yoga
-  - day: Tuesday
-    start: "18:00"
-    end: "19:15"
-    label: Yoga & Meditation
   - day: Wednesday
     start: "18:00"
     end: "19:15"
@@ -39,7 +35,7 @@ sessions:
     label: Yoga & Meditation
 feeGroups:
   - title: "Yoga & Meditation"
-    duration: "Tue 6:00–7:15pm · Fri 9:30–10:45am · Sun 8:00–9:15am (75 min)"
+    duration: "Fri 9:30–10:45am · Sun 8:00–9:15am (75 min)"
     items:
       - label: "Casual class"
         price: "$24"
@@ -80,7 +76,7 @@ feeGroups:
 
 Relax and revive with our amazing Yoga Teacher Alicia Grace. Alicia is a Trauma-Informed yoga teacher who provides a safe and supportive environment for all levels of  Yoga and incites a feeling of community within her classes.
 
-* Tuesday Seniors Yoga 9:30 am · Yoga & Meditation 6:00 pm
+* Tuesday Seniors Yoga 9:30 am
 * Wednesday Yin Yoga 6:00 pm
 * Thursday Seniors Yoga 9:30 am
 * Friday Yoga & Meditation 9:30 am

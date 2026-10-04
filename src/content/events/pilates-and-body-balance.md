@@ -2,7 +2,7 @@
 title: "Pilates and Body Balance"
 order: 5
 category: "course"
-schedule: "Chair Pilates 8:15am · Mat Pilates 8:45am"
+schedule: "Chair Pilates 8:30am · Mat Pilates 9:00am"
 summary: "Safely conditions body and mind for muscle control, strength and flexibility — quality of movement over quantity."
 image: "/images/events/pilates-and-body-balance.webp"
 instructor: "Monique Carole"
@@ -13,22 +13,22 @@ location: "Health Hub Tweed Coast, Hastings Point"
 active: true
 sessions:
   - day: Wednesday
-    start: "08:15"
-    end: "08:45"
+    start: "08:30"
+    end: "09:00"
     label: Chair Pilates & Body Balance
   - day: Wednesday
-    start: "08:45"
-    end: "09:30"
+    start: "09:00"
+    end: "09:45"
     label: Balance & Mat Pilates
 feeGroups:
   - title: "Class Options"
     duration: "Wednesdays"
     items:
-      - label: "Chair Pilates · 8:15–8:45am"
+      - label: "Chair Pilates · 8:30–9:00am"
         price: "$10"
-      - label: "Mat Pilates · 8:45–9:30am"
+      - label: "Mat Pilates · 9:00–9:45am"
         price: "$15"
-      - label: "Stay for both · 8:15–9:30am"
+      - label: "Stay for both · 8:30–9:45am"
         price: "$20"
 ---
 ### Pilates and Body Balance
